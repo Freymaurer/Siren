@@ -9,12 +9,18 @@
     <Compile Include="Util.fs" />
     <Compile Include="ProjectInfo.fs" />
     <Compile Include="Test\NET.fs" />
+    <Compile Include="Examples\Util.fs" />
+    <Compile Include="Examples\Flowchart.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="BlackFox.CommandLine" Version="1.0.0" />
     <PackageReference Include="SimpleExec" Version="12.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\src\Siren.fsproj" />
   </ItemGroup>
 
 </Project>

@@ -9,4 +9,8 @@
     <Compile Include="Siren.fs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Fable.Core" Version="4.3.0" />
+  </ItemGroup>
+
 </Project>

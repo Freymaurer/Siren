@@ -1,13 +1,15 @@
-﻿module Tests
+﻿module Main
 
 open Fable.Pyxpecto
 open Siren
 
 let all = testList "Main" [
-    testCase "init" <| fun _ ->
-        Siren.Init.hello "World"
-        Expect.pass()
+    Tests.Comment.main
+    Tests.Node.main
+    Tests.Connection.main
+    Tests.Subgraph.main
+    Tests.Flowchart.main
 ]
 
 [<EntryPoint>]
-let main argv = Pyxpecto.runTests [||] all
+let main argv = Pyxpecto.runTests (ConfigArg.fromStrings argv) all

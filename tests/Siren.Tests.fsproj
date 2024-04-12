@@ -6,6 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Util.fs" />
+    <Compile Include="Tests.Comment.fs" />
+    <Compile Include="Tests.Node.fs" />
+    <Compile Include="Tests.Connection.fs" />
+    <Compile Include="Tests.Subgraph.fs" />
+    <Compile Include="Tests.Flowchart.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
 

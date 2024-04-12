@@ -30,6 +30,8 @@ let main argv =
         match args with
         | "dotnet" :: args -> Test.NET.handle args
         | _ -> printHelp ()
+    | "examples" :: _ ->
+        Examples.Flowchart.writeMoonRocketExample()
     | _ -> printHelp ()
 
     0
