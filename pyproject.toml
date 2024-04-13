@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "siren"
+version = "1.0.0"
+description = ""
+authors = ["Kevin Frey <freymaurer@gmx.de>"]
+maintainers = []
+readme = "README.md"
+repository = "https://github.com/Freymaurer/Siren"
+keywords = []
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.1.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

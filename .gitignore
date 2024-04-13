@@ -399,3 +399,5 @@ FodyWeavers.xsd
 py/
 js/
 tests/JavaScript/siren/
+tests/Python/siren/
+.venv

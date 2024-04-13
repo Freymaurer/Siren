@@ -24,7 +24,7 @@ diagram.flowchart.bt [
 flowchart BT
     subgraph space[space]
         direction BT
-        earth[earth]-......->|"🚀"|moon[moon]
+        earth-......->|"🚀"|moon[moon]
         moon(moon)
         subgraph atmosphere[atmosphere]
             earth((earth))

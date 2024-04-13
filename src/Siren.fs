@@ -123,6 +123,7 @@ module rec Types =
 
     and Element =
         | Empty
+        | Raw of string
         | Comment of string
         | KeyValue of key: string * value: string
         | Click of Click
@@ -137,6 +138,7 @@ module rec Formatter =
     open System.Text
 
     let writeComment (txt: string) = sprintf "%%%% %s" txt
+    let writeRaw (txt: string) = txt
     let writeKeyValue (key: string) (v: string) = sprintf "%s %s" key v
     let writeClick (click: Click) =
         [
@@ -216,6 +218,7 @@ module rec Formatter =
         sb.Append(whitespaceString) |> ignore
         match e with
         | Element.Empty -> sb
+        | Element.Raw txt -> sb.AppendLine(writeRaw txt)
         | Element.Comment txt -> sb.AppendLine(writeComment txt)
         | Element.KeyValue (k,v) -> sb.AppendLine(writeKeyValue k v)
         | Element.Click c -> sb.AppendLine(writeClick c)
@@ -249,6 +252,8 @@ module Interop =
     open Types
 
     let mkKeyValue (key: string) (v: string) : Element = KeyValue (key, v)
+
+    let mkLineRaw (txt: string) = Raw txt
 
     let mkComment (comment: string) = Comment comment
     
@@ -366,11 +371,12 @@ type diagram =
     static member quadrant (children: #seq<Element>) = Interop.mkGraph "quadrantChart" children
     static member xy (children: #seq<Element>) = Interop.mkGraph "xychart-beta" children
 
-//type IFlowchartElement = interface end
+[<AttachMembers>]
+type line =
+    static member raw txt = Interop.mkLineRaw txt
 
 [<AttachMembers>]
 type link =
-    //inherit IFlowchartElement with
     static member arrow (node1,node2,?text:string,?addedLength: int) = 
         Interop.mkConnection node1 node2 <| LinkTypes.Arrow (text, addedLength) |> Connection
     static member open_ (node1,node2,?text:string,?addedLength: int) =

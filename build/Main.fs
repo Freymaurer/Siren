@@ -32,11 +32,13 @@ let main argv =
         | "js" :: "native" :: args -> 
             Test.JavaScript.handleNative args
         | "js" :: args -> Test.JavaScript.handle args
+        | "py" :: "native" :: args -> Test.Python.handleNative args
         | "py" :: args -> Test.Python.handle args
         | [] | "all" :: _ -> 
             Test.NET.handle []
             Test.JavaScript.handle []
             Test.Python.handle []
+            Test.Python.handleNative args
             Test.JavaScript.handleNative args
         | _ -> printHelp ()
     | "examples" :: _ ->
