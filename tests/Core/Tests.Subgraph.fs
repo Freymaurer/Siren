@@ -6,14 +6,12 @@ open Siren
 
 let private tests_formatter = testList "formatter" [
     
-    let n1 = node.node "A1" "Coffee"
-    
     testCase "empty" <| fun _ -> 
         let actual = subgraph.subgraph "sub1" [] |> Formatter.writeElementFast
         let expected = """subgraph sub1[sub1]
 end
 """
-        Expect.equal actual expected ""
+        Expect.stringEqualF actual expected ""
 
     testCase "nodes" <| fun _ -> 
         let actual = 
@@ -31,7 +29,7 @@ end
     Earth(Earth)-->Moon[Moon]
 end
 """
-        Expect.equal actual expected ""     
+        Expect.stringEqualF actual expected ""     
 
     testCase "nested" <| fun _ -> 
         let actual = 
@@ -51,7 +49,7 @@ end
     earth[earth]-......->|"rocket 🚀"|moon[moon]
 end
 """
-        Expect.equal actual expected ""
+        Expect.stringEqualF actual expected ""
 ]
 
 let main = testList "Subgraph" [

@@ -27,9 +27,9 @@ module Fable =
         printf "%s" s
         #endif
 
-open Fable.Pyxpecto
-
 module Expect =
+    open Fable.Pyxpecto
+
     /// <summary>
     /// This function only verifies non-whitespace characters
     /// </summary>
@@ -52,3 +52,15 @@ module Expect =
             actual 
             expected
         Expect.equal actual expected message
+
+    
+
+    /// <summary>
+    /// This function uses equal on dotnet and string equal on fable to avoid handling line endings
+    /// </summary>
+    let stringEqualF actual expected message = 
+        #if FABLE_COMPILER
+        stringEqual actual expected message
+        #else
+        Expect.equal actual expected message
+        #endif

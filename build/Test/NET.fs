@@ -11,11 +11,10 @@ let handle (args: string list) =
         CmdLine.empty
         |> CmdLine.appendIf isWatch "watch"
         |> CmdLine.appendRaw "run"
-        |> CmdLine.appendPrefix "--project" ProjectInfo.Fsproj.Tests.NET
+        |> CmdLine.appendPrefix "--project" ProjectInfo.Projects.TestsSiren
         |> CmdLine.toString
 
     Command.Run(
         "dotnet",
-        args,
-        workingDirectory = ""
+        args
     )

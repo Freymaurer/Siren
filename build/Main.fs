@@ -29,6 +29,15 @@ let main argv =
     | "test" :: args ->
         match args with
         | "dotnet" :: args -> Test.NET.handle args
+        | "js" :: "native" :: args -> 
+            Test.JavaScript.handleNative args
+        | "js" :: args -> Test.JavaScript.handle args
+        | "py" :: args -> Test.Python.handle args
+        | [] | "all" :: _ -> 
+            Test.NET.handle []
+            Test.JavaScript.handle []
+            Test.Python.handle []
+            Test.JavaScript.handleNative args
         | _ -> printHelp ()
     | "examples" :: _ ->
         Examples.Flowchart.writeMoonRocketExample()

@@ -1,5 +1,7 @@
 ﻿namespace Siren
 
+open Fable.Core
+
 type NodeTypes =
     | Default
     | Round
@@ -287,14 +289,17 @@ module Interop =
 
 open Types    
 
+[<AttachMembers>]
 type formatting =
     //static member escaped (txt: string) = // idea for escaping for example quotes
     static member unicode (txt: string) = string '"' + txt + string '"'
     static member markdown (txt: string) = string """ "` """ + txt + string """ `" """
 
+[<AttachMembers>]
 type comment =
     static member comment (txt: string) = Interop.mkComment txt
 
+[<AttachMembers>]
 type node =
     static member simple (id: string) = Interop.mkNodeSimple id
     static member node (id: string) (name: string) = Interop.mkNode id name
@@ -315,16 +320,19 @@ type node =
     static member trapezoidAlt (id: string) (name: string) = Interop.mkNodeTrapezoidAlt id name
     static member doubleCircle (id: string) (name: string) = Interop.mkNodeDoubleCircle id name
 
+[<AttachMembers>]
 type click =
     static member href (nodeid: string, url: string, ?target, ?tooltip) = Interop.mkClickHref nodeid url target tooltip
     static member callback (nodeid: string, callbackName: string, ?tooltip) = Interop.mkClickCallback nodeid callbackName tooltip
 
+[<AttachMembers>]
 type style =
     static member styleString (nodeid: string) (styleString: string) = Interop.mkKeyValue "style" (nodeid + " " + styleString)
     static member style (nodeid: string) (keyValueStyles: #seq<string*string>) = 
         let styleString = keyValueStyles |> List.ofSeq |> List.fold (fun acc (k,v) -> acc + sprintf ",%s:%s" k v) ""
         style.styleString nodeid styleString
 
+[<AttachMembers>]
 type direction =
     static member custom (v: string) = Interop.mkKeyValue "direction" v
     static member tb = direction.custom "TB"
@@ -333,10 +341,12 @@ type direction =
     static member rl = direction.custom "RL"
     static member lr = direction.custom "LR"
 
+[<AttachMembers>]
 type subgraph =
     static member subgraph (id: string) (children: #seq<Element>) = Interop.mkSubgraph id children
     static member subgraphNamed (id: string) (name:string) (children: #seq<Element>) = Interop.mkSubgraphNamed id name children
 
+[<AttachMembers>]
 type flowchart() = 
     member this.td (children: #seq<Element>) = Interop.mkGraph "flowchart TD" children
     member this.tb (children: #seq<Element>) = this.td children
@@ -344,6 +354,7 @@ type flowchart() =
     member this.bt (children: #seq<Element>) = Interop.mkGraph "flowchart BT" children
     member this.rl (children: #seq<Element>) = Interop.mkGraph "flowchart RL" children
 
+[<AttachMembers>]
 type diagram =
     static member flowchart = flowchart()
     static member sequence (children: #seq<Element>) = Interop.mkGraph "sequenceDiagram" children
@@ -355,16 +366,17 @@ type diagram =
     static member quadrant (children: #seq<Element>) = Interop.mkGraph "quadrantChart" children
     static member xy (children: #seq<Element>) = Interop.mkGraph "xychart-beta" children
 
-type IFlowchartElement = interface end
+//type IFlowchartElement = interface end
 
+[<AttachMembers>]
 type link =
-    inherit IFlowchartElement with
+    //inherit IFlowchartElement with
     static member arrow (node1,node2,?text:string,?addedLength: int) = 
         Interop.mkConnection node1 node2 <| LinkTypes.Arrow (text, addedLength) |> Connection
-    static member open' (node1,node2,?text:string,?addedLength: int) =
+    static member open_ (node1,node2,?text:string,?addedLength: int) =
         Interop.mkConnection node1 node2 <| LinkTypes.Open (text, addedLength) |> Connection
     static member simple (node1,node2,?text:string,?addedLength: int) =
-        link.open'(node1,node2,?text=text,?addedLength=addedLength)
+        link.open_(node1,node2,?text=text,?addedLength=addedLength)
     static member dotted (node1,node2,?text:string,?addedLength: int) =
         Interop.mkConnection node1 node2 <| LinkTypes.Dotted (text, addedLength) |> Connection
     static member dottedArrow (node1,node2,?text:string,?addedLength: int) =
@@ -388,6 +400,7 @@ type link =
 
 open Interop
 
+[<AttachMembers>]
 type siren =
     static member write (element: Element, ?whitespaces: int) : string =
         let whitespaces = defaultArg whitespaces 4
@@ -399,7 +412,7 @@ type siren =
 module Operators =
     
     let (---) (node1:Element) (node2:Element) : Element =
-        link.open' (node1, node2)
+        link.open_ (node1, node2)
 
     let (-->) (node1:Element) (node2:Element) : Element =
         link.arrow (node1, node2)

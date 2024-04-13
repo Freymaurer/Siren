@@ -6,25 +6,20 @@ open Build.Utils.Path
 
 let root = Path.Resolve()
 
-module ProjectDir =
+let [<Literal>] PackageFolder = "./pkg"
 
-    let [<Literal>] TestFolder = "./tests"
-    let [<Literal>] PackageFolder = "./pkg"
+module TestPaths =
 
-    module Packages =
+    let [<Literal>] BaseDirectory = "./tests"
+    let [<Literal>] CoreDirectory = BaseDirectory + "/Core"
+    let [<Literal>] JSNativeDirectory = BaseDirectory + "/JavaScript"
+    let [<Literal>] PyNativeDirectory = BaseDirectory + "/Python"
 
-        let NET = Path.Resolve(PackageFolder, "NET")
+module Packages =
 
-    module Tests =
+    let NET = Path.Resolve(PackageFolder, "NET")
 
-        let NET = TestFolder
+module Projects =
 
-module Fsproj =
-
-    module Tests =
-
-        let NET =
-            Path.Combine(
-                ProjectDir.Tests.NET,
-                "Siren.Tests.fsproj"
-            )
+    let Siren = "./src/Siren.fsproj"
+    let TestsSiren = System.IO.Path.Combine(TestPaths.CoreDirectory, "Siren.Tests.fsproj")

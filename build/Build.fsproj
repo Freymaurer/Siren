@@ -8,6 +8,8 @@
   <ItemGroup>
     <Compile Include="Util.fs" />
     <Compile Include="ProjectInfo.fs" />
+    <Compile Include="Test\Python.fs" />
+    <Compile Include="Test\JavaScript.fs" />
     <Compile Include="Test\NET.fs" />
     <Compile Include="Examples\Util.fs" />
     <Compile Include="Examples\Flowchart.fs" />

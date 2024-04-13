@@ -13,7 +13,7 @@ let private tests_formatter = testList "formatter" [
 
         let expected = """flowchart BT
 """
-        Expect.equal actual expected ""
+        Expect.stringEqualF actual expected ""
 
     testCase "small" <| fun _ ->
         let actual =
@@ -39,7 +39,7 @@ let private tests_formatter = testList "formatter" [
         end
     end
 """
-        Expect.equal actual expected ""
+        Expect.stringEqualF actual expected ""
 ]
 
 let main = testList "Flowchart" [
