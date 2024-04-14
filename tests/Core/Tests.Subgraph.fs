@@ -8,7 +8,7 @@ let private tests_formatter = testList "formatter" [
     
     testCase "empty" <| fun _ -> 
         let actual = subgraph.subgraph "sub1" [] |> Formatter.writeElementFast
-        let expected = """subgraph sub1[sub1]
+        let expected = """subgraph sub1
 end
 """
         Expect.stringEqualF actual expected ""
@@ -23,7 +23,7 @@ end
                 earth --> node.simple "Moon"
             ] 
             |> Formatter.writeElementFast
-        let expected = """subgraph sub1[sub1]
+        let expected = """subgraph sub1
     Earth(Earth)-..........-|Satellite|Space[Space]
     Space[Space]-->Earth(Earth)
     Earth(Earth)-->Moon[Moon]
@@ -41,9 +41,9 @@ end
                 link.dottedArrow(node.simple "earth", node.simple "moon", formatting.unicode "rocket 🚀", 6)
             ] 
             |> Formatter.writeElementFast
-        let expected = """subgraph space[space]
+        let expected = """subgraph space
     moon(moon)
-    subgraph atmosphere[atmosphere]
+    subgraph atmosphere
         earth((earth))
     end
     earth[earth]-......->|"rocket 🚀"|moon[moon]

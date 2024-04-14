@@ -30,11 +30,11 @@ let private tests_formatter = testList "formatter" [
             |> siren.write
 
         let expected = """flowchart BT
-    subgraph space[space]
+    subgraph space
         direction BT
         earth[earth]-......->|"🚀"|moon[moon]
         moon(moon)
-        subgraph atmosphere[atmosphere]
+        subgraph atmosphere
             earth((earth))
         end
     end

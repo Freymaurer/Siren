@@ -2,7 +2,9 @@
 
 open Fable.Core
 
+[<RequireQualifiedAccess>]
 type NodeTypes =
+    | Id
     | Default
     | Round
     | Stadium
@@ -18,6 +20,32 @@ type NodeTypes =
     | TrapezoidAlt
     | DoubleCircle
 
+[<RequireQualifiedAccess>]
+type NotePosition =
+| RightOf
+| LeftOf
+| Over
+    member this.toFormatString() =
+        match this with
+        | RightOf -> "right of"
+        | LeftOf -> "left of"
+        | Over -> "over"
+
+[<RequireQualifiedAccess>]
+type SubgraphType =
+| Subgraph
+| Box of color: string option
+| Loop 
+    member this.toFormatString() =
+        let start =
+            match this with
+            | Subgraph -> "subgraph"
+            | Box color -> if color.IsSome then sprintf "box %s" color.Value else "box"
+            | Loop -> "loop"
+        let end_ = "end"
+        start, end_
+
+[<RequireQualifiedAccess>]
 type LinkTypes =
     | Arrow         of text: string option * addlength: int option
     | Open          of text: string option * addlength: int option
@@ -50,6 +78,17 @@ type LinkTypes =
         | Dotted _ | DottedArrow _ -> "."
         | Thick _ | ThickArrow _ -> "="
         | Invisible _ -> "~"
+
+[<RequireQualifiedAccess>]
+type MessageTypes =
+    | Solid
+    | Dotted
+    | Arrow
+    | DottedArrow
+    | CrossEdge
+    | DottedCrossEdge
+    | OpenArrow
+    | DottedOpenArrow
 
 [<RequireQualifiedAccess>]
 type target =
@@ -108,6 +147,22 @@ module rec Types =
             LinkType = t
         }
 
+    type Message = {
+        Id1: Element
+        Id2: Element
+        MessageType: MessageTypes
+        Message: string
+        // if None then ignore, if true then "activate", if false then "deactivate"
+        Active: bool option
+    } with
+        static member create(id1, id2, mt, msg, ?active) = {
+            Id1 = id1
+            Id2 = id2
+            MessageType = mt
+            Message = msg
+            Active = active
+        }
+
     type Click = {
         NodeId: string
         Type: ClickTypes
@@ -119,6 +174,20 @@ module rec Types =
             Tooltip = tooltip
         }
 
+    type Subgraph = {
+        Type: SubgraphType
+        Id: string
+        Name: string option
+        Children: Children
+    } with
+        static member create (type_, id, name, children) = 
+            {
+                Type = type_
+                Id = id
+                Name = name
+                Children = children
+            }
+
     type Children = Element list
 
     and Element =
@@ -127,15 +196,32 @@ module rec Types =
         | Comment of string
         | KeyValue of key: string * value: string
         | Click of Click
+        | Message of Message
         | Node of Node
         | Connection of Connection
-        | Connections of Connection list
-        | Subgraph of id:string * name:string * Children
+        | Subgraph of Subgraph
+        | SubgraphChain of Subgraph list
         | Graph of name:string * Children
+
+        member this.GetId() =
+            match this with 
+            | Empty -> failwith "Cannot get ID from `Empty` Element."
+            | Raw _ -> failwith "Cannot get ID from `Raw` Element."
+            | Comment _ -> failwith "Cannot get ID from `Comment` Element."
+            | KeyValue _ -> failwith "Cannot get ID from `KeyValue` Element."
+            | Click c -> c.NodeId
+            | Node n -> n.Id
+            | Message _ -> failwith "Cannot get ID from `Message` Element."
+            | Connection _ -> failwith "Cannot get ID from `Connection` Element."
+            | Subgraph sg -> sg.Id
+            | SubgraphChain _ -> failwith "Cannot get ID from `SubgraphChain` Element."
+            | Graph _ -> failwith "Cannot get ID from `Graph` Element."
 
 module rec Formatter =
     open Types
     open System.Text
+
+    let formatSequenceDiagramAlias (id: string) (alias: string option) = if alias.IsSome then sprintf "%s as %s" id alias.Value else id
 
     let writeComment (txt: string) = sprintf "%%%% %s" txt
     let writeRaw (txt: string) = txt
@@ -165,46 +251,62 @@ module rec Formatter =
     let internal formatNodeType (nodetype: NodeTypes) =
         let this = nodetype
         match this with
-        | Default -> fun id name -> formatMinimalNamedNode id name
-        | Round -> fun id name -> $"{id}({name})"
-        | Stadium -> fun id name -> $"{id}([{name}])"
-        | Subroutine -> fun id name -> $"{id}[[{name}]]"
-        | Cylindrical -> fun id name -> $"{id}[({name})]"
-        | Circle -> fun id name -> $"{id}(({name}))"
-        | Asymmetric -> fun id name -> $"{id}>{name}]"
-        | Rhombus -> fun id name -> sprintf "%s{%s}" id name
-        | Hexagon -> fun id name -> sprintf "%s{{%s}}" id name
-        | Parallelogram -> fun id name -> sprintf "%s[/%s/]" id name
-        | ParallelogramAlt -> fun id name -> sprintf "%s[\%s\]" id name
-        | Trapezoid -> fun id name -> sprintf "%s[/%s\]" id name
-        | TrapezoidAlt -> fun id name -> sprintf "%s[\%s/]" id name
-        | DoubleCircle -> fun id name -> sprintf "%s(((%s)))" id name
+        | NodeTypes.Id -> fun id _ -> id
+        | NodeTypes.Default -> fun id name -> formatMinimalNamedNode id name
+        | NodeTypes.Round -> fun id name -> $"{id}({name})"
+        | NodeTypes.Stadium -> fun id name -> $"{id}([{name}])"
+        | NodeTypes.Subroutine -> fun id name -> $"{id}[[{name}]]"
+        | NodeTypes.Cylindrical -> fun id name -> $"{id}[({name})]"
+        | NodeTypes.Circle -> fun id name -> $"{id}(({name}))"
+        | NodeTypes.Asymmetric -> fun id name -> $"{id}>{name}]"
+        | NodeTypes.Rhombus -> fun id name -> sprintf "%s{%s}" id name
+        | NodeTypes.Hexagon -> fun id name -> sprintf "%s{{%s}}" id name
+        | NodeTypes.Parallelogram -> fun id name -> sprintf "%s[/%s/]" id name
+        | NodeTypes.ParallelogramAlt -> fun id name -> sprintf "%s[\%s\]" id name
+        | NodeTypes.Trapezoid -> fun id name -> sprintf "%s[/%s\]" id name
+        | NodeTypes.TrapezoidAlt -> fun id name -> sprintf "%s[\%s/]" id name
+        | NodeTypes.DoubleCircle -> fun id name -> sprintf "%s(((%s)))" id name
 
     let writeNode (node: Node) =
         let formatter = formatNodeType node.NodeType
         formatter node.Id node.Name
 
+    let internal formatMessageType (msgType: MessageTypes) =
+        match msgType with
+        | MessageTypes.Solid             -> "->"
+        | MessageTypes.Dotted            -> "-->"
+        | MessageTypes.Arrow             -> "->>"
+        | MessageTypes.DottedArrow       -> "-->>"
+        | MessageTypes.CrossEdge         -> "-x"
+        | MessageTypes.DottedCrossEdge   -> "--x"
+        | MessageTypes.OpenArrow         -> "-)"
+        | MessageTypes.DottedOpenArrow   -> "--)"
+
     let internal formatLinkType (link: LinkTypes) =
         let this = link
         match this with
-        | Arrow (txt, l) -> txt, $"-{this.AddedLengthLinker(l)}>" 
-        | Open (txt, l) -> txt, $"-{this.AddedLengthLinker(l)}-"
-        | Dotted (txt, l) -> txt, $"-{this.AddedLengthLinker(l)}-"
-        | DottedArrow (txt, l) -> txt, $"-{this.AddedLengthLinker(l)}->"
-        | Thick (txt, l) -> txt, $"={this.AddedLengthLinker(l)}="
-        | ThickArrow (txt, l) -> txt, $"={this.AddedLengthLinker(l)}>"
-        | Invisible (txt, l) -> txt, $"~{this.AddedLengthLinker(l)}~"
-        | CircleEdge (txt, l) -> txt, $"-{this.AddedLengthLinker(l)}o"
-        | CrossEdge (txt, l) -> txt, $"-{this.AddedLengthLinker(l)}x"
-        | ArrowDouble (txt, l) -> txt, $"<-{this.AddedLengthLinker(l)}>"
-        | CircleDouble (txt, l) -> txt, $"o-{this.AddedLengthLinker(l)}o"
-        | CrossDouble (txt, l) -> txt, $"x-{this.AddedLengthLinker(l)}x"
+        | LinkTypes.Arrow (txt, l) -> txt, $"-{this.AddedLengthLinker(l)}>" 
+        | LinkTypes.Open (txt, l) -> txt, $"-{this.AddedLengthLinker(l)}-"
+        | LinkTypes.Dotted (txt, l) -> txt, $"-{this.AddedLengthLinker(l)}-"
+        | LinkTypes.DottedArrow (txt, l) -> txt, $"-{this.AddedLengthLinker(l)}->"
+        | LinkTypes.Thick (txt, l) -> txt, $"={this.AddedLengthLinker(l)}="
+        | LinkTypes.ThickArrow (txt, l) -> txt, $"={this.AddedLengthLinker(l)}>"
+        | LinkTypes.Invisible (txt, l) -> txt, $"~{this.AddedLengthLinker(l)}~"
+        | LinkTypes.CircleEdge (txt, l) -> txt, $"-{this.AddedLengthLinker(l)}o"
+        | LinkTypes.CrossEdge (txt, l) -> txt, $"-{this.AddedLengthLinker(l)}x"
+        | LinkTypes.ArrowDouble (txt, l) -> txt, $"<-{this.AddedLengthLinker(l)}>"
+        | LinkTypes.CircleDouble (txt, l) -> txt, $"o-{this.AddedLengthLinker(l)}o"
+        | LinkTypes.CrossDouble (txt, l) -> txt, $"x-{this.AddedLengthLinker(l)}x"
         ||> LinkTypes.appendTextOption
+
+    let writeMessage (msg: Message) =
+        let active = match msg.Active with |None -> "" | Some true -> "+"| Some false -> "-"
+        sprintf "%s%s%s:%s%s" (msg.Id1.GetId()) (formatMessageType msg.MessageType) (msg.Id2.GetId()) active msg.Message
 
     let formatConnectionElement (e:Element) =
         match e with
         | Element.Node node -> writeNode node
-        | Element.Subgraph (id,name,_) -> formatMinimalNamedNode id name
+        | Element.Subgraph {Id = id} -> id
         | _ -> failwith "todo"
 
     let writeConnection (connection: Connection) =
@@ -212,6 +314,15 @@ module rec Formatter =
         let n1 = formatConnectionElement connection.Node1
         let n2 = formatConnectionElement connection.Node2
         n1 + link + n2 
+
+    let writeSubgraph (subgraph: Subgraph) =
+        let prefix, suffix = subgraph.Type.toFormatString()
+        let start =
+            if subgraph.Name.IsSome then
+                sprintf "%s %s[%s]" prefix subgraph.Id subgraph.Name.Value
+            else
+                sprintf "%s %s" prefix subgraph.Id 
+        start, suffix
 
     let rec writeElement (e:Element) (sb: StringBuilder) (config: Config) = 
         let whitespaceString = config.GetWhiteSpaceString()
@@ -224,17 +335,20 @@ module rec Formatter =
         | Element.Click c -> sb.AppendLine(writeClick c)
         | Element.Node n -> sb.AppendLine(writeNode n)
         | Element.Connection c -> 
-            let c = writeConnection c
-            sb.AppendLine(c)
-        | Element.Connections _ -> failwith "todo"
-        | Element.Subgraph (id, name, children) ->
-            sb.AppendLine($"subgraph {id}[{name}]") |> ignore
+            let str = writeConnection c
+            sb.AppendLine(str)
+        | Element.Message msg ->
+            let str = writeMessage msg
+            sb.AppendLine(str)
+        | Element.Subgraph sg ->
+            let prefix, suffix = writeSubgraph sg
+            sb.AppendLine(prefix) |> ignore
             let nextConfig = config.GetIncreasedLevel()
-            for child in children do
+            for child in sg.Children do
                 let _: StringBuilder = writeElement child sb nextConfig
                 ()
             sb.Append(whitespaceString) |> ignore
-            sb.AppendLine($"end")
+            sb.AppendLine(suffix)
         | Element.Graph (name, children) ->
             let nextConfig = config.GetIncreasedLevel()
             sb.AppendLine(name) |> ignore
@@ -256,11 +370,17 @@ module Interop =
     let mkLineRaw (txt: string) = Raw txt
 
     let mkComment (comment: string) = Comment comment
+
+    let mkNote (id: string) (position: NotePosition) (msg: string) = 
+        let v = sprintf "%s %s: %s" (position.toFormatString()) (id: string) msg
+        KeyValue ("Note", v)
     
     // link
-    let mkConnection node1 node2 linkType = Connection.create(node1, node2, linkType)
+    let mkConnection node1 node2 linkType = Connection.create(node1, node2, linkType) |> Element.Connection
+    let mkMessage node1 node2 messageType message active = Message.create(node1, node2, messageType, message, ?active=active) |> Element.Message
 
     // nodes
+    let mkNodeId (id: string) : Element = Node <| Node.create(id, id, NodeTypes.Id)
     let mkNodeSimple (id: string) : Element = Node <| Node.create(id)
     let mkNode (id: string) (name: string) = Node <| Node.create (id, name)
     let mkNodeRound (id: string) (name: string) = Node <| Node.create (id, name, NodeTypes.Round)
@@ -278,8 +398,10 @@ module Interop =
     let mkNodeDoubleCircle (id: string) (name: string) = Node <| Node.create (id, name, NodeTypes.DoubleCircle)    
     
     // subgraph
-    let mkSubgraph (id: string) (children: #seq<Element>) : Element = Subgraph (id, id, List.ofSeq children)
-    let mkSubgraphNamed (id: string) (name:string) (children: #seq<Element>) : Element = Subgraph (id, name, List.ofSeq children)
+    let mkSubgraph (id: string) (children: #seq<Element>) : Element = Subgraph <| Subgraph.create(SubgraphType.Subgraph, id, None, List.ofSeq children)
+    let mkSubgraphNamed (id: string) (name:string) (children: #seq<Element>) : Element = Subgraph <| Subgraph.create(SubgraphType.Subgraph, id, Some name, List.ofSeq children)
+    let mkBox (name: string) (color: string option) (children: #seq<Element>) = Subgraph <| Subgraph.create(SubgraphType.Box color, name, None, List.ofSeq children)
+    let mkLoop (name: string) (children: #seq<Element>) = Subgraph <| Subgraph.create(SubgraphType.Loop, name, None, List.ofSeq children)
 
     // click
     let mkClickHref (nodeid: string) (url:string) (target: target option) (tooltip: string option) = 
@@ -301,11 +423,18 @@ type formatting =
     static member markdown (txt: string) = string """ "` """ + txt + string """ `" """
 
 [<AttachMembers>]
+type notePosition =
+    static member rightOf = NotePosition.RightOf
+    static member leftOf = NotePosition.LeftOf
+    static member over = NotePosition.Over
+
+[<AttachMembers>]
 type comment =
     static member comment (txt: string) = Interop.mkComment txt
 
 [<AttachMembers>]
 type node =
+    static member id (id: string) = Interop.mkNodeSimple id
     static member simple (id: string) = Interop.mkNodeSimple id
     static member node (id: string) (name: string) = Interop.mkNode id name
     static member unicode (id: string) (name: string) = Interop.mkNode id (formatting.unicode name)
@@ -360,6 +489,63 @@ type flowchart() =
     member this.rl (children: #seq<Element>) = Interop.mkGraph "flowchart RL" children
 
 [<AttachMembers>]
+type line =
+    static member raw txt = Interop.mkLineRaw txt
+
+[<AttachMembers>]
+type link =
+    static member arrow (node1,node2,?text:string,?addedLength: int) = 
+        Interop.mkConnection node1 node2 <| LinkTypes.Arrow (text, addedLength)
+    static member open_ (node1,node2,?text:string,?addedLength: int) =
+        Interop.mkConnection node1 node2 <| LinkTypes.Open (text, addedLength)
+    static member simple (node1,node2,?text:string,?addedLength: int) =
+        link.open_(node1,node2,?text=text,?addedLength=addedLength)
+    static member dotted (node1,node2,?text:string,?addedLength: int) =
+        Interop.mkConnection node1 node2 <| LinkTypes.Dotted (text, addedLength)
+    static member dottedArrow (node1,node2,?text:string,?addedLength: int) =
+        Interop.mkConnection node1 node2 <| LinkTypes.DottedArrow (text, addedLength)
+    static member thick (node1,node2,?text:string,?addedLength: int) =
+        Interop.mkConnection node1 node2 <| LinkTypes.Thick (text, addedLength)
+    static member thickArrow (node1,node2,?text:string,?addedLength: int) =
+        Interop.mkConnection node1 node2 <| LinkTypes.ThickArrow (text, addedLength)
+    static member invisible (node1,node2,?text:string,?addedLength: int) =
+        Interop.mkConnection node1 node2 <| LinkTypes.Invisible (text, addedLength)
+    static member circleEdge (node1,node2,?text:string,?addedLength: int) =
+        Interop.mkConnection node1 node2 <| LinkTypes.CircleEdge (text, addedLength)
+    static member crossEdge (node1,node2,?text:string,?addedLength: int) =
+        Interop.mkConnection node1 node2 <| LinkTypes.CrossEdge (text, addedLength)
+    static member arrowDouble (node1,node2,?text:string,?addedLength: int) =
+        Interop.mkConnection node1 node2 <| LinkTypes.ArrowDouble (text, addedLength)
+    static member circleDouble (node1,node2,?text:string,?addedLength: int) =
+        Interop.mkConnection node1 node2 <| LinkTypes.CircleDouble (text, addedLength)
+    static member crossDouble (node1,node2,?text:string,?addedLength: int) =
+        Interop.mkConnection node1 node2 <| LinkTypes.CrossDouble (text, addedLength)
+
+[<AttachMembers>]
+type message =
+    static member solid (node1, node2, msg, active: bool option) = Interop.mkMessage node1 node2 MessageTypes.Solid msg active
+    static member arrow (node1, node2, msg, active: bool option) = Interop.mkMessage node1 node2 MessageTypes.Arrow msg active
+    static member dotted (node1, node2, msg, active: bool option) = Interop.mkMessage node1 node2 MessageTypes.Dotted msg active
+    static member dottedArrow (node1, node2, msg, active: bool option) = Interop.mkMessage node1 node2 MessageTypes.DottedArrow msg active
+    static member cross (node1, node2, msg, active: bool option) = Interop.mkMessage node1 node2 MessageTypes.CrossEdge msg active
+    static member dottedCross (node1, node2, msg, active: bool option) = Interop.mkMessage node1 node2 MessageTypes.DottedCrossEdge msg active
+    static member openArrow (node1, node2, msg, active: bool option) = Interop.mkMessage node1 node2 MessageTypes.OpenArrow msg active
+    static member dottedOpenArrow (node1, node2, msg, active: bool option) = Interop.mkMessage node1 node2 MessageTypes.DottedOpenArrow msg active
+
+[<AttachMembers>]
+type sequenceDiagram =
+    static member participant (id: string, ?alias: string) = Interop.mkKeyValue "participant" (Formatter.formatSequenceDiagramAlias id alias)
+    static member actor (id: string, ?alias: string) = Interop.mkKeyValue "actor" (Formatter.formatSequenceDiagramAlias id alias)
+    static member destroy (id: string) = Interop.mkKeyValue "destroy" id
+    static member createParticipant (id: string, ?alias: string) = Interop.mkKeyValue "create participant" (Formatter.formatSequenceDiagramAlias id alias)
+    static member createActor (id: string, ?alias: string) = Interop.mkKeyValue "create actor" (Formatter.formatSequenceDiagramAlias id alias)
+    static member box (name: string) (children: #seq<Element>) = Interop.mkBox name None children
+    static member boxColored (name: string) (color: string) (children: #seq<Element>) = Interop.mkBox name (Some color) children
+    static member activate (id: string) = Interop.mkKeyValue "activate" id
+    static member deactivate (id: string) = Interop.mkKeyValue "deactivate" id
+    static member note(id: string, position, msg) = Interop.mkNote id position msg
+
+[<AttachMembers>]
 type diagram =
     static member flowchart = flowchart()
     static member sequence (children: #seq<Element>) = Interop.mkGraph "sequenceDiagram" children
@@ -370,39 +556,6 @@ type diagram =
     static member journey (children: #seq<Element>) = Interop.mkGraph "journey" children
     static member quadrant (children: #seq<Element>) = Interop.mkGraph "quadrantChart" children
     static member xy (children: #seq<Element>) = Interop.mkGraph "xychart-beta" children
-
-[<AttachMembers>]
-type line =
-    static member raw txt = Interop.mkLineRaw txt
-
-[<AttachMembers>]
-type link =
-    static member arrow (node1,node2,?text:string,?addedLength: int) = 
-        Interop.mkConnection node1 node2 <| LinkTypes.Arrow (text, addedLength) |> Connection
-    static member open_ (node1,node2,?text:string,?addedLength: int) =
-        Interop.mkConnection node1 node2 <| LinkTypes.Open (text, addedLength) |> Connection
-    static member simple (node1,node2,?text:string,?addedLength: int) =
-        link.open_(node1,node2,?text=text,?addedLength=addedLength)
-    static member dotted (node1,node2,?text:string,?addedLength: int) =
-        Interop.mkConnection node1 node2 <| LinkTypes.Dotted (text, addedLength) |> Connection
-    static member dottedArrow (node1,node2,?text:string,?addedLength: int) =
-        Interop.mkConnection node1 node2 <| LinkTypes.DottedArrow (text, addedLength) |> Connection
-    static member thick (node1,node2,?text:string,?addedLength: int) =
-        Interop.mkConnection node1 node2 <| LinkTypes.Thick (text, addedLength) |> Connection
-    static member thickArrow (node1,node2,?text:string,?addedLength: int) =
-        Interop.mkConnection node1 node2 <| LinkTypes.ThickArrow (text, addedLength) |> Connection
-    static member invisible (node1,node2,?text:string,?addedLength: int) =
-        Interop.mkConnection node1 node2 <| LinkTypes.Invisible (text, addedLength) |> Connection
-    static member circleEdge (node1,node2,?text:string,?addedLength: int) =
-        Interop.mkConnection node1 node2 <| LinkTypes.CircleEdge (text, addedLength) |> Connection
-    static member crossEdge (node1,node2,?text:string,?addedLength: int) =
-        Interop.mkConnection node1 node2 <| LinkTypes.CrossEdge (text, addedLength) |> Connection
-    static member arrowDouble (node1,node2,?text:string,?addedLength: int) =
-        Interop.mkConnection node1 node2 <| LinkTypes.ArrowDouble (text, addedLength) |> Connection
-    static member circleDouble (node1,node2,?text:string,?addedLength: int) =
-        Interop.mkConnection node1 node2 <| LinkTypes.CircleDouble (text, addedLength) |> Connection
-    static member crossDouble (node1,node2,?text:string,?addedLength: int) =
-        Interop.mkConnection node1 node2 <| LinkTypes.CrossDouble (text, addedLength) |> Connection
 
 open Interop
 

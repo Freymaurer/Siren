@@ -12,6 +12,7 @@ let handle (args: string list) =
         |> CmdLine.appendIf isWatch "watch"
         |> CmdLine.appendRaw "run"
         |> CmdLine.appendPrefix "--project" ProjectInfo.Projects.TestsSiren
+        |> CmdLine.appendRaw "--silent"
         |> CmdLine.toString
 
     Command.Run(
