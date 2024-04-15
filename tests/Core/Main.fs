@@ -10,6 +10,7 @@ let all = testList "Main" [
     Tests.Connection.main
     Tests.Subgraph.main
     Tests.Flowchart.main
+    Tests.SequenceDiagram.main
 ]
 
 [<EntryPoint>]

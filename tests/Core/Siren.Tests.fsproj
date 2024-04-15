@@ -13,6 +13,7 @@
     <Compile Include="Tests.Connection.fs" />
     <Compile Include="Tests.Subgraph.fs" />
     <Compile Include="Tests.Flowchart.fs" />
+    <Compile Include="Tests.SequenceDiagram.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
 

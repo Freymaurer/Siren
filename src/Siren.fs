@@ -36,12 +36,30 @@ type SubgraphType =
 | Subgraph
 | Box of color: string option
 | Loop 
+| Alt
+| Else
+| Opt
+| Par
+| And
+| Critical
+| Option
+| Break
+| Rect
     member this.toFormatString() =
         let start =
             match this with
             | Subgraph -> "subgraph"
             | Box color -> if color.IsSome then sprintf "box %s" color.Value else "box"
             | Loop -> "loop"
+            | Alt -> "alt"
+            | Else -> "else"
+            | Opt -> "opt"
+            | Par -> "par"
+            | And -> "and"
+            | Critical -> "critical"
+            | Option -> "option"
+            | Break -> "break"
+            | Rect -> "rect"
         let end_ = "end"
         start, end_
 
@@ -301,7 +319,7 @@ module rec Formatter =
 
     let writeMessage (msg: Message) =
         let active = match msg.Active with |None -> "" | Some true -> "+"| Some false -> "-"
-        sprintf "%s%s%s:%s%s" (msg.Id1.GetId()) (formatMessageType msg.MessageType) (msg.Id2.GetId()) active msg.Message
+        sprintf "%s%s%s%s: %s" (msg.Id1.GetId()) (formatMessageType msg.MessageType) active (msg.Id2.GetId()) msg.Message
 
     let formatConnectionElement (e:Element) =
         match e with
@@ -349,6 +367,16 @@ module rec Formatter =
                 ()
             sb.Append(whitespaceString) |> ignore
             sb.AppendLine(suffix)
+        | Element.SubgraphChain subgraphs ->
+            for subgraph in subgraphs do
+                let prefix, _ = writeSubgraph subgraph
+                sb.AppendLine(prefix) |> ignore
+                let nextConfig = config.GetIncreasedLevel()
+                for child in subgraph.Children do
+                    let _: StringBuilder = writeElement child sb nextConfig
+                    ()
+                sb.Append(whitespaceString) |> ignore
+            sb.AppendLine("end")
         | Element.Graph (name, children) ->
             let nextConfig = config.GetIncreasedLevel()
             sb.AppendLine(name) |> ignore
@@ -373,7 +401,7 @@ module Interop =
 
     let mkNote (id: string) (position: NotePosition) (msg: string) = 
         let v = sprintf "%s %s: %s" (position.toFormatString()) (id: string) msg
-        KeyValue ("Note", v)
+        KeyValue ("note", v)
     
     // link
     let mkConnection node1 node2 linkType = Connection.create(node1, node2, linkType) |> Element.Connection
@@ -402,6 +430,18 @@ module Interop =
     let mkSubgraphNamed (id: string) (name:string) (children: #seq<Element>) : Element = Subgraph <| Subgraph.create(SubgraphType.Subgraph, id, Some name, List.ofSeq children)
     let mkBox (name: string) (color: string option) (children: #seq<Element>) = Subgraph <| Subgraph.create(SubgraphType.Box color, name, None, List.ofSeq children)
     let mkLoop (name: string) (children: #seq<Element>) = Subgraph <| Subgraph.create(SubgraphType.Loop, name, None, List.ofSeq children)
+    let mkAlt (name: string) (children: #seq<Element>) = Subgraph <| Subgraph.create(SubgraphType.Alt, name, None, List.ofSeq children)
+    let mkElse (name: string) (children: #seq<Element>) = Subgraph <| Subgraph.create(SubgraphType.Else, name, None, List.ofSeq children)
+    let mkOpt (name: string) (children: #seq<Element>) = Subgraph <| Subgraph.create(SubgraphType.Opt, name, None, List.ofSeq children)
+    let mkCustomSubgraphType (type',name,id,children) = Subgraph <| Subgraph.create(type',name, id,List.ofSeq children)
+    let mkSubgraphChain (children: #seq<Element>) = 
+        [
+            for child in children do
+                match child with
+                | Subgraph s -> s
+                | anyElse -> failwithf "Error. Found non subgraph element in subgraph chain: %A" anyElse
+        ]
+        |> SubgraphChain
 
     // click
     let mkClickHref (nodeid: string) (url:string) (target: target option) (tooltip: string option) = 
@@ -479,6 +519,7 @@ type direction =
 type subgraph =
     static member subgraph (id: string) (children: #seq<Element>) = Interop.mkSubgraph id children
     static member subgraphNamed (id: string) (name:string) (children: #seq<Element>) = Interop.mkSubgraphNamed id name children
+    static member chain (children: #seq<Element>) = Interop.mkSubgraphChain children
 
 [<AttachMembers>]
 type flowchart() = 
@@ -523,14 +564,14 @@ type link =
 
 [<AttachMembers>]
 type message =
-    static member solid (node1, node2, msg, active: bool option) = Interop.mkMessage node1 node2 MessageTypes.Solid msg active
-    static member arrow (node1, node2, msg, active: bool option) = Interop.mkMessage node1 node2 MessageTypes.Arrow msg active
-    static member dotted (node1, node2, msg, active: bool option) = Interop.mkMessage node1 node2 MessageTypes.Dotted msg active
-    static member dottedArrow (node1, node2, msg, active: bool option) = Interop.mkMessage node1 node2 MessageTypes.DottedArrow msg active
-    static member cross (node1, node2, msg, active: bool option) = Interop.mkMessage node1 node2 MessageTypes.CrossEdge msg active
-    static member dottedCross (node1, node2, msg, active: bool option) = Interop.mkMessage node1 node2 MessageTypes.DottedCrossEdge msg active
-    static member openArrow (node1, node2, msg, active: bool option) = Interop.mkMessage node1 node2 MessageTypes.OpenArrow msg active
-    static member dottedOpenArrow (node1, node2, msg, active: bool option) = Interop.mkMessage node1 node2 MessageTypes.DottedOpenArrow msg active
+    static member solid (node1, node2, msg, ?active: bool) = Interop.mkMessage node1 node2 MessageTypes.Solid msg active
+    static member arrow (node1, node2, msg, ?active: bool) = Interop.mkMessage node1 node2 MessageTypes.Arrow msg active
+    static member dotted (node1, node2, msg, ?active: bool) = Interop.mkMessage node1 node2 MessageTypes.Dotted msg active
+    static member dottedArrow (node1, node2, msg, ?active: bool) = Interop.mkMessage node1 node2 MessageTypes.DottedArrow msg active
+    static member cross (node1, node2, msg, ?active: bool) = Interop.mkMessage node1 node2 MessageTypes.CrossEdge msg active
+    static member dottedCross (node1, node2, msg, ?active: bool) = Interop.mkMessage node1 node2 MessageTypes.DottedCrossEdge msg active
+    static member openArrow (node1, node2, msg, ?active: bool) = Interop.mkMessage node1 node2 MessageTypes.OpenArrow msg active
+    static member dottedOpenArrow (node1, node2, msg, ?active: bool) = Interop.mkMessage node1 node2 MessageTypes.DottedOpenArrow msg active
 
 [<AttachMembers>]
 type sequenceDiagram =
@@ -544,6 +585,21 @@ type sequenceDiagram =
     static member activate (id: string) = Interop.mkKeyValue "activate" id
     static member deactivate (id: string) = Interop.mkKeyValue "deactivate" id
     static member note(id: string, position, msg) = Interop.mkNote id position msg
+    static member alt(name: string) (children: #seq<Element>) = Interop.mkAlt name children
+    static member else_ (name: string) (children: #seq<Element>) = Interop.mkElse name children
+    static member opt (name: string) (children: #seq<Element>) = Interop.mkOpt name children
+    static member par (name: string) (children: #seq<Element>) = Interop.mkCustomSubgraphType (SubgraphType.Par,name,None,children)
+    static member and_ (name: string) (children: #seq<Element>) = Interop.mkCustomSubgraphType (SubgraphType.And,name,None,children)
+    static member critical (name: string) (children: #seq<Element>) = Interop.mkCustomSubgraphType (SubgraphType.Critical,name,None,children)
+    static member option (name: string) (children: #seq<Element>) = Interop.mkCustomSubgraphType (SubgraphType.Option,name,None,children)
+    static member break_ (name: string) (children: #seq<Element>) = Interop.mkCustomSubgraphType (SubgraphType.Break,name,None,children)
+    static member rect (color: string) (children: #seq<Element>) = Interop.mkCustomSubgraphType (SubgraphType.Rect,color,None,children)
+    static member autoNumber = Interop.mkLineRaw "autonumber"
+    static member link (actor: string, urlLabel: string, url: string) = Interop.mkLineRaw (sprintf "link %s: %s @ %s" actor urlLabel url)
+    static member links (actor: string, urls: #seq<string*string>) = 
+        let json0 = urls |> List.ofSeq |> List.map (fun (k,v) -> sprintf "\"%s\": \"%s\"" k v) |> String.concat ", "
+        let json = "{" + json0 + "}"
+        Interop.mkLineRaw (sprintf "links %s: %s" actor json)
 
 [<AttachMembers>]
 type diagram =
