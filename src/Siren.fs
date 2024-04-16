@@ -19,6 +19,7 @@ type NodeTypes =
     | Trapezoid
     | TrapezoidAlt
     | DoubleCircle
+    | Class
 
 [<RequireQualifiedAccess>]
 type NotePosition =
@@ -109,6 +110,18 @@ type MessageTypes =
     | DottedOpenArrow
 
 [<RequireQualifiedAccess>]
+type RelationshipTypes =
+    | Inheritance
+    | Composition
+    | Aggregation
+    | Association
+    | Solid // solid
+    | Dependency
+    | Realization
+    | Dashed
+    | Custom of string
+
+[<RequireQualifiedAccess>]
 type target =
     | _self
     | _blank
@@ -181,6 +194,19 @@ module rec Types =
             Active = active
         }
 
+    type Relationship = {
+        Id1: Element
+        Id2: Element
+        RelationshipType: RelationshipTypes
+        Label: string option
+    } with
+        static member create(id1, id2, rt, ?label) = {
+            Id1 = id1
+            Id2 = id2
+            RelationshipType = rt
+            Label = label
+        }
+
     type Click = {
         NodeId: string
         Type: ClickTypes
@@ -215,6 +241,7 @@ module rec Types =
         | KeyValue of key: string * value: string
         | Click of Click
         | Message of Message
+        | Relationship of Relationship
         | Node of Node
         | Connection of Connection
         | Subgraph of Subgraph
@@ -230,6 +257,7 @@ module rec Types =
             | Click c -> c.NodeId
             | Node n -> n.Id
             | Message _ -> failwith "Cannot get ID from `Message` Element."
+            | Relationship _ -> failwith "Cannot get ID from `Relationship` Element."
             | Connection _ -> failwith "Cannot get ID from `Connection` Element."
             | Subgraph sg -> sg.Id
             | SubgraphChain _ -> failwith "Cannot get ID from `SubgraphChain` Element."
@@ -317,15 +345,33 @@ module rec Formatter =
         | LinkTypes.CrossDouble (txt, l) -> txt, $"x-{this.AddedLengthLinker(l)}x"
         ||> LinkTypes.appendTextOption
 
+    let internal formatRelationshipType (rs: RelationshipTypes) =
+        match rs with
+        | RelationshipTypes.Inheritance     -> "--|>"
+        | RelationshipTypes.Composition     -> "--*"
+        | RelationshipTypes.Aggregation     -> "--o"
+        | RelationshipTypes.Association     -> "-->"
+        | RelationshipTypes.Solid           -> "--"
+        | RelationshipTypes.Dependency      -> "..>"
+        | RelationshipTypes.Realization     -> "..|>"
+        | RelationshipTypes.Dashed          -> ".."
+        | RelationshipTypes.Custom str      -> str
+
     let writeMessage (msg: Message) =
         let active = match msg.Active with |None -> "" | Some true -> "+"| Some false -> "-"
         sprintf "%s%s%s%s: %s" (msg.Id1.GetId()) (formatMessageType msg.MessageType) active (msg.Id2.GetId()) msg.Message
+
+    let writeRelationship (rs:Relationship) =
+        let label = rs.Label |> Option.map (fun label -> sprintf " : %s" label)
+        sprintf "%s %s %s" (rs.Id1.GetId()) (formatRelationshipType rs.RelationshipType) (rs.Id2.GetId())
+        |> fun b -> if label.IsSome then b + label.Value else b
 
     let formatConnectionElement (e:Element) =
         match e with
         | Element.Node node -> writeNode node
         | Element.Subgraph {Id = id} -> id
         | _ -> failwith "todo"
+
 
     let writeConnection (connection: Connection) =
         let link = formatLinkType connection.LinkType
@@ -357,6 +403,9 @@ module rec Formatter =
             sb.AppendLine(str)
         | Element.Message msg ->
             let str = writeMessage msg
+            sb.AppendLine(str)
+        | Element.Relationship rt ->
+            let str = writeRelationship rt
             sb.AppendLine(str)
         | Element.Subgraph sg ->
             let prefix, suffix = writeSubgraph sg
@@ -406,6 +455,7 @@ module Interop =
     // link
     let mkConnection node1 node2 linkType = Connection.create(node1, node2, linkType) |> Element.Connection
     let mkMessage node1 node2 messageType message active = Message.create(node1, node2, messageType, message, ?active=active) |> Element.Message
+    let mkRelationship node1 node2 rt label = Relationship.create(node1, node2, rt, ?label = label) |> Element.Relationship
 
     // nodes
     let mkNodeId (id: string) : Element = Node <| Node.create(id, id, NodeTypes.Id)
@@ -574,6 +624,18 @@ type message =
     static member dottedOpenArrow (node1, node2, msg, ?active: bool) = Interop.mkMessage node1 node2 MessageTypes.DottedOpenArrow msg active
 
 [<AttachMembers>]
+type relationship =
+    static member inheritance (node1, node2, ?label) = Interop.mkRelationship node1 node2 RelationshipTypes.Inheritance label
+    static member composition (node1, node2, ?label) = Interop.mkRelationship node1 node2 RelationshipTypes.Composition label
+    static member aggregation (node1, node2, ?label) = Interop.mkRelationship node1 node2 RelationshipTypes.Aggregation label
+    static member association (node1, node2, ?label) = Interop.mkRelationship node1 node2 RelationshipTypes.Association label
+    static member solid (node1, node2, ?label) = Interop.mkRelationship node1 node2 RelationshipTypes.Solid label
+    static member dependency (node1, node2, ?label) = Interop.mkRelationship node1 node2 RelationshipTypes.Dependency label
+    static member realization (node1, node2, ?label) = Interop.mkRelationship node1 node2 RelationshipTypes.Realization label
+    static member dashed (node1, node2, ?label) = Interop.mkRelationship node1 node2 RelationshipTypes.Dashed label
+    static member custom (node1, node2, relationship: string, ?label) = Interop.mkRelationship node1 node2 (RelationshipTypes.Custom relationship) label
+
+[<AttachMembers>]
 type sequenceDiagram =
     static member participant (id: string, ?alias: string) = Interop.mkKeyValue "participant" (Formatter.formatSequenceDiagramAlias id alias)
     static member actor (id: string, ?alias: string) = Interop.mkKeyValue "actor" (Formatter.formatSequenceDiagramAlias id alias)
@@ -601,12 +663,15 @@ type sequenceDiagram =
         let json = "{" + json0 + "}"
         Interop.mkLineRaw (sprintf "links %s: %s" actor json)
 
+type classDiagram =
+    static member class_ (name: string) = Interop.mkKeyValue "class" name
+
 [<AttachMembers>]
 type diagram =
     static member flowchart = flowchart()
     static member sequence (children: #seq<Element>) = Interop.mkGraph "sequenceDiagram" children
-    static member gantt (children: #seq<Element>) = Interop.mkGraph "gantt" children
     static member classDiagram (children: #seq<Element>) = Interop.mkGraph "classDiagram" children
+    static member gantt (children: #seq<Element>) = Interop.mkGraph "gantt" children
     static member git (children: #seq<Element>) = Interop.mkGraph "gitGraph" children
     static member entityRelationship (children: #seq<Element>) = Interop.mkGraph "erDiagram" children
     static member journey (children: #seq<Element>) = Interop.mkGraph "journey" children
