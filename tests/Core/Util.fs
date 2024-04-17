@@ -53,7 +53,10 @@ module Expect =
             expected
         Expect.equal actual expected message
 
-    
+    let trimEqual (actual: string) (expected: string) message =
+        let a = actual.Trim()
+        let e = expected.Trim()
+        Expect.equal a e message
 
     /// <summary>
     /// This function uses equal on dotnet and string equal on fable to avoid handling line endings

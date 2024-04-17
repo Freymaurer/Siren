@@ -93,6 +93,25 @@ module Types =
     type SequenceElement = 
         | SequenceElement of string
         | SequenceWrapper of opener: string * closer: string * SequenceElement list
+        | SequenceWrapperList of SequenceElement list
+
+        member this.ToYamlAst() = 
+            match this with
+            | SequenceElement line -> [Yaml.line line]
+            | SequenceWrapper (opener, closer, children) ->
+                [
+                    Yaml.line opener
+                    Yaml.level [
+                        for child in children do 
+                            yield! child.ToYamlAst()
+                    ]
+                    if closer <> "" then Yaml.line closer
+                ]
+            | SequenceWrapperList children ->
+                [
+                    for child in children do
+                        yield! child.ToYamlAst()
+                ]
 
     type ClassDiagramElement = 
         | ClassDiagramElement of string
@@ -191,7 +210,9 @@ type flowchartDirection =
     static member leftToRight = flowchartDirection.lr
     static member custom (str: string) = FlowchartDirection.Custom str
 
-
+module Generic =
+    
+    let formatComment (txt: string) = sprintf "%%%% %s" txt
 module Flowchart =
 
     [<RequireQualifiedAccess>]
@@ -301,11 +322,10 @@ module Flowchart =
         let tooltip = tooltip |> Option.map (fun s -> sprintf " %A" s) |> Option.defaultValue ""
         sprintf """click %s href %A%s""" id url tooltip
 
-    let formatComment (txt: string) = sprintf "%%%% %s" txt
-
 [<AttachMembers>]
 type flowchart =
     static member raw (txt: string) = FlowchartElement txt
+    static member id (txt: string) = FlowchartElement txt
     static member node (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name Flowchart.NodeTypes.Default |> FlowchartElement
     static member nodeRound (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name Flowchart.NodeTypes.Round |> FlowchartElement
     static member nodeStadium (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name Flowchart.NodeTypes.Stadium |> FlowchartElement
@@ -317,6 +337,7 @@ type flowchart =
     static member nodeHexagon (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name Flowchart.NodeTypes.Hexagon |> FlowchartElement
     static member nodeParallelogram (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name Flowchart.NodeTypes.Parallelogram |> FlowchartElement
     static member nodeParallelogramAlt (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name Flowchart.NodeTypes.ParallelogramAlt |> FlowchartElement
+    static member nodeTrapezoid (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name Flowchart.NodeTypes.Trapezoid |> FlowchartElement
     static member nodeTrapezoidAlt (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name Flowchart.NodeTypes.TrapezoidAlt |> FlowchartElement
     static member nodeDoubleCircle (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name Flowchart.NodeTypes.DoubleCircle |> FlowchartElement
     static member linkArrow (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 Flowchart.LinkTypes.Arrow message addedLength |> FlowchartElement
@@ -340,12 +361,20 @@ type flowchart =
     static member subgraphNamed (id: string, name: string, children: #seq<FlowchartElement>) = Flowchart.formatSubgraph id (Some name) ||> fun opener closer -> FlowchartSubgraph (opener,closer,List.ofSeq children)
     static member subgraph (id: string, children: #seq<FlowchartElement>) = Flowchart.formatSubgraph id None ||> fun opener closer -> FlowchartSubgraph (opener,closer,List.ofSeq children)
     static member clickHref(id: string, url: string, ?tooltip: string) = Flowchart.formatClickHref id url tooltip |> FlowchartElement
-    static member comment(txt:string) = Flowchart.formatComment txt |> FlowchartElement
+    static member comment(txt:string) = Generic.formatComment txt |> FlowchartElement
     //static member clickCallback() = failwith "TODO"
 
-type INotePosition = obj
-
 module Sequence =
+
+    type NotePosition =
+    | Over
+    | RightOf
+    | LeftOf
+        member this.ToFormatString() =
+            match this with
+            | Over      -> "over"
+            | RightOf   -> "right of"
+            | LeftOf    -> "left of"
 
     [<RequireQualifiedAccess>]
     type MessageTypes =
@@ -390,7 +419,21 @@ module Sequence =
         let color = color |> Option.formatString (sprintf "%s ")
         sprintf "box %s%s" color name
 
+    let formatNote (id) (position: NotePosition option) (msg: string) =
+        let position = defaultArg position NotePosition.RightOf |> _.ToFormatString()
+        sprintf "note %s %s: %s" position id msg
+
+    let formatNoteSpanning id1 id2 (position: NotePosition option) (msg: string) =
+        let position = defaultArg position NotePosition.RightOf |> _.ToFormatString()
+        sprintf "note %s %s,%s: %s" position id1 id2 msg
+
     let [<Literal>] BoxCloser = "end"
+
+[<AttachMembers>]
+type notePosition =
+    static member over = Sequence.NotePosition.Over
+    static member rightOf = Sequence.NotePosition.RightOf
+    static member leftOf = Sequence.NotePosition.LeftOf
 
 [<AttachMembers>]
 type sequence =
@@ -402,29 +445,66 @@ type sequence =
     static member destroy (id: string) = Sequence.formatDestroy id |> SequenceElement
     static member box (name: string, children: #seq<SequenceElement>) = SequenceWrapper (Sequence.formatBox name None, Sequence.BoxCloser, List.ofSeq children)
     static member boxColored (name: string, color: string, children: #seq<SequenceElement>) = SequenceWrapper (Sequence.formatBox name (Some color), Sequence.BoxCloser, List.ofSeq children)
-    static member message(a1, a2, message, activate: bool option) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.Solid message activate |> SequenceElement 
-    static member messageSolid(a1, a2, message, activate: bool option) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.Solid message activate |> SequenceElement 
-    static member messageDotted(a1, a2, message, activate: bool option) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.Dotted message activate |> SequenceElement 
-    static member messageArrow(a1, a2, message, activate: bool option) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.Arrow message activate |> SequenceElement 
-    static member messageDottedArrow(a1, a2, message, activate: bool option) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.DottedArrow message activate |> SequenceElement 
-    static member messageCross(a1, a2, message, activate: bool option) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.CrossEdge message activate |> SequenceElement 
-    static member messageDottedCross(a1, a2, message, activate: bool option) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.DottedCrossEdge message activate |> SequenceElement 
-    static member messageOpenArrow(a1, a2, message, activate: bool option) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.OpenArrow message activate |> SequenceElement 
-    static member messageDottedOpenArrow(a1, a2, message, activate: bool option) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.DottedOpenArrow message activate |> SequenceElement 
+    static member message(a1, a2, message, ?activate: bool) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.Solid message activate |> SequenceElement 
+    static member messageSolid(a1, a2, message, ?activate: bool) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.Solid message activate |> SequenceElement 
+    static member messageDotted(a1, a2, message, ?activate: bool ) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.Dotted message activate |> SequenceElement 
+    static member messageArrow(a1, a2, message, ?activate: bool) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.Arrow message activate |> SequenceElement 
+    static member messageDottedArrow(a1, a2, message, ?activate: bool) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.DottedArrow message activate |> SequenceElement 
+    static member messageCross(a1, a2, message, ?activate: bool) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.CrossEdge message activate |> SequenceElement 
+    static member messageDottedCross(a1, a2, message, ?activate: bool) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.DottedCrossEdge message activate |> SequenceElement 
+    static member messageOpenArrow(a1, a2, message, ?activate: bool) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.OpenArrow message activate |> SequenceElement 
+    static member messageDottedOpenArrow(a1, a2, message, ?activate: bool) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.DottedOpenArrow message activate |> SequenceElement 
     static member activate(id: string) = sprintf "activate %s" id |> SequenceElement
     static member deactivate(id: string) = sprintf "deactivate %s" id |> SequenceElement
-    static member note(id: string, text: string, ?notePosition: INotePosition) = SequenceElement "TODO"
-    static member noteSpanning(id1: string, id2, text: string, ?notePosition: INotePosition) = SequenceElement "TODO"
-    static member alt(name: string, elseList: #seq<string*#seq<SequenceElement>>) = SequenceWrapper (name, "", [])
-    static member opt(name: string, children: #seq<SequenceElement>) = SequenceWrapper (name, "", List.ofSeq children)
-    static member par(name: string, andList: #seq<string*#seq<SequenceElement>>) = SequenceWrapper (name, "", [])
-    static member critical(name: string, optionList: #seq<string*#seq<SequenceElement>>) = SequenceWrapper (name, "", [])
-    static member break_ (name: string, children: #seq<SequenceElement>) = SequenceWrapper (name, "", List.ofSeq children)
-    static member rect (color: string, children: #seq<SequenceElement>) = SequenceWrapper (color, "", List.ofSeq children)
-    static member comment (txt: string) = SequenceElement txt
+    static member note(id: string, text: string, ?notePosition: Sequence.NotePosition) = Sequence.formatNote id notePosition text |> SequenceElement
+    static member noteSpanning(id1: string, id2, text: string, ?notePosition: Sequence.NotePosition) = Sequence.formatNoteSpanning id1 id2 notePosition text |> SequenceElement
+    static member loop(name: string, children: #seq<SequenceElement>) = SequenceWrapper(sprintf "loop %s" name,"end", List.ofSeq children)
+    static member alt(name: string, children: #seq<SequenceElement>, elseList: #seq<string*#seq<SequenceElement>>) = 
+        let elseItems = elseList |> Seq.length
+        let altCloser = if elseItems = 0 then "end" else ""
+        let last = elseItems-1 
+        SequenceWrapperList [
+            SequenceWrapper (sprintf "alt %s" name, altCloser, List.ofSeq children)
+            if elseItems <> 0 then 
+                for i in 0 .. last do
+                    let name, children = elseList |> Seq.item i
+                    let closer = if i = last then "end" else ""
+                    SequenceWrapper(sprintf "else %s" name, closer, List.ofSeq children)                
+        ]
+    static member opt(name: string, children: #seq<SequenceElement>) = SequenceWrapper (sprintf "opt %s" name, "end", List.ofSeq children)
+    static member par(name: string, children: #seq<SequenceElement>, andList: #seq<string*#seq<SequenceElement>>) = 
+        let elseItems = andList |> Seq.length
+        let altCloser = if elseItems = 0 then "end" else ""
+        let last = elseItems-1 
+        SequenceWrapperList [
+            SequenceWrapper (sprintf "par %s" name, altCloser, List.ofSeq children)
+            if elseItems <> 0 then 
+                for i in 0 .. last do
+                    let name, children = andList |> Seq.item i
+                    let closer = if i = last then "end" else ""
+                    SequenceWrapper(sprintf "and %s" name, closer, List.ofSeq children)                
+        ]
+    static member critical(name: string, children: #seq<SequenceElement>, optionList: #seq<string*#seq<SequenceElement>>) = 
+        let elseItems = optionList |> Seq.length
+        let altCloser = if elseItems = 0 then "end" else ""
+        let last = elseItems-1 
+        SequenceWrapperList [
+            SequenceWrapper (sprintf "critical %s" name, altCloser, List.ofSeq children)
+            if elseItems <> 0 then 
+                for i in 0 .. last do
+                    let name, children = optionList |> Seq.item i
+                    let closer = if i = last then "end" else ""
+                    SequenceWrapper(sprintf "option %s" name, closer, List.ofSeq children)                
+        ]
+    static member breakSeq (name: string, children: #seq<SequenceElement>) = SequenceWrapper (sprintf "break %s" name, "end", List.ofSeq children)
+    static member rect (color: string, children: #seq<SequenceElement>) = SequenceWrapper (sprintf "rect %s" color, "end", List.ofSeq children)
+    static member comment (txt: string) = Generic.formatComment txt |> SequenceElement
     static member autoNumber = SequenceElement "autonumber"
-    static member link (id: string, urlLabel: string, url: string) = SequenceElement "TODO"
-    static member links (id: string, linkJson: obj) = SequenceElement "TODO" // look at implementation
+    static member link (id: string, urlLabel: string, url: string) = sprintf "link %s: %s @ %s" id urlLabel url |> SequenceElement
+    static member links (id: string, urls: #seq<string*string>) = 
+        let json0 = urls |> List.ofSeq |> List.map (fun (k,v) -> sprintf "\"%s\": \"%s\"" k v) |> String.concat ", "
+        let json = "{" + json0 + "}"
+        sprintf "links %s: %s" id json |> SequenceElement
 
 type IAccessibility = obj
 type IClassifier = obj
@@ -463,7 +543,7 @@ type stateDiagram =
     static member startStop = StateDiagramElement "TODO"
     static member startStopString : string = "[*]"
     static member stateComposite (id: string, children: #seq<StateDiagramElement>) = StateDiagramWrapper ("TODO","TODO", List.ofSeq children)
-    static member note (id: string, notePosition: INotePosition) = StateDiagramElement "TODO"
+    static member note (id: string, notePosition: Sequence.NotePosition) = StateDiagramElement "TODO"
     /// Can only be used in stateComposite
     static member concurrency = StateDiagramElement "--" 
     static member direction (direction: obj) = StateDiagramElement "TODO"
@@ -618,6 +698,15 @@ type siren =
         match diagram with
         | SirenElement.Flowchart (direction, children) ->
             let dia = "flowchart " + direction.ToString()
+            Yaml.root [
+                Yaml.line dia
+                Yaml.level [
+                    for child in children do
+                        yield! child.ToYamlAst()
+                ]
+            ]
+        | SirenElement.Sequence (children) ->
+            let dia = "sequenceDiagram"
             Yaml.root [
                 Yaml.line dia
                 Yaml.level [
