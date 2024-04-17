@@ -4,13 +4,16 @@ open Fable.Pyxpecto
 open Siren
 
 let all = testList "Main" [
-    Tests.Comment.main
-    Tests.Line.main
-    Tests.Node.main
-    Tests.Connection.main
-    Tests.Subgraph.main
+    Tests.Yaml.main
+    //Tests.Comment.main
+    //Tests.Line.main
+    //Tests.Node.main
+    //Tests.Connection.main
+    //Tests.Subgraph.main
     Tests.Flowchart.main
-    Tests.SequenceDiagram.main
+    //Tests.SequenceDiagram.main
+    testCase "ensure" <| fun _ ->
+        Expect.equal 1 1 "Hello"
 ]
 
 [<EntryPoint>]

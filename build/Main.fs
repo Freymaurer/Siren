@@ -42,7 +42,8 @@ let main argv =
             Test.JavaScript.handleNative args
         | _ -> printHelp ()
     | "examples" :: _ ->
-        Examples.Flowchart.writeMoonRocketExample()
+        //Examples.Flowchart.writeMoonRocketExample()
+        ()
     | _ -> printHelp ()
 
     0
