@@ -74,7 +74,7 @@ let private tests_comment = testList "Comment" [
         testCase "simple" <| fun _ ->
             let actual = flowchart.comment "Lorem ipsum dolor sit amet, consetetur sadipscing elitr." |> writeYml
             let expected = "%% Lorem ipsum dolor sit amet, consetetur sadipscing elitr."
-            Expect.stringEqual actual expected ""
+            Expect.trimEqual actual expected ""
     ]
 ]
 
@@ -99,51 +99,51 @@ let private tests_link = testList "link" [
     testCase "simple" <| fun _ ->
         let actual = flowchart.linkOpen (n1,n2) |> writeYml
         let expected = "A[A]---B[B]"
-        Expect.stringEqual actual expected ""
+        Expect.trimEqual actual expected ""
     testCase "arrow" <| fun _ ->
         let actual = flowchart.linkArrow (n1,n2) |> writeYml
         let expected = "A[A]-->B[B]"
-        Expect.stringEqual actual expected ""
+        Expect.trimEqual actual expected ""
     testCase "arrowDouble" <| fun _ ->
         let actual = flowchart.linkArrowDouble (n1,n2) |> writeYml
         let expected = "A[A]<-->B[B]"
-        Expect.stringEqual actual expected ""
+        Expect.trimEqual actual expected ""
     testCase "dotted" <| fun _ ->
         let actual = flowchart.linkDotted (n1,n2) |> writeYml
         let expected = "A[A]-.-B[B]"
-        Expect.stringEqual actual expected ""
+        Expect.trimEqual actual expected ""
     testCase "dottedArrow" <| fun _ ->
         let actual = flowchart.linkDottedArrow (n1,n2) |> writeYml
         let expected = "A[A]-.->B[B]"
-        Expect.stringEqual actual expected ""
+        Expect.trimEqual actual expected ""
     testCase "thick" <| fun _ ->
         let actual = flowchart.linkThick(n1,n2) |> writeYml
         let expected = "A[A]===B[B]"
-        Expect.stringEqual actual expected ""
+        Expect.trimEqual actual expected ""
     testCase "thickArrow" <| fun _ ->
         let actual = flowchart.linkThickArrow(n1,n2) |> writeYml
         let expected = "A[A]==>B[B]"
-        Expect.stringEqual actual expected ""
+        Expect.trimEqual actual expected ""
     testCase "invisible" <| fun _ ->
         let actual = flowchart.linkInvisible(n1,n2) |> writeYml
         let expected = "A[A]~~~B[B]"
-        Expect.stringEqual actual expected ""
+        Expect.trimEqual actual expected ""
     testCase "circle edge" <| fun _ ->
         let actual = flowchart.linkCircleEdge(n1,n2) |> writeYml
         let expected = "A[A]--oB[B]"
-        Expect.stringEqual actual expected ""
+        Expect.trimEqual actual expected ""
     testCase "circle double" <| fun _ ->
         let actual = flowchart.linkCircleDouble(n1,n2) |> writeYml
         let expected = "A[A]o--oB[B]"
-        Expect.stringEqual actual expected ""
+        Expect.trimEqual actual expected ""
     testCase "cross edge" <| fun _ ->
         let actual = flowchart.linkCrossEdge(n1,n2) |> writeYml
         let expected = "A[A]--xB[B]"
-        Expect.stringEqual actual expected ""
+        Expect.trimEqual actual expected ""
     testCase "cross double" <| fun _ ->
         let actual = flowchart.linkCrossDouble(n1,n2) |> writeYml
         let expected = "A[A]x--xB[B]"
-        Expect.stringEqual actual expected ""
+        Expect.trimEqual actual expected ""
 ]
 
 let private tests_subgraph = testList "subgraph" [
@@ -153,7 +153,7 @@ let private tests_subgraph = testList "subgraph" [
         let expected = """subgraph sub1
 end
 """
-        Expect.stringEqualF actual expected ""
+        Expect.trimEqual actual expected ""
 
     testCase "nodes" <| fun _ -> 
         let actual = 
@@ -169,7 +169,7 @@ end
     Earth-..........-|Satellite|Space
 end
 """
-        Expect.stringEqualF actual expected ""     
+        Expect.trimEqual actual expected ""     
 
     testCase "nested" <| fun _ -> 
         let actual = 
@@ -189,7 +189,7 @@ end
     earth-......->|"rocket 🚀"|moon
 end
 """
-        Expect.stringEqualF actual expected ""
+        Expect.trimEqual actual expected ""
 ]
 
 
@@ -203,7 +203,7 @@ let private tests_formatter = testList "formatter" [
 
         let expected = """flowchart BT
 """
-        Expect.stringEqualF actual expected ""
+        Expect.trimEqual actual expected ""
 
     testCase "small" <| fun _ ->
         let actual =
@@ -229,7 +229,7 @@ let private tests_formatter = testList "formatter" [
         end
     end
 """
-        Expect.stringEqualF actual expected ""
+        Expect.trimEqual actual expected ""
 ]
 
 let main = testList "Flowchart" [

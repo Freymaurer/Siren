@@ -6,8 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Tests.Yaml.fs" />
     <Compile Include="Util.fs" />
+    <Compile Include="Tests.Yaml.fs" />
     <Compile Include="Tests.Flowchart.fs" />
     <Compile Include="Tests.SequenceDiagram.fs" />
     <Compile Include="Main.fs" />

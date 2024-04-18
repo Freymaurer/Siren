@@ -4,29 +4,32 @@
 
 ## Flowchart
 
+Python currently not running due to:
+https://github.com/fable-compiler/Fable/issues/3808
+
 <!--Example1-->
 ```fsharp
-diagram.flowchart.bt [
-    subgraph.subgraph "space" [
-        direction.bt
-        link.dottedArrow(node.simple "earth", node.simple "moon", formatting.unicode "🚀", 6)
-        node.round "moon" "moon"
-        subgraph.subgraph "atmosphere" [
-            node.circle "earth" "earth"
-        ]
-    ]
-]
+diagram.flowchart(flowchartDirection.bt, [
+    flowchart.subgraph ("space", [
+        flowchart.directionBT
+        flowchart.linkDottedArrow("earth", "moon", formatting.unicode "🚀", 6)
+        flowchart.nodeRound "moon"
+        flowchart.subgraph ("atmosphere", [
+            flowchart.nodeCircle "earth"
+        ])
+    ])
+])
 |> siren.write
 
 ```
 
 ```mermaid
 flowchart BT
-    subgraph space[space]
+    subgraph space
         direction BT
-        earth-......->|"🚀"|moon[moon]
+        earth-......->|"🚀"|moon
         moon(moon)
-        subgraph atmosphere[atmosphere]
+        subgraph atmosphere
             earth((earth))
         end
     end

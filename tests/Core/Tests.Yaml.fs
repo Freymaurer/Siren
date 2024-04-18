@@ -40,6 +40,6 @@ let main = testList "Yaml" [
         c1-->c2
     end
 """
-        Expect.equal actual expected ""
+        Expect.trimEqual actual expected ""
 ] 
 

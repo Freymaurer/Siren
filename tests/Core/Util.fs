@@ -53,17 +53,8 @@ module Expect =
             expected
         Expect.equal actual expected message
 
+    /// Trims whitespace and normalizes lineendings to "\n"
     let trimEqual (actual: string) (expected: string) message =
-        let a = actual.Trim()
-        let e = expected.Trim()
+        let a = actual.Trim().Replace("\r\n", "\n")
+        let e = expected.Trim().Replace("\r\n", "\n")
         Expect.equal a e message
-
-    /// <summary>
-    /// This function uses equal on dotnet and string equal on fable to avoid handling line endings
-    /// </summary>
-    let stringEqualF actual expected message = 
-        #if FABLE_COMPILER
-        stringEqual actual expected message
-        #else
-        Expect.equal actual expected message
-        #endif
