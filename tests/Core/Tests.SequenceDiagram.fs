@@ -173,7 +173,7 @@ let private tests_formatter = testList "Formatter" [
     participant Alice
     participant John
     rect rgb(191, 223, 255)
-        note right of Alice: Alice calls John.
+        note right of Alice : Alice calls John.
         Alice->>+John: Hello John, how are you?
         rect rgb(200, 150, 255)
             Alice->>+John: John, can you hear me?

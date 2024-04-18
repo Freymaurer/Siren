@@ -8,6 +8,8 @@ let all = testList "Main" [
     Tests.Flowchart.main
     Tests.SequenceDiagram.main
     Tests.ClassDiagram.main
+    Tests.StateDiagram.main
+    Tests.EntityRelationshipDiagram.main
 ]
 
 [<EntryPoint>]

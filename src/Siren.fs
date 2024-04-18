@@ -140,10 +140,24 @@ module Types =
     type StateDiagramElement =
         | StateDiagramElement of string
         | StateDiagramWrapper of opener: string * closer: string * StateDiagramElement list
+        interface IYamlConvertible with
+            
+            member this.ToYamlAst() = 
+                match this with
+                | StateDiagramElement line -> [Yaml.line line]
+                | StateDiagramWrapper (opener, closer, children) ->
+                    writeYamlASTBasicWrapper opener closer children
 
     type ERDiagramElement =
         | ERDiagramElement of string
-        | ERDiagramWrapper of opener: string * closer: string * StateDiagramElement list
+        | ERDiagramWrapper of opener: string * closer: string * ERDiagramElement list
+        interface IYamlConvertible with
+            
+            member this.ToYamlAst() = 
+                match this with
+                | ERDiagramElement line -> [Yaml.line line]
+                | ERDiagramWrapper (opener, closer, children) ->
+                    writeYamlASTBasicWrapper opener closer children
 
     type JourneyElement =
         | JourneyElement of string
@@ -208,13 +222,39 @@ module Types =
     | Sankey of SankeyElement list
     | XYChart of XYChartElement list
 
+open Types
+
+module Generic =
+
+    type NotePosition =
+    | Over
+    | RightOf
+    | LeftOf
+        member this.ToFormatString() =
+            match this with
+            | Over      -> "over"
+            | RightOf   -> "right of"
+            | LeftOf    -> "left of"
+    
+    let formatComment (txt: string) = sprintf "%%%% %s" txt
+
+    let formatDirection (direction: Direction) =
+        sprintf "direction %s" (direction.ToString())
+
+    let formatClickHref id url (tooltip:string option) =
+        let tooltip = tooltip |> Option.map (fun s -> sprintf " \"%s\"" s) |> Option.defaultValue ""
+        sprintf """click %s href "%s"%s""" id url tooltip
+
+    let formatNote (id) (position: NotePosition option) (msg: string) =
+        let position = defaultArg position NotePosition.RightOf |> _.ToFormatString()
+        sprintf "note %s %s : %s" position id msg
+
 [<AttachMembers>]
 type formatting =
     //static member escaped (txt: string) = // idea for escaping for example quotes
     static member unicode (txt: string) = string '"' + txt + string '"'
     static member markdown (txt: string) = """ "` """ + txt + """ `" """
-
-open Types
+    static member comment (txt: string) = Generic.formatComment txt
 
 [<AttachMembers>]
 type direction =
@@ -229,17 +269,6 @@ type direction =
     static member rightToLeft = direction.rl
     static member leftToRight = direction.lr
     static member custom (str: string) = Direction.Custom str
-
-module Generic =
-    
-    let formatComment (txt: string) = sprintf "%%%% %s" txt
-
-    let formatDirection (direction: Direction) =
-        sprintf "direction %s" (direction.ToString())
-
-    let formatClickHref id url (tooltip:string option) =
-        let tooltip = tooltip |> Option.map (fun s -> sprintf " %A" s) |> Option.defaultValue ""
-        sprintf """click %s href %A%s""" id url tooltip
 
 module Flowchart =
 
@@ -389,16 +418,6 @@ type flowchart =
 
 module Sequence =
 
-    type NotePosition =
-    | Over
-    | RightOf
-    | LeftOf
-        member this.ToFormatString() =
-            match this with
-            | Over      -> "over"
-            | RightOf   -> "right of"
-            | LeftOf    -> "left of"
-
     [<RequireQualifiedAccess>]
     type MessageTypes =
         | Solid
@@ -442,21 +461,17 @@ module Sequence =
         let color = color |> Option.formatString (sprintf "%s ")
         sprintf "box %s%s" color name
 
-    let formatNote (id) (position: NotePosition option) (msg: string) =
-        let position = defaultArg position NotePosition.RightOf |> _.ToFormatString()
-        sprintf "note %s %s: %s" position id msg
-
-    let formatNoteSpanning id1 id2 (position: NotePosition option) (msg: string) =
-        let position = defaultArg position NotePosition.RightOf |> _.ToFormatString()
-        sprintf "note %s %s,%s: %s" position id1 id2 msg
+    let formatNoteSpanning id1 id2 (position: Generic.NotePosition option) (msg: string) =
+        let position = defaultArg position Generic.NotePosition.RightOf |> _.ToFormatString()
+        sprintf "note %s %s,%s : %s" position id1 id2 msg
 
     let [<Literal>] BoxCloser = "end"
 
 [<AttachMembers>]
 type notePosition =
-    static member over = Sequence.NotePosition.Over
-    static member rightOf = Sequence.NotePosition.RightOf
-    static member leftOf = Sequence.NotePosition.LeftOf
+    static member over = Generic.NotePosition.Over
+    static member rightOf = Generic.NotePosition.RightOf
+    static member leftOf = Generic.NotePosition.LeftOf
 
 [<AttachMembers>]
 type sequence =
@@ -479,8 +494,8 @@ type sequence =
     static member messageDottedOpenArrow(a1, a2, message, ?activate: bool) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.DottedOpenArrow message activate |> SequenceElement 
     static member activate(id: string) = sprintf "activate %s" id |> SequenceElement
     static member deactivate(id: string) = sprintf "deactivate %s" id |> SequenceElement
-    static member note(id: string, text: string, ?notePosition: Sequence.NotePosition) = Sequence.formatNote id notePosition text |> SequenceElement
-    static member noteSpanning(id1: string, id2, text: string, ?notePosition: Sequence.NotePosition) = Sequence.formatNoteSpanning id1 id2 notePosition text |> SequenceElement
+    static member note(id: string, text: string, ?notePosition: Generic.NotePosition) = Generic.formatNote id notePosition text |> SequenceElement
+    static member noteSpanning(id1: string, id2, text: string, ?notePosition: Generic.NotePosition) = Sequence.formatNoteSpanning id1 id2 notePosition text |> SequenceElement
     static member loop(name: string, children: #seq<SequenceElement>) = SequenceWrapper(sprintf "loop %s" name,"end", List.ofSeq children)
     static member alt(name: string, children: #seq<SequenceElement>, elseList: #seq<string*#seq<SequenceElement>>) = 
         let elseItems = elseList |> Seq.length
@@ -707,33 +722,138 @@ type classDiagram =
     static member link(id: string, url: string, ?tooltip: string) = Generic.formatClickHref id url tooltip |> ClassDiagramElement
     //static member callback(id: string, func: unit -> unit, ?tooltip: string) = failwith "TODO"
 
-type ITransitionType = obj
+module StateDiagram =
+
+    let formatState id (description: string option) = 
+        let description = description |> Option.formatString (fun s -> sprintf " : %s" s)
+        sprintf "%s%s" id description
+
+    let formatTransition id1 id2 (description: string option) =
+        let description = description |> Option.formatString (fun s -> sprintf " : %s" s)
+        sprintf "%s --> %s%s" id1 id2 description
+
+    let formatNoteWrapper (id) (position: Generic.NotePosition option) =
+        let position = defaultArg position Generic.RightOf |> _.ToFormatString()
+        sprintf "note %s %s" position id
+
 
 [<AttachMembers>]
 type stateDiagram =
-    static member state (id: string, ?description: string) = StateDiagramElement "TODO"
-    static member stateIf (id: string) = StateDiagramElement "TODO" //state if_state <<choice>>
-    static member stateFork (id: string) = StateDiagramElement "TODO" // state fork_state <<fork>>
-    static member transition (id1: string, id2: string, ?transitionType: ITransitionType, ?description: string) = StateDiagramElement "TODO"
-    static member startStop = StateDiagramElement "TODO"
-    static member startStopString : string = "[*]"
-    static member stateComposite (id: string, children: #seq<StateDiagramElement>) = StateDiagramWrapper ("TODO","TODO", List.ofSeq children)
-    static member note (id: string, notePosition: Sequence.NotePosition) = StateDiagramElement "TODO"
+    static member state (id: string, ?description: string) = StateDiagram.formatState id description |> StateDiagramElement 
+    static member transition (id1: string, id2: string, ?description: string) = StateDiagram.formatTransition id1 id2 description |> StateDiagramElement
+    static member transitionStart (id: string, ?description: string) = StateDiagram.formatTransition stateDiagram.startEnd id description |> StateDiagramElement
+    static member transitionEnd (id: string, ?description: string) = StateDiagram.formatTransition id stateDiagram.startEnd description |> StateDiagramElement
+    static member startEnd : string = "[*]"
+    static member stateComposite (id: string, children: #seq<StateDiagramElement>) = StateDiagramWrapper (sprintf "state %s {" id,"}", List.ofSeq children)
+    static member stateChoice (id: string) = sprintf "state %s <<choice>>" id |> StateDiagramElement
+    static member stateFork (id: string) = sprintf "state %s <<fork>>" id |> StateDiagramElement
+    static member stateJoin (id: string) = sprintf "state %s <<join>>" id |> StateDiagramElement
+    static member note (id: string, msg: string, ?notePosition: Generic.NotePosition) = 
+        if notePosition.IsSome && notePosition.Value = Generic.NotePosition.Over then failwith "Error: Cannot use \"over\" for note in State Diagram!"
+        let lines = msg.Split([|"\r\n"; "\n";|], System.StringSplitOptions.RemoveEmptyEntries)
+        StateDiagramWrapper(StateDiagram.formatNoteWrapper id notePosition, "end note", [for line in lines do StateDiagramElement line])
+    static member noteMultiLine (id: string, lines: #seq<string>, ?notePosition: Generic.NotePosition) = 
+        if notePosition.IsSome && notePosition.Value = Generic.NotePosition.Over then failwith "Error: Cannot use \"over\" for note in State Diagram!"
+        //let lines = msg.Split([|"\r\n"; "\n";|], System.StringSplitOptions.RemoveEmptyEntries)
+        StateDiagramWrapper(StateDiagram.formatNoteWrapper id notePosition, "end note", [for line in lines do StateDiagramElement line])
+    static member noteLine (id: string, msg: string, ?notePosition: Generic.NotePosition) = 
+        if notePosition.IsSome && notePosition.Value = Generic.NotePosition.Over then failwith "Error: Cannot use \"over\" for note in State Diagram!"
+        Generic.formatNote id notePosition msg |> StateDiagramElement
     /// Can only be used in stateComposite
     static member concurrency = StateDiagramElement "--" 
-    static member direction (direction: obj) = StateDiagramElement "TODO"
-    static member comment (txt: string) = StateDiagramElement "TODO"
+    static member direction (direction: Direction) = Generic.formatDirection direction |> StateDiagramElement
+    static member comment (txt: string) = Generic.formatComment txt |> StateDiagramElement
 
-type IERRelationshipType = obj
-type IERKeyType = obj
-type IERAttribute = obj
+type IERCardinalityType = 
+    | OneOrZero
+    | OneOrMany
+    | ZeroOrMany
+    | OnlyOne
+    member this.ToFormatString() =
+        match this with
+        | OneOrZero -> "one or zero"
+        | OneOrMany -> "one or many"
+        | ZeroOrMany -> "zero or many"
+        | OnlyOne -> "only one"
+
+type IERKeyType = 
+    | PK
+    | FK
+    | UK
+type IERAttribute = {
+    Type : string
+    Name : string
+    Keys : IERKeyType list
+    Comment: string option
+} 
+
+module ERDiagram =
+
+    let formatEntityNode (id) (alias: string option) =
+        let alias = alias |> Option.formatString (fun s -> sprintf "[\"%s\"]" s)
+        sprintf "%s%s" id alias
+
+    let formatEntityWrapper (id) (alias: string option) =
+        formatEntityNode id alias + " {"
+
+    let formatAttribute (attr:IERAttribute) =
+        let keys = attr.Keys |> List.map _.ToString() |> String.concat ", "
+        let comment = attr.Comment |> Option.formatString (fun s -> sprintf "\"%s\"" s)
+        [
+            attr.Type
+            attr.Name
+            keys
+            comment
+        ]
+        |> List.filter (fun s -> s <> "")
+        |> String.concat " "
+
+    let formatRelationship (id1) (card1: IERCardinalityType) id2 (card2: IERCardinalityType) msg (isOptional: bool option) =
+        let isOptional = defaultArg isOptional false
+        let toString = if isOptional then "optionally to" else "to"
+        sprintf "%s %s %s %s %s : %s" id1 (card1.ToFormatString()) toString (card2.ToFormatString()) id2 msg
+        
+[<AttachMembers>]
+type erKey =
+    static member pk = IERKeyType.PK
+    static member fk = IERKeyType.FK
+    static member uk = IERKeyType.UK
+
+type erCardinality =
+    /// <summary>
+    /// }| or |{
+    /// </summary>
+    /// <param name="oneOrZero"></param>
+    static member oneOrMany = IERCardinalityType.OneOrMany
+    /// <summary>
+    /// |o or o|
+    /// </summary>
+    /// <param name="oneOrZero"></param>
+    static member oneOrZero = IERCardinalityType.OneOrZero
+    /// <summary>
+    /// ||
+    /// </summary>
+    /// <param name="oneOrMany"></param>
+    static member onlyOne = IERCardinalityType.OnlyOne
+    /// <summary>
+    /// }o or o{
+    /// </summary>
+    /// <param name="zeroOrMany"></param>
+    static member zeroOrMany = IERCardinalityType.ZeroOrMany
+    
 
 [<AttachMembers>]
 type erDiagram =
     static member raw (line: string) = ERDiagramElement line
-    static member entity (id: string, ?alias: string, ?attributes: #seq<IERAttribute>) = if attributes.IsSome then ERDiagramWrapper ("TODO", "TODO", []) else ERDiagramElement "TODO"
-    static member relationship(id1, id2, ?relationshipType: IERRelationshipType, ?message) = ERDiagramElement "TODO"
-    static member attribute(type': string, name: string, ?keys: #seq<IERKeyType>, ?comment: string) : IERAttribute = "TODO"
+    static member entity (id: string, ?alias: string, ?attr: #seq<IERAttribute>) = 
+        if attr.IsSome then 
+            let children = [for attr in attr.Value do ERDiagram.formatAttribute attr |> ERDiagramElement] // of attributes
+            ERDiagramWrapper (ERDiagram.formatEntityWrapper id alias, "}", children) 
+        else ERDiagram.formatEntityNode id alias |> ERDiagramElement
+    static member relationship(id1, erCardinality1, id2, erCardinality2, message, ?isOptional: bool) = 
+        ERDiagram.formatRelationship id1 erCardinality1 id2 erCardinality2 message isOptional |> ERDiagramElement
+    static member attribute(type': string, name: string, ?keys: #seq<IERKeyType>, ?comment: string) : IERAttribute = 
+        {Type=type'; Name=name;Keys=Option.map List.ofSeq keys |> Option.defaultValue []; Comment = comment}
 
 [<AttachMembers>]
 type journey =
@@ -875,6 +995,15 @@ type siren =
             writeYamlDiagramRoot dia children
         | SirenElement.Class children ->
             let dia = "classDiagram"
+            writeYamlDiagramRoot dia children
+        | SirenElement.StateV2 children ->
+            let dia = "stateDiagram-v2"
+            writeYamlDiagramRoot dia children
+        | SirenElement.State children ->
+            let dia = "stateDiagram"
+            writeYamlDiagramRoot dia children
+        | SirenElement.ERDiagram children ->
+            let dia = "erDiagram"
             writeYamlDiagramRoot dia children
         | _ -> failwith "TODO"
         |> Yaml.write
