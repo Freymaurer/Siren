@@ -8,6 +8,7 @@ open Build.Utils.Path
 let ReadMePath = Path.Resolve("./README.md")
 
 let writeExample(key:string, replacement: string) =
+    printfn "START with %s" key
     let startMarker = mkMardownCommentOpen key
     let endMarker = mkMardownCommentClose key
     let content = System.IO.File.ReadAllText(ReadMePath, System.Text.Encoding.UTF8)
@@ -20,4 +21,5 @@ let writeExample(key:string, replacement: string) =
     else
         content
     |> fun c -> System.IO.File.WriteAllText(ReadMePath, c)
+    printfn "DONE with %s" key
 

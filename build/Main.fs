@@ -44,6 +44,7 @@ let main argv =
     | "examples" :: _ ->
         Examples.Flowchart.writeMoonRocketExample()
         Examples.ClassDiagram.writeAnimalExample()
+        Examples.EntityRelationshipDiagram.writeCarExample()
     | _ -> printHelp ()
 
     0

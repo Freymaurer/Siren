@@ -14,6 +14,7 @@
     <Compile Include="Examples\Util.fs" />
     <Compile Include="Examples\ClassDiagram.fs" />
     <Compile Include="Examples\Flowchart.fs" />
+    <Compile Include="Examples\EntityRelationshipDiagram.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
 
