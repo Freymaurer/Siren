@@ -182,18 +182,19 @@ module Types =
 
     type PieChartElement =
         | PieChartElement of string
-        | PieChartWrapper of opener:string * closer:string * PieChartElement list
         interface IYamlConvertible with
             
             member this.ToYamlAst() = 
                 match this with
                 | PieChartElement line -> [Yaml.line line]
-                | PieChartWrapper (opener, closer, children) ->
-                    writeYamlASTBasicWrapper opener closer children
 
     type QuadrantElement =
         | QuadrantElement of string
-        | QuadrantWrapper of opener:string * closer:string * QuadrantElement list
+        interface IYamlConvertible with
+            
+            member this.ToYamlAst() = 
+                match this with
+                | QuadrantElement line -> [Yaml.line line]
 
     type RequirementDiagramElement =
         | RequirementDiagramElement of string
@@ -1000,14 +1001,36 @@ type pieChart =
     static member title (title: string) = sprintf "title %s" title |> PieChartElement
     static member data (name: string) (value: float) = PieChart.formatData name value |> PieChartElement
 
+module QuadrantChart =
+    let formatAxis (base0) (req: string) (opt: string option) =
+        match opt with
+        | Some v -> base0 + sprintf "%s --> %s" req v
+        | None -> base0 + req
+
+    let formatXAxis (left: string) (right: string option) =
+        let base0 = "x-axis "
+        formatAxis base0 left right
+
+    let formatYAxis (bottom: string) (top: string option) =
+        let base0 = "y-axis "
+        formatAxis base0 bottom top
+
+    let formatPoint (name) x y =
+        sprintf "%s: [%.2f, %.2f]" name x y
+
+
 [<AttachMembers>]
 type quadrant =
-    static member title (title: string) = QuadrantElement "TODO"
-    static member xAxis (left:string, ?right: string) = QuadrantElement "TODO"
-    static member yAxis (bottom:string, ?top: string) = QuadrantElement "TODO"
-    static member quadrant (number: int, title: string) = QuadrantElement "TODO"
-    static member point (name: string, xAxis: float, yAxis: float) = QuadrantElement "TODO"
-    static member comment (txt: string) = QuadrantElement "TODO"
+    static member raw (txt: string) = QuadrantElement txt
+    static member title (title: string) = "title " + title |> QuadrantElement
+    static member xAxis (left:string, ?right: string) = QuadrantChart.formatXAxis left right |> QuadrantElement
+    static member yAxis (bottom:string, ?top: string) = QuadrantChart.formatYAxis bottom top |> QuadrantElement
+    static member quadrant1 (title: string) = "quadrant-1 " + title |> QuadrantElement
+    static member quadrant2 (title: string) = "quadrant-2 " + title |> QuadrantElement
+    static member quadrant3 (title: string) = "quadrant-3 " + title |> QuadrantElement
+    static member quadrant4 (title: string) = "quadrant-4 " + title |> QuadrantElement
+    static member point (name: string, xAxis: float, yAxis: float) = QuadrantChart.formatPoint name xAxis yAxis |> QuadrantElement
+    static member comment (txt: string) = Generic.formatComment txt |> QuadrantElement
     
 type IRequirementType = obj
 type IRiskType = obj
@@ -1125,6 +1148,9 @@ type siren =
             writeYamlDiagramRoot dia children
         | SirenElement.PieChart (children) ->
             let dia = "pie " // This whitespace is important! without the pie chart is not correctly parsed when using "showData" or "title"
+            writeYamlDiagramRoot dia children
+        | SirenElement.Quadrant children ->
+            let dia = "quadrantChart"
             writeYamlDiagramRoot dia children
         | _ -> failwith "TODO"
         |> Yaml.write

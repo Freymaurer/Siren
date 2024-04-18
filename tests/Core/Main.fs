@@ -13,6 +13,7 @@ let all = testList "Main" [
     Tests.Journey.main
     Tests.Gantt.main
     Tests.PieChart.main
+    Tests.Quadrant.main
 ]
 
 [<EntryPoint>]
