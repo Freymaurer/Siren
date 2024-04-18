@@ -174,18 +174,22 @@ module Types =
 
     type GanttElement =
         | GanttElement of string
-        | GanttWrapper of opener: string * closer: string * GanttElement list
         interface IYamlConvertible with
             
             member this.ToYamlAst() = 
                 match this with
                 | GanttElement line -> [Yaml.line line]
-                | GanttWrapper (opener, closer, children) ->
-                    writeYamlASTBasicWrapper opener closer children
 
     type PieChartElement =
         | PieChartElement of string
         | PieChartWrapper of opener:string * closer:string * PieChartElement list
+        interface IYamlConvertible with
+            
+            member this.ToYamlAst() = 
+                match this with
+                | PieChartElement line -> [Yaml.line line]
+                | PieChartWrapper (opener, closer, children) ->
+                    writeYamlASTBasicWrapper opener closer children
 
     type QuadrantElement =
         | QuadrantElement of string
@@ -984,12 +988,17 @@ type gantt =
     static member excludes (day: string) = sprintf "excludes %s" day |> GanttElement 
     static member comment (txt: string) = Generic.formatComment txt |> GanttElement
 
+module PieChart =
+
+    let formatData name value =
+        sprintf "\"%s\" : %A" name value
+
 [<AttachMembers>]
 type pieChart =
     static member raw (line: string) = PieChartElement line
-    static member showDate = PieChartElement "TODO"
-    static member title (title: string) = PieChartElement "TODO"
-    static member data(name: string, value: float) = PieChartElement "TODO"
+    static member showData = PieChartElement "showData"
+    static member title (title: string) = sprintf "title %s" title |> PieChartElement
+    static member data (name: string) (value: float) = PieChart.formatData name value |> PieChartElement
 
 [<AttachMembers>]
 type quadrant =
@@ -1113,6 +1122,9 @@ type siren =
             writeYamlDiagramRoot dia children
         | SirenElement.Gantt children ->
             let dia = "gantt"
+            writeYamlDiagramRoot dia children
+        | SirenElement.PieChart (children) ->
+            let dia = "pie " // This whitespace is important! without the pie chart is not correctly parsed when using "showData" or "title"
             writeYamlDiagramRoot dia children
         | _ -> failwith "TODO"
         |> Yaml.write

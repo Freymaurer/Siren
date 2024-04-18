@@ -12,6 +12,7 @@ let all = testList "Main" [
     Tests.EntityRelationshipDiagram.main
     Tests.Journey.main
     Tests.Gantt.main
+    Tests.PieChart.main
 ]
 
 [<EntryPoint>]
