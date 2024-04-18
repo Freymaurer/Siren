@@ -33,5 +33,71 @@ flowchart BT
             earth((earth))
         end
     end
+
 ```
 <!--Example1-End-->
+
+<!--Example2-->
+```fsharp
+let duck,animal,zebra,fish = "Duck","Animal","Zebra", "Fish"
+siren.classDiagram [
+    classDiagram.note "From Duck till Zebra"
+    classDiagram.relationshipInheritance(duck, animal)
+    classDiagram.note(@"can fly\ncan swim\ncan dive\ncan help in debugging", duck)
+    classDiagram.relationshipInheritance(fish, animal)
+    classDiagram.relationshipInheritance(zebra, animal)
+    classDiagram.classMember(animal,"+int age")
+    classDiagram.classMember(animal,"+String gender")
+    classDiagram.classMember(animal,"+isMammal()")
+    classDiagram.classMember(animal,"+mate()")
+    classDiagram.class'(duck,members=[
+        "+String beakColor"
+        "+swim()"
+        "+quack()"
+    ])
+    classDiagram.class'(fish,members=[
+        "-int sizeInFeet"
+        "-canEat()"
+    ])
+    classDiagram.class'(zebra,members=[
+        "+bool is_wild"
+        "+run()"
+    ])
+    classDiagram.namespace'("Mammals", [
+        classDiagram.class'(zebra)
+    ])
+]
+|> siren.write
+
+```
+
+```mermaid
+classDiagram
+    note "From Duck till Zebra"
+    Duck --|> Animal
+    note for Duck "can fly\ncan swim\ncan dive\ncan help in debugging"
+    Fish --|> Animal
+    Zebra --|> Animal
+    Animal : +int age
+    Animal : +String gender
+    Animal : +isMammal()
+    Animal : +mate()
+    class Duck{
+        +String beakColor
+        +swim()
+        +quack()
+    }
+    class Fish{
+        -int sizeInFeet
+        -canEat()
+    }
+    class Zebra{
+        +bool is_wild
+        +run()
+    }
+    namespace Mammals {
+        class Zebra
+    }
+
+```
+<!--Example2-End-->

@@ -5,7 +5,7 @@ open Siren
 
 open Types
 
-let private writeYml (ele: FlowchartElement) = ele.ToYamlAst() |> Yaml.root |> Yaml.write
+let private writeYml (ele: FlowchartElement) = ele :> IYamlConvertible |> _.ToYamlAst() |> Yaml.root |> Yaml.write
 
 let private tests_nodes = testList "nodes" [
     let id = "A"
@@ -196,7 +196,7 @@ end
 let private tests_formatter = testList "formatter" [
     testCase "empty" <| fun _ ->
         let actual =
-            diagram.flowchart (flowchartDirection.bt, [
+            siren.flowchart (direction.bt, [
         
             ])
             |> siren.write
@@ -207,7 +207,7 @@ let private tests_formatter = testList "formatter" [
 
     testCase "small" <| fun _ ->
         let actual =
-            diagram.flowchart(flowchartDirection.bt, [
+            siren.flowchart(direction.bt, [
                 flowchart.subgraph ("space", [
                     flowchart.directionBT
                     flowchart.linkDottedArrow("earth", "moon", formatting.unicode "🚀", 6)

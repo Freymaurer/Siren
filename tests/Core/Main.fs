@@ -7,6 +7,7 @@ let all = testList "Main" [
     Tests.Yaml.main
     Tests.Flowchart.main
     Tests.SequenceDiagram.main
+    Tests.ClassDiagram.main
 ]
 
 [<EntryPoint>]

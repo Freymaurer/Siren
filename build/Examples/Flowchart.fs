@@ -18,7 +18,7 @@ let writeMoonRocketExample() =
 |> siren.write
 """
     let mermaidMd = 
-        diagram.flowchart(flowchartDirection.bt, [
+        siren.flowchart(direction.bt, [
             flowchart.subgraph ("space", [
                 flowchart.directionBT
                 flowchart.linkDottedArrow("earth", "moon", formatting.unicode "🚀", 6)

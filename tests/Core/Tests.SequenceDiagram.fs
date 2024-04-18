@@ -4,19 +4,17 @@ open Fable.Pyxpecto
 open Siren
 open Types
 
-let private writeYml (ele: SequenceElement) = ele.ToYamlAst() |> Yaml.root |> Yaml.write
-
 let private tests_formatter = testList "Formatter" [
     testCase "empty" <| fun _ ->
         let actual = 
-            diagram.sequence [] 
+            siren.sequence [] 
             |> siren.write
         let expected = """sequenceDiagram
 """
         Expect.trimEqual actual expected ""
     testCase "alt-else-opt" <| fun _ ->
         let actual = 
-            diagram.sequence [
+            siren.sequence [
                 sequence.messageArrow("Alice", "Bob", "Hello Bob, how are you?")
                 sequence.alt ("is sick", [
                     sequence.messageArrow("Bob", "Alice", "Not so good :(")
@@ -44,7 +42,7 @@ let private tests_formatter = testList "Formatter" [
         Expect.trimEqual actual expected ""
     testCase "parallel" <| fun _ ->
         let actual = 
-            diagram.sequence [
+            siren.sequence [
                 sequence.par ("Alice to Bob", [
                         sequence.messageArrow("Alice", "Bob", "Hello guys!")
                 ], [
@@ -75,7 +73,7 @@ let private tests_formatter = testList "Formatter" [
         Expect.trimEqual actual expected ""
     testCase "parallel-nested" <| fun _ ->
         let actual = 
-            diagram.sequence [
+            siren.sequence [
                 sequence.par ("Alice to Bob", [
                     sequence.messageArrow("Alice", "Bob", "Go help John")
                 ], [
@@ -108,7 +106,7 @@ let private tests_formatter = testList "Formatter" [
 
     testCase "critical-option" <| fun _ ->
         let actual =
-            diagram.sequence [
+            siren.sequence [
                 sequence.critical("Establish a connection to the DB", [
                     sequence.messageDotted("Service", "DB", "connect")
                 ], [
@@ -134,7 +132,7 @@ let private tests_formatter = testList "Formatter" [
 
     testCase "break" <| fun _ ->
         let actual =
-            diagram.sequence [
+            siren.sequence [
                 sequence.messageDotted("Consumer", "API", "Book something")
                 sequence.messageDotted("API", "BookingService", "Start booking process")
                 sequence.breakSeq ("when the booking process fails", [
@@ -155,7 +153,7 @@ let private tests_formatter = testList "Formatter" [
 
     testCase "rect" <| fun _ ->
         let actual =
-            diagram.sequence [
+            siren.sequence [
                 sequence.participant "Alice"
                 sequence.participant "John"
                 sequence.rect ("rgb(191, 223, 255)", [
@@ -189,7 +187,7 @@ let private tests_formatter = testList "Formatter" [
         Expect.trimEqual actual expected ""
     testCase "comment" <| fun _ ->
         let actual = 
-            diagram.sequence [
+            siren.sequence [
                 sequence.messageArrow("Alice", "John", "Hello John, how are you?")
                 sequence.comment "This is a comment"
                 sequence.messageDottedArrow("John", "Alice", "Great!")
@@ -203,7 +201,7 @@ let private tests_formatter = testList "Formatter" [
         Expect.trimEqual actual expected ""
     testCase "actor-links" <| fun _ ->
         let actual = 
-            diagram.sequence [
+            siren.sequence [
                 sequence.participant "Alice"
                 sequence.participant "John"
                 sequence.link("Alice", "Dashboard", "https://dashboard.contoso.com/alice")
@@ -225,7 +223,7 @@ let private tests_formatter = testList "Formatter" [
         Expect.trimEqual actual expected ""
     testCase "actor-links" <| fun _ ->
         let actual = 
-            diagram.sequence [
+            siren.sequence [
                 sequence.participant "Alice"
                 sequence.participant "John"
                 sequence.links("Alice", ["Dashboard", "https://dashboard.contoso.com/alice"; "Wiki", "https://wiki.contoso.com/alice"])

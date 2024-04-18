@@ -43,6 +43,7 @@ let main argv =
         | _ -> printHelp ()
     | "examples" :: _ ->
         Examples.Flowchart.writeMoonRocketExample()
+        Examples.ClassDiagram.writeAnimalExample()
     | _ -> printHelp ()
 
     0

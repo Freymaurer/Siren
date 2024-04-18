@@ -56,7 +56,7 @@ module Yaml =
 
 module Types =
 
-    type FlowchartDirection = 
+    type Direction = 
         | TB
         | TD
         | BT
@@ -73,49 +73,69 @@ module Types =
             | LR -> "LR"
             | Custom str -> str
 
+    type IYamlConvertible =
+        abstract ToYamlAst: unit -> Yaml.AST list
+
+    let writeYamlASTBasicWrapper opener closer children =
+        [
+            Yaml.line opener
+            Yaml.level [
+                for child in children do 
+                    yield! child :> IYamlConvertible |> _.ToYamlAst()
+            ]
+            if closer <> "" then Yaml.line closer
+        ]
+
+    let writeYamlDiagramRoot opener children =
+        Yaml.root [
+            Yaml.line opener
+            Yaml.level [
+                for child in children do
+                    yield! child :> IYamlConvertible |> _.ToYamlAst()
+            ]
+        ]
+
     type FlowchartElement =
         | FlowchartElement of string
         | FlowchartSubgraph of opener:string * closer: string * FlowchartElement list
-
-        member this.ToYamlAst() = 
-            match this with
-            | FlowchartElement line -> [Yaml.line line]
-            | FlowchartSubgraph (opener, closer, children) ->
-                [
-                    Yaml.line opener
-                    Yaml.level [
-                        for child in children do 
-                            yield! child.ToYamlAst()
-                    ]
-                    Yaml.line closer
-                ]
+        interface IYamlConvertible with
+            
+            member this.ToYamlAst() = 
+                match this with
+                | FlowchartElement line -> [Yaml.line line]
+                | FlowchartSubgraph (opener, closer, children) ->
+                    writeYamlASTBasicWrapper opener closer children
 
     type SequenceElement = 
         | SequenceElement of string
         | SequenceWrapper of opener: string * closer: string * SequenceElement list
         | SequenceWrapperList of SequenceElement list
 
-        member this.ToYamlAst() = 
-            match this with
-            | SequenceElement line -> [Yaml.line line]
-            | SequenceWrapper (opener, closer, children) ->
-                [
-                    Yaml.line opener
-                    Yaml.level [
-                        for child in children do 
-                            yield! child.ToYamlAst()
+        interface IYamlConvertible with
+            member this.ToYamlAst() = 
+                match this with
+                | SequenceElement line -> [Yaml.line line]
+                | SequenceWrapper (opener, closer, children) ->
+                    writeYamlASTBasicWrapper opener closer children
+                | SequenceWrapperList children ->
+                    [
+                        for child in children do
+                            yield! child :> IYamlConvertible |> _.ToYamlAst()
                     ]
-                    if closer <> "" then Yaml.line closer
-                ]
-            | SequenceWrapperList children ->
-                [
-                    for child in children do
-                        yield! child.ToYamlAst()
-                ]
 
     type ClassDiagramElement = 
         | ClassDiagramElement of string
         | ClassDiagramWrapper of opener: string * closer: string * ClassDiagramElement list
+        | ClassDiagramNone
+
+        interface IYamlConvertible with
+            
+            member this.ToYamlAst() = 
+                match this with
+                | ClassDiagramElement line -> [Yaml.line line]
+                | ClassDiagramWrapper (opener, closer, children) ->
+                    writeYamlASTBasicWrapper opener closer children
+                | ClassDiagramNone -> []
 
     type StateDiagramElement =
         | StateDiagramElement of string
@@ -171,7 +191,7 @@ module Types =
 
     [<RequireQualifiedAccess>]
     type SirenElement =
-    | Flowchart of FlowchartDirection * FlowchartElement list 
+    | Flowchart of Direction * FlowchartElement list 
     | Sequence of SequenceElement list
     | Class of ClassDiagramElement list
     | State of StateDiagramElement list
@@ -197,22 +217,30 @@ type formatting =
 open Types
 
 [<AttachMembers>]
-type flowchartDirection =
-    static member tb = FlowchartDirection.TB
-    static member td = FlowchartDirection.TD
-    static member bt = FlowchartDirection.BT
-    static member rl = FlowchartDirection.RL
-    static member lr = FlowchartDirection.LR
-    static member topToBottom = flowchartDirection.tb
-    static member topDown = flowchartDirection.td
-    static member bottomToTop = flowchartDirection.bt
-    static member rightToLeft = flowchartDirection.rl
-    static member leftToRight = flowchartDirection.lr
-    static member custom (str: string) = FlowchartDirection.Custom str
+type direction =
+    static member tb = Direction.TB
+    static member td = Direction.TD
+    static member bt = Direction.BT
+    static member rl = Direction.RL
+    static member lr = Direction.LR
+    static member topToBottom = direction.tb
+    static member topDown = direction.td
+    static member bottomToTop = direction.bt
+    static member rightToLeft = direction.rl
+    static member leftToRight = direction.lr
+    static member custom (str: string) = Direction.Custom str
 
 module Generic =
     
     let formatComment (txt: string) = sprintf "%%%% %s" txt
+
+    let formatDirection (direction: Direction) =
+        sprintf "direction %s" (direction.ToString())
+
+    let formatClickHref id url (tooltip:string option) =
+        let tooltip = tooltip |> Option.map (fun s -> sprintf " %A" s) |> Option.defaultValue ""
+        sprintf """click %s href %A%s""" id url tooltip
+
 module Flowchart =
 
     [<RequireQualifiedAccess>]
@@ -313,14 +341,9 @@ module Flowchart =
     let formatSubgraph (id) (name: string option) = 
         let nameStr = if name.IsSome then sprintf "[%s]" name.Value else ""
         let opener = sprintf "subgraph %s%s" id nameStr 
-        opener, "end"
+        opener
 
-    let formatDirection (direction: FlowchartDirection) =
-        sprintf "direction %s" (direction.ToString())
 
-    let formatClickHref id url (tooltip:string option) =
-        let tooltip = tooltip |> Option.map (fun s -> sprintf " %A" s) |> Option.defaultValue ""
-        sprintf """click %s href %A%s""" id url tooltip
 
 [<AttachMembers>]
 type flowchart =
@@ -352,15 +375,15 @@ type flowchart =
     static member linkCircleDouble (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 Flowchart.LinkTypes.CircleDouble message addedLength |> FlowchartElement
     static member linkCrossEdge (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 Flowchart.LinkTypes.CrossEdge message addedLength |> FlowchartElement
     static member linkCrossDouble (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 Flowchart.LinkTypes.CrossDouble message addedLength |> FlowchartElement
-    static member direction (direction: FlowchartDirection) = Flowchart.formatDirection direction |> FlowchartElement
-    static member directionTB = Flowchart.formatDirection FlowchartDirection.TB |> FlowchartElement
-    static member directionTD = Flowchart.formatDirection FlowchartDirection.TD |> FlowchartElement
-    static member directionBT = Flowchart.formatDirection FlowchartDirection.BT |> FlowchartElement
-    static member directionRL = Flowchart.formatDirection FlowchartDirection.RL |> FlowchartElement
-    static member directionLR = Flowchart.formatDirection FlowchartDirection.LR |> FlowchartElement
-    static member subgraphNamed (id: string, name: string, children: #seq<FlowchartElement>) = Flowchart.formatSubgraph id (Some name) ||> fun opener closer -> FlowchartSubgraph (opener,closer,List.ofSeq children)
-    static member subgraph (id: string, children: #seq<FlowchartElement>) = Flowchart.formatSubgraph id None ||> fun opener closer -> FlowchartSubgraph (opener,closer,List.ofSeq children)
-    static member clickHref(id: string, url: string, ?tooltip: string) = Flowchart.formatClickHref id url tooltip |> FlowchartElement
+    static member direction (direction: Direction) = Generic.formatDirection direction |> FlowchartElement
+    static member directionTB = Generic.formatDirection Direction.TB |> FlowchartElement
+    static member directionTD = Generic.formatDirection Direction.TD |> FlowchartElement
+    static member directionBT = Generic.formatDirection Direction.BT |> FlowchartElement
+    static member directionRL = Generic.formatDirection Direction.RL |> FlowchartElement
+    static member directionLR = Generic.formatDirection Direction.LR |> FlowchartElement
+    static member subgraphNamed (id: string, name: string, children: #seq<FlowchartElement>) = FlowchartSubgraph (Flowchart.formatSubgraph id (Some name),"end",List.ofSeq children)
+    static member subgraph (id: string, children: #seq<FlowchartElement>) = FlowchartSubgraph (Flowchart.formatSubgraph id None ,"end",List.ofSeq children)
+    static member clickHref(id: string, url: string, ?tooltip: string) = Generic.formatClickHref id url tooltip |> FlowchartElement
     static member comment(txt:string) = Generic.formatComment txt |> FlowchartElement
     //static member clickCallback() = failwith "TODO"
 
@@ -506,31 +529,183 @@ type sequence =
         let json = "{" + json0 + "}"
         sprintf "links %s: %s" id json |> SequenceElement
 
-type IAccessibility = obj
-type IClassifier = obj
-type IClassRelationshipType = obj
-type ICardinality = obj
+module ClassDiagram =
+    type MemberVisibility =
+    | Public
+    | Private
+    | Protected
+    | PackageInternal
+    | Custom of string
+        member this.ToFormatString() =
+            match this with
+            | Public            -> "+"
+            | Private           -> "-"
+            | Protected         -> "#"
+            | PackageInternal   -> "~"
+            | Custom string     -> string
+    type MemberClassifier = 
+    | Abstract
+    | Static
+    | Custom of string
+        member this.ToFormatString() =
+            match this with
+            | Abstract      -> "*"
+            | Static        -> "$"
+            | Custom string -> string
+
+    type ClassRelationshipDirection =
+    | Left
+    | Right
+    | TwoWay
+        member this.ToFormatString(left: string, right: string, center: string) =
+            match this with
+            | Left  -> left + center
+            | Right -> center + right
+            | TwoWay -> left + center + right
+        member this.ToFormatString(edge: string, center: string) =
+            match this with
+            | Left  -> edge + center
+            | Right -> center + edge
+            | TwoWay -> edge + center + edge
+
+    type ClassRelationshipType = 
+        | Inheritance
+        | Composition
+        | Aggregation
+        | Association
+        | Link
+        | Solid
+        | Dashed
+        | Dependency
+        | Realization
+
+        member this.ToFormatString(?direction: ClassRelationshipDirection, ?isDotted: bool) =
+            let isDotted = defaultArg isDotted false
+            let dotted = ".."
+            let solid = "--"
+            let center = if isDotted then dotted else solid
+            let direct = defaultArg direction ClassRelationshipDirection.Right
+            match this with
+            | Inheritance   -> direct.ToFormatString("<|", "|>", center)
+            | Composition   -> direct.ToFormatString("*",center)
+            | Aggregation   -> direct.ToFormatString("o", center)
+            | Association   -> direct.ToFormatString("<",">", center)
+            | Link          -> center
+            | Solid         -> solid
+            | Dashed        -> dotted
+            | Dependency    -> direct.ToFormatString("<",">", dotted)
+            | Realization   -> direct.ToFormatString("<|","|>", dotted)
+
+    type Cardinality = 
+        | One
+        | ZeroOrOne
+        | OneOrMore
+        | Many
+        | N
+        | ZeroToN
+        | OneToN
+        | Custom of string
+
+        member this.ToFormatString() =
+            match this with
+            | One       -> "1"
+            | ZeroOrOne -> "0..1"
+            | OneOrMore -> "1..*"
+            | Many      -> "*"
+            | N         -> "n"
+            | ZeroToN   -> "0..n"
+            | OneToN    -> "1..n"
+            | Custom s  -> s
+
+    let formatClass (id) (name) generic =
+        let name = name |> Option.formatString (fun s -> sprintf "[\"%s\"]" s)
+        let generic = generic |> Option.formatString (fun s -> sprintf "~%s~" s)
+        sprintf "class %s%s%s" id generic name
+
+    let formatMember id label (visibility: MemberVisibility option) (classifier: MemberClassifier option) =
+        let visibility = visibility |> Option.map _.ToFormatString() |> Option.formatString (fun x -> x)
+        let classifier = classifier |> Option.map _.ToFormatString() |> Option.formatString (fun x -> x)
+        sprintf "%s : %s%s%s" id visibility label classifier
+
+    let formatRelationship0 id1 id2 (link: string) (label: string option) (cardinality1: Cardinality option) (cardinality2: Cardinality option) =
+        //classI -- classJ : Link(Solid)
+        //Student "1" --> "1..*" Course
+        let car1 = cardinality1 |> Option.map _.ToFormatString() |> Option.formatString (fun s -> sprintf " \"%s\"" s)
+        let car2 = cardinality2 |> Option.map _.ToFormatString() |> Option.formatString (fun s -> sprintf "\"%s\" " s)
+        let label = label |> Option.formatString (fun l -> sprintf " : %s" l)
+        sprintf "%s%s %s %s%s%s" id1 car1 link car2 id2 label
+
+    let formatRelationship id1 id2 (type': ClassRelationshipType) (label: string option) (cardinality1: Cardinality option) (cardinality2: Cardinality option) =
+        let link = type'.ToFormatString()
+        formatRelationship0 id1 id2 link label cardinality1 cardinality2
+
+    let formatRelationshipCustom id1 id2 (type': ClassRelationshipType) (direction) (dotted) (label: string option) (cardinality1: Cardinality option) (cardinality2: Cardinality option) =
+        let link = type'.ToFormatString(?direction=direction, ?isDotted=dotted)
+        formatRelationship0 id1 id2 link label cardinality1 cardinality2
+
+    let formatAnnotation id (annotation: string) = sprintf "<<%s>> %s" annotation id
+
+    let formatNote txt (id: string option) =
+        if id.IsSome then
+            sprintf "note for %s \"%s\"" id.Value txt
+        else
+            sprintf "note \"%s\"" txt
+
+
+[<AttachMembers>]
+type memberVisibility =
+    static member public' = ClassDiagram.MemberVisibility.Public
+    static member private' = ClassDiagram.MemberVisibility.Private
+    static member protected' = ClassDiagram.MemberVisibility.Protected
+    static member packageInternal = ClassDiagram.MemberVisibility.PackageInternal
+    static member custom str = ClassDiagram.MemberVisibility.Custom str
+
+[<AttachMembers>]
+type memberClassifier =
+    static member abstract' = ClassDiagram.MemberClassifier.Abstract
+    static member static' = ClassDiagram.MemberClassifier.Static
+    static member custom str = ClassDiagram.MemberClassifier.Custom str
 
 [<AttachMembers>]
 type classDiagram =
     static member raw (txt: string) = ClassDiagramElement txt
-    static member class' (id: string, ?label: string, ?members: #seq<string>) = if members.IsSome then ClassDiagramWrapper ("TODO","",[]) else ClassDiagramElement "TODO"
-    static member classMember (id: string, label:string, ?accessibility: IAccessibility, ?classifier: IClassifier) = ClassDiagramElement "TODO"
-    static member attribute (name: string, ?type': string, ?accessibility: IAccessibility, ?classifier: IClassifier) : string = "TODO"
-    static member function' (name: string, args: string, ?type': string, ?accessibility: IAccessibility, ?classifier: IClassifier) : string = "TODO"
-    static member generic (name: string) : string = "TODO"
-    static member relationship (c1, c2, ?rltsType: IClassRelationshipType,?msg: string, ?cardinality1: ICardinality, ?cardinality2: ICardinality) = ClassDiagramElement "TODO"
-    static member rlts (c1, c2, ?rltsType: IClassRelationshipType) = classDiagram.relationship (c1,c2,rltsType=rltsType)
-    static member namespace' (name: string, children: #seq<ClassDiagramElement>) = ClassDiagramWrapper (name,"",List.ofSeq children)
-    static member annotation (id: string, annotation: string) = ClassDiagramElement "TODO"
-    static member annotationString (id: string, annotation: string) : string = "TODO"
-    static member comment (txt:string) = ClassDiagramElement "TODO"
-    static member direction (direction: obj) = ClassDiagramElement "TODO"
-    static member clickHref() = failwith "TODO"
-    static member clickCallback() = failwith "TODO"
-    static member note(txt:string, ?id: string) = ClassDiagramElement "TODO"
-    static member link(id: string, url: string, ?tooltip: string) = ClassDiagramElement "TODO"
-    static member callback(id: string, func: unit -> unit, ?tooltip: string) = failwith "TODO"
+    static member class' (id: string, ?name: string, ?generic: string, ?members: #seq<string>) = 
+        if members.IsSome then ClassDiagramWrapper (ClassDiagram.formatClass id name generic + "{","}", (List.ofSeq >> List.map ClassDiagramElement) members.Value) 
+        else ClassDiagram.formatClass id name generic |> ClassDiagramElement
+    static member classMember (id: string, label:string, ?visibility: ClassDiagram.MemberVisibility, ?classifier: ClassDiagram.MemberClassifier) = 
+        ClassDiagram.formatMember id label visibility classifier |> ClassDiagramElement
+    
+    static member relationshipInheritance (id1, id2, ?label: string, ?cardinality1: ClassDiagram.Cardinality, ?cardinality2: ClassDiagram.Cardinality) = 
+        ClassDiagram.formatRelationship id1 id2 ClassDiagram.ClassRelationshipType.Inheritance label cardinality1 cardinality2 |> ClassDiagramElement
+    static member relationshipComposition (id1, id2, ?label: string, ?cardinality1: ClassDiagram.Cardinality, ?cardinality2: ClassDiagram.Cardinality) = 
+        ClassDiagram.formatRelationship id1 id2 ClassDiagram.ClassRelationshipType.Composition label cardinality1 cardinality2 |> ClassDiagramElement
+    static member relationshipAggregation (id1, id2, ?label: string, ?cardinality1: ClassDiagram.Cardinality, ?cardinality2: ClassDiagram.Cardinality) = 
+        ClassDiagram.formatRelationship id1 id2 ClassDiagram.ClassRelationshipType.Aggregation label cardinality1 cardinality2 |> ClassDiagramElement
+    static member relationshipAssociation (id1, id2, ?label: string, ?cardinality1: ClassDiagram.Cardinality, ?cardinality2: ClassDiagram.Cardinality) = 
+        ClassDiagram.formatRelationship id1 id2 ClassDiagram.ClassRelationshipType.Association label cardinality1 cardinality2 |> ClassDiagramElement
+    static member relationshipSolid (id1, id2, ?label: string, ?cardinality1: ClassDiagram.Cardinality, ?cardinality2: ClassDiagram.Cardinality) = 
+        ClassDiagram.formatRelationship id1 id2 ClassDiagram.ClassRelationshipType.Solid label cardinality1 cardinality2 |> ClassDiagramElement
+    static member relationshipDependency (id1, id2, ?label: string, ?cardinality1: ClassDiagram.Cardinality, ?cardinality2: ClassDiagram.Cardinality) = 
+        ClassDiagram.formatRelationship id1 id2 ClassDiagram.ClassRelationshipType.Dependency label cardinality1 cardinality2 |> ClassDiagramElement
+    static member relationshipRealization (id1, id2, ?label: string, ?cardinality1: ClassDiagram.Cardinality, ?cardinality2: ClassDiagram.Cardinality) = 
+        ClassDiagram.formatRelationship id1 id2 ClassDiagram.ClassRelationshipType.Realization label cardinality1 cardinality2 |> ClassDiagramElement
+    static member relationshipDashed (id1, id2, ?label: string, ?cardinality1: ClassDiagram.Cardinality, ?cardinality2: ClassDiagram.Cardinality) = 
+        ClassDiagram.formatRelationship id1 id2 ClassDiagram.ClassRelationshipType.Dashed label cardinality1 cardinality2 |> ClassDiagramElement
+    static member relationshipCustom (id1, id2, rltsType, ?label: string, ?direction, ?isDotted, ?cardinality1: ClassDiagram.Cardinality, ?cardinality2: ClassDiagram.Cardinality) = 
+        ClassDiagram.formatRelationshipCustom id1 id2 rltsType direction isDotted label cardinality1 cardinality2 |> ClassDiagramElement
+
+    static member namespace' (name: string, children: #seq<ClassDiagramElement>) =
+        if Seq.isEmpty children then ClassDiagramNone 
+        else ClassDiagramWrapper (sprintf "namespace %s {" name,"}", List.ofSeq children)
+    static member annotation (id: string, annotation: string) = classDiagram.annotationString (id, annotation)
+    static member annotationString (id: string, annotation: string) : string = ClassDiagram.formatAnnotation id annotation
+    static member comment (txt:string) = Generic.formatComment txt
+    static member direction (direction: Direction) = Generic.formatDirection direction |> ClassDiagramElement
+    static member clickHref(id,url,?tooltip) = Generic.formatClickHref id url tooltip |> ClassDiagramElement
+    //static member clickCallback() = failwith "TODO"
+    static member note(txt:string, ?id: string) = ClassDiagram.formatNote txt id |> ClassDiagramElement
+    static member link(id: string, url: string, ?tooltip: string) = Generic.formatClickHref id url tooltip |> ClassDiagramElement
+    //static member callback(id: string, func: unit -> unit, ?tooltip: string) = failwith "TODO"
 
 type ITransitionType = obj
 
@@ -671,11 +846,10 @@ type xyChart =
     static member yAxisRange (?name: string, ?startEnd: float*float) = XYChartElement "TODO"
     static member line (data: #seq<float>) = XYChartElement "TODO"
     static member bar (data: #seq<float>) = XYChartElement "TODO"
-    
 
 [<AttachMembers>]
-type diagram =
-    static member flowchart (direction:FlowchartDirection, children: #seq<FlowchartElement>) = SirenElement.Flowchart (direction, List.ofSeq children)
+type siren =
+    static member flowchart (direction:Direction, children: #seq<FlowchartElement>) = SirenElement.Flowchart (direction, List.ofSeq children)
     static member sequence (children: #seq<SequenceElement>) = SirenElement.Sequence (List.ofSeq children)
     static member classDiagram (children: #seq<ClassDiagramElement>) = SirenElement.Class(List.ofSeq children)
     static member state (children: #seq<StateDiagramElement>) = SirenElement.State(List.ofSeq children)
@@ -691,28 +865,16 @@ type diagram =
     static member timeline (children: #seq<TimelineElement>) = SirenElement.Timeline (List.ofSeq children)
     static member sankey (children: #seq<SankeyElement>) = SirenElement.Sankey (List.ofSeq children)
     static member xyChart (children: #seq<XYChartElement>) = SirenElement.XYChart (List.ofSeq children)
-
-[<AttachMembers>]
-type siren =
     static member write(diagram: SirenElement) =
         match diagram with
         | SirenElement.Flowchart (direction, children) ->
             let dia = "flowchart " + direction.ToString()
-            Yaml.root [
-                Yaml.line dia
-                Yaml.level [
-                    for child in children do
-                        yield! child.ToYamlAst()
-                ]
-            ]
+            writeYamlDiagramRoot dia children
         | SirenElement.Sequence (children) ->
             let dia = "sequenceDiagram"
-            Yaml.root [
-                Yaml.line dia
-                Yaml.level [
-                    for child in children do
-                        yield! child.ToYamlAst()
-                ]
-            ]
+            writeYamlDiagramRoot dia children
+        | SirenElement.Class children ->
+            let dia = "classDiagram"
+            writeYamlDiagramRoot dia children
         | _ -> failwith "TODO"
         |> Yaml.write
