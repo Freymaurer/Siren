@@ -37,6 +37,8 @@ flowchart BT
 ```
 <!--Example1-End-->
 
+## Class Diagram
+
 <!--Example2-->
 ```fsharp
 let duck,animal,zebra,fish = "Duck","Animal","Zebra", "Fish"
@@ -101,6 +103,8 @@ classDiagram
 
 ```
 <!--Example2-End-->
+
+## Entity Relationship Diagram
 
 <!--Example3-->
 ```fsharp
