@@ -10,6 +10,7 @@ let all = testList "Main" [
     Tests.ClassDiagram.main
     Tests.StateDiagram.main
     Tests.EntityRelationshipDiagram.main
+    Tests.Journey.main
 ]
 
 [<EntryPoint>]

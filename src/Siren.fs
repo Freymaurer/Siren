@@ -161,7 +161,11 @@ module Types =
 
     type JourneyElement =
         | JourneyElement of string
-        | JourneyWrapper of opener: string * closer: string * JourneyElement list
+        interface IYamlConvertible with
+
+            member this.ToYamlAst() = 
+                match this with
+                | JourneyElement line -> [Yaml.line line]
 
     type GanttElement =
         | GanttElement of string
@@ -855,12 +859,23 @@ type erDiagram =
     static member attribute(type': string, name: string, ?keys: #seq<IERKeyType>, ?comment: string) : IERAttribute = 
         {Type=type'; Name=name;Keys=Option.map List.ofSeq keys |> Option.defaultValue []; Comment = comment}
 
+module UserJourney =
+
+    let formatTask name score actors =
+        let actors = actors |> Option.map (String.concat ", ")
+        List.choose id [
+            Some name
+            Some (string score)
+            actors
+        ]
+        |> String.concat ": "
+
 [<AttachMembers>]
 type journey =
     static member raw (line: string) = JourneyElement line
-    static member title (name: string) = JourneyElement "TODO"
-    static member section (name: string, tasks: #seq<JourneyElement>) = JourneyWrapper ("TODO","",List.ofSeq tasks)
-    static member task (name: string, score: int, actors: #seq<string>) = JourneyElement "TODO"
+    static member title (name: string) = sprintf "title %s" name |> JourneyElement
+    static member section (name: string) = sprintf "section %s" name |> JourneyElement
+    static member task (name: string, score: int, ?actors: #seq<string>) = UserJourney.formatTask name score actors |> JourneyElement
 
 type IGanttTags = obj
 type IGanttMetadata = obj
@@ -1004,6 +1019,9 @@ type siren =
             writeYamlDiagramRoot dia children
         | SirenElement.ERDiagram children ->
             let dia = "erDiagram"
+            writeYamlDiagramRoot dia children
+        | SirenElement.Journey children ->
+            let dia = "journey"
             writeYamlDiagramRoot dia children
         | _ -> failwith "TODO"
         |> Yaml.write
