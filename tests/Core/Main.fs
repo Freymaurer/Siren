@@ -11,6 +11,7 @@ let all = testList "Main" [
     Tests.StateDiagram.main
     Tests.EntityRelationshipDiagram.main
     Tests.Journey.main
+    Tests.Gantt.main
 ]
 
 [<EntryPoint>]

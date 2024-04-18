@@ -7,6 +7,11 @@ module Option =
     let formatString (format: string -> string) (str: string option) =
         match str with |None -> "" | Some str -> format str
 
+    let defaultBind (mapping: 'A -> 'T) (default': 'T) (opt: 'A option) =
+        match opt with
+        | Some a -> mapping a
+        | None -> default'
+
 [<RequireQualifiedAccess>]
 module Yaml =
 
@@ -170,6 +175,13 @@ module Types =
     type GanttElement =
         | GanttElement of string
         | GanttWrapper of opener: string * closer: string * GanttElement list
+        interface IYamlConvertible with
+            
+            member this.ToYamlAst() = 
+                match this with
+                | GanttElement line -> [Yaml.line line]
+                | GanttWrapper (opener, closer, children) ->
+                    writeYamlASTBasicWrapper opener closer children
 
     type PieChartElement =
         | PieChartElement of string
@@ -216,7 +228,7 @@ module Types =
     | StateV2 of StateDiagramElement list
     | ERDiagram of ERDiagramElement list
     | Journey of JourneyElement list
-    | Gantt of compactMode: bool * GanttElement list
+    | Gantt of GanttElement list
     | PieChart of PieChartElement list
     | Quadrant of QuadrantElement list
     | RequirementDiagram of RequirementDiagramElement list
@@ -768,6 +780,7 @@ type stateDiagram =
     static member direction (direction: Direction) = Generic.formatDirection direction |> StateDiagramElement
     static member comment (txt: string) = Generic.formatComment txt |> StateDiagramElement
 
+[<RequireQualifiedAccess>]
 type IERCardinalityType = 
     | OneOrZero
     | OneOrMany
@@ -780,10 +793,12 @@ type IERCardinalityType =
         | ZeroOrMany -> "zero or many"
         | OnlyOne -> "only one"
 
+[<RequireQualifiedAccess>]
 type IERKeyType = 
     | PK
     | FK
     | UK
+[<RequireQualifiedAccess>]
 type IERAttribute = {
     Type : string
     Name : string
@@ -877,24 +892,97 @@ type journey =
     static member section (name: string) = sprintf "section %s" name |> JourneyElement
     static member task (name: string, score: int, ?actors: #seq<string>) = UserJourney.formatTask name score actors |> JourneyElement
 
-type IGanttTags = obj
-type IGanttMetadata = obj
-type IGanttFormatString = obj
-type IGanttAxisFormatString = obj
-type ITimeUnit = obj
+[<RequireQualifiedAccess>]
+type IGanttTags = 
+| Active
+| Done
+| Crit
+| Milestone
+    member this.ToFormatString() =
+        match this with
+        | Active    -> "active"
+        | Done      -> "done"
+        | Crit      -> "crit"
+        | Milestone -> "milestone"
+
+[<RequireQualifiedAccess>]
+type IGanttUnit =
+| Millisecond
+| Second
+| Minute
+| Hour
+| Day
+| Week
+| Month
+    member this.ToFormatString() =
+        string this |> _.ToLower()
+
+module Gantt =
+
+    let formatTask title (tags: IGanttTags list) (selfid: string option) (startDate: string option) (endDate: string option) =
+        let tags = tags |> Seq.map (fun x -> x.ToFormatString() |> Some) |> Seq.distinct 
+        let metadata =
+            [
+                yield! tags
+                selfid
+                startDate
+                endDate
+            ]
+            |> List.choose id
+            |> String.concat ", "
+        sprintf "%s : %s" title metadata
+
+[<AttachMembers>]
+type ganttTime =
+    static member length (timespan: string) : string = timespan
+    static member dateTime (datetime: string) : string = datetime
+    static member after (id) : string = sprintf "after %s" id
+    static member until (id) : string = sprintf "until %s" id
+
+[<AttachMembers>]
+type ganttTags =
+    static member active = IGanttTags.Active
+    static member done' = IGanttTags.Done
+    static member crit = IGanttTags.Crit
+    static member milestone = IGanttTags.Milestone
+
+[<AttachMembers>]
+type ganttUnit =
+    static member millisecond = IGanttUnit.Millisecond
+    static member second = IGanttUnit.Second
+    static member minute = IGanttUnit.Minute
+    static member hour = IGanttUnit.Hour
+    static member day = IGanttUnit.Day
+    static member week = IGanttUnit.Week
+    static member month = IGanttUnit.Month
 
 [<AttachMembers>]
 type gantt =
     static member raw (line: string) = GanttElement line
-    static member title (name: string) = GanttElement "TODO"
-    static member section (name: string, children: #seq<GanttElement>) = GanttWrapper ("TODO", "", List.ofSeq children)
-    static member task (title: string, ?tags: #seq<IGanttMetadata>, ?metadata: IGanttMetadata) = GanttElement "TODO"
-    static member milestone (title: string, ?id: string, ?startPoint: string, ?timespan: string) = GanttElement "TODO"
-    static member dateFormat (formatString: IGanttFormatString) = GanttElement "TODO"
-    static member axisFormat (formatString: IGanttAxisFormatString) = GanttElement "TODO"
-    static member tickInterval (interval: int, unit: ITimeUnit) = GanttElement "TODO" ///^([1-9][0-9]*)(millisecond|second|minute|hour|day|week|month)$/;
-    static member weekday (day: string) = GanttElement "TODO"
-    static member comment (txt: string) = GanttElement "TODO"
+    static member title (name: string) = sprintf "title %s" name |> GanttElement
+    static member section (name: string) = sprintf "section %s" name |> GanttElement
+
+    static member task (title: string, id: string, startDate:string, endDate: string, ?tags: #seq<IGanttTags>) = 
+        Gantt.formatTask title (Option.defaultBind List.ofSeq [] tags) (Some id) (Some startDate) (Some endDate) |> GanttElement
+    static member taskStartEnd (title: string, startDate:string, endDate: string, ?tags: #seq<IGanttTags>) = 
+        Gantt.formatTask title (Option.defaultBind List.ofSeq [] tags) (None) (Some startDate) (Some endDate) |> GanttElement
+    static member taskEnd (title: string, endDate: string, ?tags: #seq<IGanttTags>) = 
+        Gantt.formatTask title (Option.defaultBind List.ofSeq [] tags) (None) (None) (Some endDate) |> GanttElement
+
+    static member milestone (title: string, id: string, startDate:string, endDate: string, ?tags: #seq<IGanttTags>) = 
+        Gantt.formatTask title (ganttTags.milestone::Option.defaultBind List.ofSeq [] tags) (Some id) (Some startDate) (Some endDate) |> GanttElement
+    static member milestoneStartEnd (title: string, startDate:string, endDate: string, ?tags: #seq<IGanttTags>) = 
+        Gantt.formatTask title (ganttTags.milestone::Option.defaultBind List.ofSeq [] tags) (None) (Some startDate) (Some endDate) |> GanttElement
+    static member milestoneEnd (title: string, endDate: string, ?tags: #seq<IGanttTags>) = 
+        Gantt.formatTask title (ganttTags.milestone::Option.defaultBind List.ofSeq [] tags) (None) (None) (Some endDate) |> GanttElement
+
+    static member dateFormat (formatString: string) = sprintf "dateFormat %s" formatString |> GanttElement
+    static member axisFormat (formatString: string) = sprintf "axisFormat %s" formatString |> GanttElement
+    static member tickInterval (interval: int, unit: IGanttUnit) = sprintf "tickInterval %i%s" interval (unit.ToFormatString()) |> GanttElement ///^([1-9][0-9]*)(millisecond|second|minute|hour|day|week|month)$/;
+
+    static member weekday (day: string) = sprintf "weekday %s" day |> GanttElement 
+    static member excludes (day: string) = sprintf "excludes %s" day |> GanttElement 
+    static member comment (txt: string) = Generic.formatComment txt |> GanttElement
 
 [<AttachMembers>]
 type pieChart =
@@ -991,7 +1079,7 @@ type siren =
     static member stateV2 (children: #seq<StateDiagramElement>) = SirenElement.StateV2(List.ofSeq children)
     static member erDiagram (children: #seq<ERDiagramElement>) = SirenElement.ERDiagram(List.ofSeq children)
     static member journey (children: #seq<JourneyElement>) = SirenElement.Journey (List.ofSeq children)
-    static member gantt (children: #seq<GanttElement>,?compactMode: bool) = SirenElement.Gantt(defaultArg compactMode false, List.ofSeq children)
+    static member gantt (children: #seq<GanttElement>) = SirenElement.Gantt(List.ofSeq children)
     static member pieChart (children: #seq<PieChartElement>) = SirenElement.PieChart(List.ofSeq children)
     static member quadrant (children: #seq<QuadrantElement>) = SirenElement.Quadrant (List.ofSeq children)
     static member requirementDiagram (children: #seq<RequirementDiagramElement>) = SirenElement.RequirementDiagram (List.ofSeq children)
@@ -1022,6 +1110,9 @@ type siren =
             writeYamlDiagramRoot dia children
         | SirenElement.Journey children ->
             let dia = "journey"
+            writeYamlDiagramRoot dia children
+        | SirenElement.Gantt children ->
+            let dia = "gantt"
             writeYamlDiagramRoot dia children
         | _ -> failwith "TODO"
         |> Yaml.write
