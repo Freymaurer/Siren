@@ -19,6 +19,7 @@ let all = testList "Main" [
     Tests.Mindmap.main
     Tests.Timeline.main
     Tests.Sankey.main
+    Tests.XYChart.main
 ]
 
 [<EntryPoint>]

@@ -255,8 +255,11 @@ module Types =
 
     type XYChartElement =
         | XYChartElement of string
-        | XYChartWrapper of opener:string * closer:string * XYChartElement list
-        | XYChartDirection of string
+        interface IYamlConvertible with
+            
+            member this.ToYamlAst() = 
+                match this with
+                | XYChartElement line -> [Yaml.line line]
 
     [<RequireQualifiedAccess>]
     type SirenElement =
@@ -275,7 +278,7 @@ module Types =
     | Mindmap of MindmapElement list
     | Timeline of TimelineElement list
     | Sankey of SankeyElement list
-    | XYChart of XYChartElement list
+    | XYChart of isHorizontal:bool * XYChartElement list
 
 open Types
 
@@ -1340,18 +1343,58 @@ type sankey =
     static member links (source: string, targets: list<string*float>) = 
         Sankey.createLinks source targets
 
+module XYChart =
+    let formatData (data: string list) =
+        ("[" + (data |> String.concat ", ") + "]")
+
+    let formatXAxis name data =
+        [
+            Some "x-axis"
+            name |> Option.map (fun name -> sprintf "\"%s\"" name)
+            Some (formatData data)
+        ]
+        |> List.choose id
+        |> String.concat " "
+
+    let formatXAxisRange (name: string option) (data: float*float) =
+        [
+            Some "x-axis"
+            name |> Option.map (fun name -> sprintf "\"%s\"" name)
+            Some (sprintf "%f --> %f" (fst data) (snd data))
+        ]
+        |> List.choose id
+        |> String.concat " "
+
+    let formatYAxis (name: string option) (data: (float*float) option) =
+        [
+            Some "y-axis"
+            name |> Option.map (fun name -> sprintf "\"%s\"" name)
+            data |> Option.map (fun data -> sprintf "%f --> %f" (fst data) (snd data))
+        ]
+        |> List.choose id
+        |> String.concat " "
+        
+    let formatLine (data: float list) = sprintf "line %s" (data |> List.map string |> formatData)
+    let formatBar (data: float list) = sprintf "bar %s" (data |> List.map string |> formatData)
+
+
 [<AttachMembers>]
 type xyChart =
     static member raw(line: string) = XYChartElement line
-    static member title(name: string) = XYChartElement "TODO" //If the title is a single word one no need to use ", but if it has space " is needed
-    static member horizontal = XYChartDirection "horizontal"
-    static member vertical = XYChartDirection "vertical"
-    static member xAxis (?name: string, ?data: #seq<string>) = XYChartElement "TODO"
-    static member xAxisRange (?name: string, ?startEnd: float*float) = XYChartElement "TODO"
-    static member yAxis (?name: string, ?data: #seq<float>) = XYChartElement "TODO"
-    static member yAxisRange (?name: string, ?startEnd: float*float) = XYChartElement "TODO"
-    static member line (data: #seq<float>) = XYChartElement "TODO"
-    static member bar (data: #seq<float>) = XYChartElement "TODO"
+    static member title(name: string) = sprintf "title \"%s\"" name |> XYChartElement
+
+    static member xAxis (data: #seq<string>) = XYChart.formatXAxis None (List.ofSeq data) |> XYChartElement
+    static member xAxisNamed (name: string, data: #seq<string>) = XYChart.formatXAxis (Some name) (List.ofSeq data) |> XYChartElement
+    static member xAxisRange (start: float, end': float) = XYChart.formatXAxisRange (None) (start,end') |> XYChartElement
+    static member xAxisNamedRange (name: string, start: float, end': float) = XYChart.formatXAxisRange (Some name) (start,end') |> XYChartElement
+
+    static member yAxis (name: string) = XYChart.formatYAxis (Some name) None |> XYChartElement
+    static member yAxisRange (start: float, end': float) = XYChart.formatYAxis (None) (Some (start,end')) |> XYChartElement
+    static member yAxisNamedRange (name: string, start: float, end': float) = XYChart.formatYAxis (Some name) (Some (start,end')) |> XYChartElement
+
+    static member line (data: #seq<float>) = XYChart.formatLine (List.ofSeq data) |> XYChartElement
+    static member bar (data: #seq<float>) = XYChart.formatBar (List.ofSeq data) |> XYChartElement
+    static member comment (txt) = Generic.formatComment txt |> XYChartElement
 
 [<AttachMembers>]
 type siren =
@@ -1370,7 +1413,7 @@ type siren =
     static member mindmap (children: #seq<MindmapElement>) = SirenElement.Mindmap (List.ofSeq children)
     static member timeline (children: #seq<TimelineElement>) = SirenElement.Timeline (List.ofSeq children)
     static member sankey (children: #seq<SankeyElement>) = SirenElement.Sankey (List.ofSeq children)
-    static member xyChart (children: #seq<XYChartElement>) = SirenElement.XYChart (List.ofSeq children)
+    static member xyChart (children: #seq<XYChartElement>, ?isHorizontal: bool) = SirenElement.XYChart (defaultArg isHorizontal false, List.ofSeq children)
     static member write(diagram: SirenElement) =
         match diagram with
         | SirenElement.Flowchart (direction, children) ->
@@ -1422,5 +1465,7 @@ type siren =
                 for child in children do
                     yield! child :> IYamlConvertible |> _.ToYamlAst()
             ]
-        | _ -> failwith "TODO"
+        | SirenElement.XYChart (isHorizontal, children) ->
+            let dia = "xychart-beta"  + if isHorizontal then " horizontal" else ""
+            writeYamlDiagramRoot dia children
         |> Yaml.write
