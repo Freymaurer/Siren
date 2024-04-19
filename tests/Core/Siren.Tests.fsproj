@@ -20,6 +20,8 @@
     <Compile Include="Tests.RequirementDiagram.fs" />
     <Compile Include="Tests.Git.fs" />
     <Compile Include="Tests.Mindmap.fs" />
+    <Compile Include="Tests.Timeline.fs" />
+    <Compile Include="Tests.Sankey.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
 

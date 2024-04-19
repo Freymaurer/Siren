@@ -232,10 +232,26 @@ module Types =
     type TimelineElement =
         | TimelineElement of string
         | TimelineWrapper of opener:string * closer:string * TimelineElement list
-        | TimelineConfig of key:string * value: string
+        interface IYamlConvertible with
+            
+            member this.ToYamlAst() = 
+                match this with
+                | TimelineElement line -> [Yaml.line line]
+                | TimelineWrapper (opener, closer, children) ->
+                    writeYamlASTBasicWrapper opener closer children
 
     type SankeyElement =
         | SankeyElement of string
+        | SankeyElementList of SankeyElement list
+        interface IYamlConvertible with
+            
+            member this.ToYamlAst() = 
+                match this with
+                | SankeyElement line -> [Yaml.line line]
+                | SankeyElementList elements -> [
+                    for ele in elements do 
+                        yield! ele :> IYamlConvertible |> _.ToYamlAst()
+                ]
 
     type XYChartElement =
         | XYChartElement of string
@@ -1211,11 +1227,11 @@ type gitType =
 type git =
     static member raw (line:string) = GitGraphElement line
     static member commit (?id: string, ?gitType: Git.IGitCommitType, ?tag: string) = Git.formatCommit id gitType tag |> GitGraphElement
-    static member branch (id: string) = GitGraphElement ("branch " + id)
-    static member checkout (id: string) = GitGraphElement ("checkout " + id)
     static member merge (targetBranchId: string, ?mergeid: string, ?gitType: Git.IGitCommitType, ?tag: string) = 
         Git.formatMerge targetBranchId mergeid gitType tag |> GitGraphElement
     static member cherryPick (commitid: string, ?parentId: string) = Git.formatCherryPick commitid parentId |> GitGraphElement
+    static member branch (id: string) = GitGraphElement ("branch " + id)
+    static member checkout (id: string) = GitGraphElement ("checkout " + id)
     //static member title (title:string) = GitGraphTitle title
     //static member showBranches (b: bool) = GitGraphConfig ("", "")
     //static member rotateCommitLabel (b: bool) = GitGraphConfig ("", "")
@@ -1281,19 +1297,48 @@ type mindmap =
     static member classNames(classNames: #seq<string>) = classNames |> String.concat " " |> sprintf "::: %s" |> MindmapElement
     static member comment (txt: string) = Generic.formatComment txt
 
+module Timeline =
+
+    let formatSingle header (data: string option) =
+        match data with
+        | None -> header
+        | Some event -> sprintf "%s : %s" header event
+
+    let createMultiple header (data: string list) =
+        let children = data |> List.map (fun s -> ": " + s |> TimelineElement)
+        TimelineWrapper(header,"", children)
+
 [<AttachMembers>]
 type timeline =
     static member raw (line: string) = TimelineElement line
-    static member title (name: string) = TimelineElement "TODO"
-    static member timePeriod (timePoint: string, data: #seq<string>) = TimelineElement "TODO"
-    static member section (name: string, children: #seq<TimelineElement>) = TimelineWrapper ("TODO","",List.ofSeq children)
-    static member disableMulticolor (b:bool) = TimelineConfig ("TODO","TODO")
+    static member title (name: string) = "title " + name |> TimelineElement
+    static member period (name: string) = TimelineElement name
+    static member single (timePeriod: string, ?event: string) = Timeline.formatSingle timePeriod event |> TimelineElement
+    static member multiple (timePeriod: string, events: #seq<string>) = Timeline.createMultiple timePeriod (List.ofSeq events)
+    static member section (name: string, children: #seq<TimelineElement>) = TimelineWrapper ("section " + name,"",List.ofSeq children)
+    static member comment (txt: string) = Generic.formatComment txt |> TimelineElement
+
+module Sankey =
+
+    let formatLink (source: string) (target:string) (value:float) =
+        let source = source.Replace("\"","\"\"")
+        let target = target.Replace("\"","\"\"")
+        sprintf "\"%s\",\"%s\",%f" source target value
+
+    let createLinks (source: string) (targets: list<string*float>) =
+        [
+            for target, value in targets do
+                formatLink source target value |> SankeyElement
+        ] |> SankeyElementList
 
 [<AttachMembers>]
 type sankey =
     static member raw(line: string) = SankeyElement line
-    static member comment (txt: string) = SankeyElement "TODO" //%% source,target,value
-    static member link (source: string, target: string, value: float) = SankeyElement "TODO" //remember to escape " and , for the user
+    static member comment (txt: string) = Generic.formatComment txt |> SankeyElement
+    static member link (source: string, target: string, value: float) = 
+        Sankey.formatLink source target value |> SankeyElement //remember to escape " and , for the user
+    static member links (source: string, targets: list<string*float>) = 
+        Sankey.createLinks source targets
 
 [<AttachMembers>]
 type xyChart =
@@ -1367,5 +1412,15 @@ type siren =
         | SirenElement.Mindmap children ->
             let dia = "mindmap"
             writeYamlDiagramRoot dia children
+        | SirenElement.Timeline children ->
+            let dia = "timeline"
+            writeYamlDiagramRoot dia children
+        | SirenElement.Sankey children ->
+            let dia = "sankey-beta"
+            Yaml.root [
+                Yaml.line dia
+                for child in children do
+                    yield! child :> IYamlConvertible |> _.ToYamlAst()
+            ]
         | _ -> failwith "TODO"
         |> Yaml.write

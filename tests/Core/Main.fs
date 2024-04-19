@@ -17,6 +17,8 @@ let all = testList "Main" [
     Tests.RequirementDiagram.main
     Tests.Git.main
     Tests.Mindmap.main
+    Tests.Timeline.main
+    Tests.Sankey.main
 ]
 
 [<EntryPoint>]
