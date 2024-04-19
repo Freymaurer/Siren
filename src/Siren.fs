@@ -271,7 +271,7 @@ module Types =
     | ERDiagram of ERDiagramElement list
     | Journey of JourneyElement list
     | Gantt of GanttElement list
-    | PieChart of PieChartElement list
+    | PieChart of showData:bool * title: string option * PieChartElement list
     | Quadrant of QuadrantElement list
     | RequirementDiagram of RequirementDiagramElement list
     | GitGraph of GitGraphElement list
@@ -1034,8 +1034,6 @@ module PieChart =
 [<AttachMembers>]
 type pieChart =
     static member raw (line: string) = PieChartElement line
-    static member showData = PieChartElement "showData"
-    static member title (title: string) = sprintf "title %s" title |> PieChartElement
     static member data (name: string) (value: float) = PieChart.formatData name value |> PieChartElement
 
 module QuadrantChart =
@@ -1406,7 +1404,7 @@ type siren =
     static member erDiagram (children: #seq<ERDiagramElement>) = SirenElement.ERDiagram(List.ofSeq children)
     static member journey (children: #seq<JourneyElement>) = SirenElement.Journey (List.ofSeq children)
     static member gantt (children: #seq<GanttElement>) = SirenElement.Gantt(List.ofSeq children)
-    static member pieChart (children: #seq<PieChartElement>) = SirenElement.PieChart(List.ofSeq children)
+    static member pieChart (children: #seq<PieChartElement>, ?showData: bool, ?title: string) = SirenElement.PieChart(defaultArg showData false, title, List.ofSeq children)
     static member quadrant (children: #seq<QuadrantElement>) = SirenElement.Quadrant (List.ofSeq children)
     static member requirement (children: #seq<RequirementDiagramElement>) = SirenElement.RequirementDiagram (List.ofSeq children)
     static member git (children: #seq<GitGraphElement>) = SirenElement.GitGraph (List.ofSeq children)
@@ -1440,8 +1438,8 @@ type siren =
         | SirenElement.Gantt children ->
             let dia = "gantt"
             writeYamlDiagramRoot dia children
-        | SirenElement.PieChart (children) ->
-            let dia = "pie " // This whitespace is important! without the pie chart is not correctly parsed when using "showData" or "title"
+        | SirenElement.PieChart (showData, title, children) ->
+            let dia = ["pie"; if showData then "showData"; if title.IsSome then sprintf "title %s" title.Value] |> String.concat " "
             writeYamlDiagramRoot dia children
         | SirenElement.Quadrant children ->
             let dia = "quadrantChart"

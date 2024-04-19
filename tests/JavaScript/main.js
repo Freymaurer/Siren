@@ -1,4 +1,4 @@
-import * as siren from "./siren/Siren.js"
+import {siren, flowchart, direction, formatting } from "./siren/Siren.js"
 import * as assert from "assert"
 
 describe('ensure testing', function () {
@@ -11,22 +11,22 @@ describe('ensure testing', function () {
 describe('syntax', function(){
     it('MoonRocketExample', function(){
         const e = 
-          siren.diagram.flowchart(siren.flowchartDirection.bt, [
-              siren.flowchart.subgraph("space",[
-                  siren.flowchart.directionBT,
-                  siren.flowchart.linkDottedArrow(
+          siren.flowchart(direction.bt, [
+              flowchart.subgraph("space",[
+                  flowchart.directionBT,
+                  flowchart.linkDottedArrow(
                     "earth", 
                     "moon", 
-                    siren.formatting.unicode("🚀"),
+                    formatting.unicode("🚀"),
                     6
                   ),
-                  siren.flowchart.nodeRound("moon"),
-                  siren.flowchart.subgraph("atmosphere",[
-                    siren.flowchart.nodeCircle("earth")
+                  flowchart.nodeRound("moon"),
+                  flowchart.subgraph("atmosphere",[
+                    flowchart.nodeCircle("earth")
                   ])
               ])
           ]);
-        const actual = siren.siren.write(e);
+        const actual = siren.write(e);
         const expected = `flowchart BT
     subgraph space
         direction BT
