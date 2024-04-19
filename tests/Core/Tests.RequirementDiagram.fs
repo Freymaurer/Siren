@@ -6,7 +6,7 @@ open Siren
 let main = testList "RequirementDiagram" [
     testCase "docs" <| fun _ ->
         let actual =
-            siren.requirementDiagram [
+            siren.requirement [
                 reqDia.requirement("test_req", "1", "the test text.", rqRisk.high, rqMethod.test)
 
                 reqDia.functionalRequirement("test_req2", "1.1", "the second test text.", rqRisk.low, rqMethod.inspection)

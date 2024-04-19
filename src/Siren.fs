@@ -221,6 +221,13 @@ module Types =
     type MindmapElement =
         | MindmapElement of string
         | MindmapWrapper of opener:string * closer:string * MindmapElement list
+        interface IYamlConvertible with
+            
+            member this.ToYamlAst() = 
+                match this with
+                | MindmapElement line -> [Yaml.line line]
+                | MindmapWrapper (opener, closer, children) ->
+                    writeYamlASTBasicWrapper opener closer children
 
     type TimelineElement =
         | TimelineElement of string
@@ -285,7 +292,7 @@ module Generic =
 type formatting =
     //static member escaped (txt: string) = // idea for escaping for example quotes
     static member unicode (txt: string) = string '"' + txt + string '"'
-    static member markdown (txt: string) = """ "` """ + txt + """ `" """
+    static member markdown (txt: string) = "\"`" + txt + "`\""
     static member comment (txt: string) = Generic.formatComment txt
 
 [<AttachMembers>]
@@ -1152,14 +1159,48 @@ module Git =
         member this.ToFormatString() =
             this.ToString().ToUpper()
 
-    let formatCommit (selfid: string option) (commitType: IGitCommitType option) =
+    let formatCommitType (commitType: IGitCommitType option) =
+        commitType |> Option.map (fun s -> sprintf "type: %s" <| s.ToFormatString())
+
+    let formatTag (tag: string option) =
+        tag |> Option.map (fun s -> sprintf "tag: \"%s\"" s)
+
+    let formatSelfID (selfid: string option) =
+        selfid |> Option.map (fun s -> sprintf "id: \"%s\"" s)
+
+    let formatParentID (aprentId: string option) =
+        aprentId |> Option.map (fun s -> sprintf "parent: \"%s\"" s)
+
+    let formatCommit (selfid: string option) (commitType: IGitCommitType option) (tag: string option) =
         [
             Some "commit"
-            selfid |> Option.map (fun s -> sprintf "id: \"%s\"" s)
-            commitType |> Option.map (fun s -> sprintf "type: %s" <| s.ToFormatString())
+            selfid |> formatSelfID
+            commitType |> formatCommitType
+            tag |> formatTag
         ]
         |> List.choose id
         |> String.concat " "
+
+    let formatMerge targetId mergeId (commitType: IGitCommitType option) tag =
+        [
+            Some "merge"
+            Some targetId
+            mergeId |> formatSelfID
+            commitType |> formatCommitType
+            tag |> formatTag
+        ]
+        |> List.choose id
+        |> String.concat " "
+
+    let formatCherryPick commitid parentid =
+        [
+            Some "cherry-pick"
+            Some commitid |> formatSelfID
+            parentid |> formatParentID
+        ]
+        |> List.choose id
+        |> String.concat " "
+
 
 type gitType =
     static member normal = Git.IGitCommitType.NORMAL
@@ -1169,11 +1210,12 @@ type gitType =
 [<AttachMembers>]
 type git =
     static member raw (line:string) = GitGraphElement line
-    static member commit (?id: string, ?commitType: Git.IGitCommitType, ?tag: string) = Git.formatCommit id commitType |>GitGraphElement
-    static member branch (id: string) = GitGraphElement "TODO"
-    static member checkout (id: string) = GitGraphElement "TODO"
-    static member merge (branchid: string, ?mergeid: string, ?commitType: Git.IGitCommitType, ?tag: string) = GitGraphElement "TODO"
-    static member cherryPick (commitid: string, ?parentId: string) = GitGraphElement "TODO"
+    static member commit (?id: string, ?gitType: Git.IGitCommitType, ?tag: string) = Git.formatCommit id gitType tag |> GitGraphElement
+    static member branch (id: string) = GitGraphElement ("branch " + id)
+    static member checkout (id: string) = GitGraphElement ("checkout " + id)
+    static member merge (targetBranchId: string, ?mergeid: string, ?gitType: Git.IGitCommitType, ?tag: string) = 
+        Git.formatMerge targetBranchId mergeid gitType tag |> GitGraphElement
+    static member cherryPick (commitid: string, ?parentId: string) = Git.formatCherryPick commitid parentId |> GitGraphElement
     //static member title (title:string) = GitGraphTitle title
     //static member showBranches (b: bool) = GitGraphConfig ("", "")
     //static member rotateCommitLabel (b: bool) = GitGraphConfig ("", "")
@@ -1184,15 +1226,60 @@ type git =
     //static member parallelCommits (b: bool) = GitGraphConfig ("", "")
     //static member rawConfig (key, value) = GitGraphConfig (key, value)
 
-type IMindmapShape = obj
+
+module Mindmap =
+
+    type IMindmapShape = 
+        | Square //id[I am a square]
+        | RoundedSquare //id(I am a rounded square)
+        | Circle //id((I am a circle))
+        | Bang //id))I am a bang((
+        | Cloud //id)I am a cloud(
+        | Hexagon //id{{I am a hexagon}}
+
+    let formatNode (id: string) (name: string option) t =
+        let name = defaultArg name id
+        match t with
+        | Square -> sprintf "%s[%s]" id name
+        | RoundedSquare -> sprintf "%s(%s)" id name
+        | Circle -> sprintf "%s((%s))" id name
+        | Bang -> sprintf "%s))%s((" id name
+        | Cloud -> sprintf "%s)%s(" id name
+        | Hexagon -> sprintf "%s{{%s}}" id name
+
+    let handleNodeChildren (children: #seq<MindmapElement> option) (opener: string)  =
+        if children.IsSome && Seq.isEmpty children.Value |> not then
+            MindmapWrapper (opener, "", List.ofSeq children.Value)
+        else
+            MindmapElement opener
 
 [<AttachMembers>]
 type mindmap =
     static member raw (line: string) = MindmapElement line
-    static member root (shape: IMindmapShape, children: #seq<MindmapElement>) = MindmapWrapper ("TODO", "", List.ofSeq children)
-    static member node(id: string, ?name: string, ?shape: IMindmapShape, ?children: #seq<MindmapElement>) = if children.IsSome then MindmapWrapper ("TODO", "", List.ofSeq children.Value) else MindmapElement "TODO"
-    static member icon(iconClass: string) = MindmapElement "TODO"
-    static member classNames(classNames: string) = MindmapElement "TODO"
+    static member node(name: string, ?children: #seq<MindmapElement>) = Mindmap.handleNodeChildren children name
+
+    static member square(name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode name None Mindmap.Square |> Mindmap.handleNodeChildren children
+    static member squareId(id, name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode id (Some name) Mindmap.Square |> Mindmap.handleNodeChildren children
+    
+    static member roundedSquare(name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode name None Mindmap.RoundedSquare |> Mindmap.handleNodeChildren children
+    static member roundedSquareId(id, name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode id (Some name) Mindmap.RoundedSquare |> Mindmap.handleNodeChildren children
+    
+    static member circle(name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode name None Mindmap.Circle |> Mindmap.handleNodeChildren children
+    static member circleId(id, name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode id (Some name) Mindmap.Circle |> Mindmap.handleNodeChildren children
+    
+    static member bang(name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode name None Mindmap.Bang |> Mindmap.handleNodeChildren children
+    static member bangId(id, name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode id (Some name) Mindmap.Bang |> Mindmap.handleNodeChildren children
+    
+    static member cloud(name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode name None Mindmap.Cloud |> Mindmap.handleNodeChildren children
+    static member cloudId(id, name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode id (Some name) Mindmap.Cloud |> Mindmap.handleNodeChildren children
+    
+    static member hexagon(name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode name None Mindmap.Hexagon |> Mindmap.handleNodeChildren children
+    static member hexagonId(id, name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode id (Some name) Mindmap.Hexagon |> Mindmap.handleNodeChildren children
+
+    static member icon(iconClass: string) = sprintf "::icon(%s)" iconClass |> MindmapElement
+    static member className(className: string) = sprintf "::: %s" className |> MindmapElement
+    static member classNames(classNames: #seq<string>) = classNames |> String.concat " " |> sprintf "::: %s" |> MindmapElement
+    static member comment (txt: string) = Generic.formatComment txt
 
 [<AttachMembers>]
 type timeline =
@@ -1233,8 +1320,8 @@ type siren =
     static member gantt (children: #seq<GanttElement>) = SirenElement.Gantt(List.ofSeq children)
     static member pieChart (children: #seq<PieChartElement>) = SirenElement.PieChart(List.ofSeq children)
     static member quadrant (children: #seq<QuadrantElement>) = SirenElement.Quadrant (List.ofSeq children)
-    static member requirementDiagram (children: #seq<RequirementDiagramElement>) = SirenElement.RequirementDiagram (List.ofSeq children)
-    static member gitGraph (children: #seq<GitGraphElement>) = SirenElement.GitGraph (List.ofSeq children)
+    static member requirement (children: #seq<RequirementDiagramElement>) = SirenElement.RequirementDiagram (List.ofSeq children)
+    static member git (children: #seq<GitGraphElement>) = SirenElement.GitGraph (List.ofSeq children)
     static member mindmap (children: #seq<MindmapElement>) = SirenElement.Mindmap (List.ofSeq children)
     static member timeline (children: #seq<TimelineElement>) = SirenElement.Timeline (List.ofSeq children)
     static member sankey (children: #seq<SankeyElement>) = SirenElement.Sankey (List.ofSeq children)
@@ -1273,6 +1360,12 @@ type siren =
             writeYamlDiagramRoot dia children
         | SirenElement.RequirementDiagram children ->
             let dia = "requirementDiagram"
+            writeYamlDiagramRoot dia children
+        | SirenElement.GitGraph children ->
+            let dia = "gitGraph"
+            writeYamlDiagramRoot dia children
+        | SirenElement.Mindmap children ->
+            let dia = "mindmap"
             writeYamlDiagramRoot dia children
         | _ -> failwith "TODO"
         |> Yaml.write

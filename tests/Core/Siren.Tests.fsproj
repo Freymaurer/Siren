@@ -18,6 +18,8 @@
     <Compile Include="Tests.PieChart.fs" />
     <Compile Include="Tests.Quadrant.fs" />
     <Compile Include="Tests.RequirementDiagram.fs" />
+    <Compile Include="Tests.Git.fs" />
+    <Compile Include="Tests.Mindmap.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
 

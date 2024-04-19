@@ -15,6 +15,8 @@ let all = testList "Main" [
     Tests.PieChart.main
     Tests.Quadrant.main
     Tests.RequirementDiagram.main
+    Tests.Git.main
+    Tests.Mindmap.main
 ]
 
 [<EntryPoint>]
