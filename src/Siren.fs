@@ -199,13 +199,24 @@ module Types =
     type RequirementDiagramElement =
         | RequirementDiagramElement of string
         | RequirementDiagramWrapper of opener:string * closer:string * RequirementDiagramElement list
+        interface IYamlConvertible with
+            
+            member this.ToYamlAst() = 
+                match this with
+                | RequirementDiagramElement line -> [Yaml.line line]
+                | RequirementDiagramWrapper (opener, closer, children) ->
+                    writeYamlASTBasicWrapper opener closer children
         
     type GitGraphElement =
         | GitGraphElement of string
         | GitGraphWrapper of opener:string * closer:string * GitGraphElement list
-        | GitGraphTitle of string
-        | GitGraphOrientation of string
-        | GitGraphConfig of key: string * value: string
+        interface IYamlConvertible with
+            
+            member this.ToYamlAst() = 
+                match this with
+                | GitGraphElement line -> [Yaml.line line]
+                | GitGraphWrapper (opener, closer, children) ->
+                    writeYamlASTBasicWrapper opener closer children
 
     type MindmapElement =
         | MindmapElement of string
@@ -1031,39 +1042,147 @@ type quadrant =
     static member quadrant4 (title: string) = "quadrant-4 " + title |> QuadrantElement
     static member point (name: string, xAxis: float, yAxis: float) = QuadrantChart.formatPoint name xAxis yAxis |> QuadrantElement
     static member comment (txt: string) = Generic.formatComment txt |> QuadrantElement
-    
-type IRequirementType = obj
-type IRiskType = obj
-type IVerifyMethod = obj
-/// A relationship type can be one of contains, copies, derives, satisfies, verifies, refines, or traces.
-type IRDRelationship = obj
+
+module RequirementDiagram =
+
+    type IRequirementType =
+        | Requirement
+        | FunctionalRequirement
+        | InterfaceRequirement
+        | PerformanceRequirement
+        | PhysicalRequirement
+        | DesignConstraint
+
+    type IRiskType = 
+        | Low
+        | Medium
+        | High
+        member this.ToFormatString() = this.ToString().ToLower()
+
+    type IVerifyMethod =
+        | Analysis
+        | Inspection
+        | Test
+        | Demonstration
+        member this.ToFormatString() = this.ToString().ToLower()
+
+    /// A relationship type can be one of contains, copies, derives, satisfies, verifies, refines, or traces.
+    type IRDRelationship = 
+        | Contains
+        | Copies
+        | Derives
+        | Satisfies
+        | Verifies
+        | Refines
+        | Traces
+        member this.ToFormatString() = this.ToString().ToLower()
+
+    let createRequirement type0 name id text (risk: IRiskType option) (methods: IVerifyMethod option) =
+        let children =
+            [
+                id |> Option.map (fun i -> sprintf "id: \"%s\"" i)
+                text |> Option.map (fun t -> sprintf "text: \"%s\"" t)
+                risk |> Option.map (fun r -> sprintf "risk: %s" <| r.ToFormatString())
+                methods |> Option.map (fun m -> sprintf "verifymethod: %s" <| m.ToFormatString())
+            ]
+            |> List.choose (fun x -> x)
+            |> List.map RequirementDiagramElement
+        RequirementDiagramWrapper(sprintf "%s %s {" type0 name, "}", children)
+
+    let createElement name type0 docref =
+        let children =
+            [
+                type0 |> Option.map (fun t -> sprintf "type: \"%s\"" t)
+                docref |> Option.map (fun d -> sprintf "docRef: \"%s\"" d)
+            ]
+            |> List.choose (fun x -> x)
+            |> List.map RequirementDiagramElement
+        RequirementDiagramWrapper(sprintf "element %s {" name,"}", children)
+        
+    let formatRelationship id1 id2 (rltsType: IRDRelationship) =
+        sprintf "%s - %s -> %s" id1 (rltsType.ToFormatString()) id2
+
+type rqRisk =
+    static member low = RequirementDiagram.IRiskType.Low
+    static member medium = RequirementDiagram.IRiskType.Medium
+    static member high = RequirementDiagram.IRiskType.High
+
+type rqMethod =
+    static member analysis = RequirementDiagram.IVerifyMethod.Analysis
+    static member inspection = RequirementDiagram.IVerifyMethod.Inspection
+    static member test = RequirementDiagram.IVerifyMethod.Test
+    static member demonstration = RequirementDiagram.IVerifyMethod.Demonstration
+
 
 [<AttachMembers>]
-type requirementDiagram =
-    static member requirement (name, ?type': IRequirementType, ?id: string, ?text: string, ?risk: IRiskType, ?methods: IVerifyMethod) = RequirementDiagramWrapper("TODO","}", [])
-    static member element (name: string, ?type': string, ?docref: string) = RequirementDiagramWrapper("TODO","}", [])
-    static member relationship (id1, id2, rltsType: IRDRelationship) = RequirementDiagramWrapper("TODO","}", [])
+type reqDia =
+    static member raw (txt: string) = RequirementDiagramElement txt
 
-type IGitCommitType = obj
+    static member requirement (name, ?id: string, ?text: string, ?rqRisk: RequirementDiagram.IRiskType, ?rqMethod: RequirementDiagram.IVerifyMethod) =
+        RequirementDiagram.createRequirement "requirement" name id text rqRisk rqMethod
+    static member functionalRequirement (name, ?id: string, ?text: string, ?rqRisk: RequirementDiagram.IRiskType, ?rqMethod: RequirementDiagram.IVerifyMethod) =
+        RequirementDiagram.createRequirement "functionalRequirement" name id text rqRisk rqMethod
+    static member interfaceRequirement (name, ?id: string, ?text: string, ?rqRisk: RequirementDiagram.IRiskType, ?rqMethod: RequirementDiagram.IVerifyMethod) =
+        RequirementDiagram.createRequirement "interfaceRequirement" name id text rqRisk rqMethod
+    static member performanceRequirement (name, ?id: string, ?text: string, ?rqRisk: RequirementDiagram.IRiskType, ?rqMethod: RequirementDiagram.IVerifyMethod) =
+        RequirementDiagram.createRequirement "performanceRequirement" name id text rqRisk rqMethod
+    static member physicalRequirement (name, ?id: string, ?text: string, ?rqRisk: RequirementDiagram.IRiskType, ?rqMethod: RequirementDiagram.IVerifyMethod) = 
+        RequirementDiagram.createRequirement "physicalRequirement" name id text rqRisk rqMethod
+    static member designConstraint (name, ?id: string, ?text: string, ?rqRisk: RequirementDiagram.IRiskType, ?rqMethod: RequirementDiagram.IVerifyMethod) =
+        RequirementDiagram.createRequirement "designConstraint" name id text rqRisk rqMethod
+
+    static member element (name, ?type', ?docref) = RequirementDiagram.createElement name type' docref
+
+    static member contains (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RequirementDiagram.Contains |> RequirementDiagramElement
+    static member copies (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RequirementDiagram.Copies |> RequirementDiagramElement
+    static member derives (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RequirementDiagram.Derives |> RequirementDiagramElement
+    static member satisfies (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RequirementDiagram.Satisfies |> RequirementDiagramElement
+    static member verifies (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RequirementDiagram.Verifies |> RequirementDiagramElement
+    static member refines (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RequirementDiagram.Refines |> RequirementDiagramElement
+    static member traces (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RequirementDiagram.Traces |> RequirementDiagramElement
+
 type IGitOrientation = obj
+
+module Git =
+
+    type IGitCommitType =
+    | NORMAL
+    | REVERSE
+    | HIGHLIGHT
+        member this.ToFormatString() =
+            this.ToString().ToUpper()
+
+    let formatCommit (selfid: string option) (commitType: IGitCommitType option) =
+        [
+            Some "commit"
+            selfid |> Option.map (fun s -> sprintf "id: \"%s\"" s)
+            commitType |> Option.map (fun s -> sprintf "type: %s" <| s.ToFormatString())
+        ]
+        |> List.choose id
+        |> String.concat " "
+
+type gitType =
+    static member normal = Git.IGitCommitType.NORMAL
+    static member reverse = Git.IGitCommitType.REVERSE
+    static member highlight = Git.IGitCommitType.HIGHLIGHT
 
 [<AttachMembers>]
 type git =
-    static member raw (line:string) = GitGraphTitle line
-    static member commit (?id: string, ?commitType: IGitCommitType, ?tag: string) = GitGraphElement "TODO"
+    static member raw (line:string) = GitGraphElement line
+    static member commit (?id: string, ?commitType: Git.IGitCommitType, ?tag: string) = Git.formatCommit id commitType |>GitGraphElement
     static member branch (id: string) = GitGraphElement "TODO"
     static member checkout (id: string) = GitGraphElement "TODO"
-    static member merge (branchid: string, ?mergeid: string, ?commitType: IGitCommitType, ?tag: string) = GitGraphElement "TODO"
+    static member merge (branchid: string, ?mergeid: string, ?commitType: Git.IGitCommitType, ?tag: string) = GitGraphElement "TODO"
     static member cherryPick (commitid: string, ?parentId: string) = GitGraphElement "TODO"
-    static member title (title:string) = GitGraphTitle title
-    static member showBranches (b: bool) = GitGraphConfig ("", "")
-    static member rotateCommitLabel (b: bool) = GitGraphConfig ("", "")
-    static member showCommitLabel (b: bool) = GitGraphConfig ("", "")
-    static member mainBranchName (name: string) = GitGraphConfig ("", "")
-    static member mainBranchOrder (order: int) = GitGraphConfig ("", "")
-    static member orientation (orientation: IGitOrientation) = GitGraphOrientation "TODO"
-    static member parallelCommits (b: bool) = GitGraphConfig ("", "")
-    static member rawConfig (key, value) = GitGraphConfig (key, value)
+    //static member title (title:string) = GitGraphTitle title
+    //static member showBranches (b: bool) = GitGraphConfig ("", "")
+    //static member rotateCommitLabel (b: bool) = GitGraphConfig ("", "")
+    //static member showCommitLabel (b: bool) = GitGraphConfig ("", "")
+    //static member mainBranchName (name: string) = GitGraphConfig ("", "")
+    //static member mainBranchOrder (order: int) = GitGraphConfig ("", "")
+    //static member orientation (orientation: IGitOrientation) = GitGraphOrientation "TODO"
+    //static member parallelCommits (b: bool) = GitGraphConfig ("", "")
+    //static member rawConfig (key, value) = GitGraphConfig (key, value)
 
 type IMindmapShape = obj
 
@@ -1151,6 +1270,9 @@ type siren =
             writeYamlDiagramRoot dia children
         | SirenElement.Quadrant children ->
             let dia = "quadrantChart"
+            writeYamlDiagramRoot dia children
+        | SirenElement.RequirementDiagram children ->
+            let dia = "requirementDiagram"
             writeYamlDiagramRoot dia children
         | _ -> failwith "TODO"
         |> Yaml.write

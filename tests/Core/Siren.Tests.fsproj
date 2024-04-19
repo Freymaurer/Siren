@@ -17,6 +17,7 @@
     <Compile Include="Tests.Gantt.fs" />
     <Compile Include="Tests.PieChart.fs" />
     <Compile Include="Tests.Quadrant.fs" />
+    <Compile Include="Tests.RequirementDiagram.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
 
