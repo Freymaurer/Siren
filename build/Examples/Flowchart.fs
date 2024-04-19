@@ -5,29 +5,29 @@ open Util
     
 let writeMoonRocketExample() =
     let key = "Example1"
-    let codeDisplay = """diagram.flowchart.bt [
-    subgraph.subgraph "space" [
-        direction.bt
-        link.dottedArrow(node.simple "earth", node.simple "moon", formatting.unicode "🚀", 6)
-        node.round "moon" "moon"
-        subgraph.subgraph "atmosphere" [
-            node.circle "earth" "earth"
-        ]
-    ]
-]
+    let codeDisplay = """diagram.flowchart(flowchartDirection.bt, [
+    flowchart.subgraph ("space", [
+        flowchart.directionBT
+        flowchart.linkDottedArrow("earth", "moon", formatting.unicode "🚀", 6)
+        flowchart.nodeRound "moon"
+        flowchart.subgraph ("atmosphere", [
+            flowchart.nodeCircle "earth"
+        ])
+    ])
+])
 |> siren.write
 """
     let mermaidMd = 
-        diagram.flowchart.bt [
-            subgraph.subgraph "space" [
-                direction.bt
-                link.dottedArrow(node.simple "earth", node.simple "moon", formatting.unicode "🚀", 6)
-                node.round "moon" "moon"
-                subgraph.subgraph "atmosphere" [
-                    node.circle "earth" "earth"
-                ]
-            ]
-        ]
+        siren.flowchart(direction.bt, [
+            flowchart.subgraph ("space", [
+                flowchart.directionBT
+                flowchart.linkDottedArrow("earth", "moon", formatting.unicode "🚀", 6)
+                flowchart.nodeRound "moon"
+                flowchart.subgraph ("atmosphere", [
+                    flowchart.nodeCircle "earth"
+                ])
+            ])
+        ])
         |> siren.write
     let replacement = $"""
 ```fsharp

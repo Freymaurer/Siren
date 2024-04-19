@@ -7,13 +7,22 @@
 
   <ItemGroup>
     <Compile Include="Util.fs" />
-    <Compile Include="Tests.Line.fs" />
-    <Compile Include="Tests.Comment.fs" />
-    <Compile Include="Tests.Node.fs" />
-    <Compile Include="Tests.Connection.fs" />
-    <Compile Include="Tests.Subgraph.fs" />
+    <Compile Include="Tests.Yaml.fs" />
     <Compile Include="Tests.Flowchart.fs" />
+    <Compile Include="Tests.ClassDiagram.fs" />
     <Compile Include="Tests.SequenceDiagram.fs" />
+    <Compile Include="Tests.StateDiagram.fs" />
+    <Compile Include="Tests.EntityRelationshipDiagram.fs" />
+    <Compile Include="Tests.Journey.fs" />
+    <Compile Include="Tests.Gantt.fs" />
+    <Compile Include="Tests.PieChart.fs" />
+    <Compile Include="Tests.Quadrant.fs" />
+    <Compile Include="Tests.RequirementDiagram.fs" />
+    <Compile Include="Tests.Git.fs" />
+    <Compile Include="Tests.Mindmap.fs" />
+    <Compile Include="Tests.Timeline.fs" />
+    <Compile Include="Tests.Sankey.fs" />
+    <Compile Include="Tests.XYChart.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
 

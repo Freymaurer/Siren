@@ -11,28 +11,28 @@ describe('ensure testing', function () {
 describe('syntax', function(){
     it('MoonRocketExample', function(){
         const e = 
-          siren.diagram.flowchart.bt([
-              siren.subgraph.subgraph("space",[
-                  siren.direction.bt,
-                  siren.link.dottedArrow(
-                    siren.node.simple("earth"), 
-                    siren.node.simple("moon"), 
+          siren.diagram.flowchart(siren.flowchartDirection.bt, [
+              siren.flowchart.subgraph("space",[
+                  siren.flowchart.directionBT,
+                  siren.flowchart.linkDottedArrow(
+                    "earth", 
+                    "moon", 
                     siren.formatting.unicode("🚀"),
                     6
                   ),
-                  siren.node.round("moon", "moon"),
-                  siren.subgraph.subgraph("atmosphere",[
-                    siren.node.circle("earth", "earth")
+                  siren.flowchart.nodeRound("moon"),
+                  siren.flowchart.subgraph("atmosphere",[
+                    siren.flowchart.nodeCircle("earth")
                   ])
               ])
           ]);
         const actual = siren.siren.write(e);
         const expected = `flowchart BT
-    subgraph space[space]
+    subgraph space
         direction BT
-        earth[earth]-......->|"🚀"|moon[moon]
+        earth-......->|"🚀"|moon
         moon(moon)
-        subgraph atmosphere[atmosphere]
+        subgraph atmosphere
             earth((earth))
         end
     end

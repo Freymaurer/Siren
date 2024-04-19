@@ -2,302 +2,389 @@
 
 open Fable.Core
 
-[<RequireQualifiedAccess>]
-type NodeTypes =
-    | Id
-    | Default
-    | Round
-    | Stadium
-    | Subroutine
-    | Cylindrical 
-    | Circle 
-    | Asymmetric
-    | Rhombus
-    | Hexagon
-    | Parallelogram
-    | ParallelogramAlt
-    | Trapezoid
-    | TrapezoidAlt
-    | DoubleCircle
-    | Class
+module Option =
+
+    let formatString (format: string -> string) (str: string option) =
+        match str with |None -> "" | Some str -> format str
+
+    let defaultBind (mapping: 'A -> 'T) (default': 'T) (opt: 'A option) =
+        match opt with
+        | Some a -> mapping a
+        | None -> default'
 
 [<RequireQualifiedAccess>]
-type NotePosition =
-| RightOf
-| LeftOf
-| Over
-    member this.toFormatString() =
-        match this with
-        | RightOf -> "right of"
-        | LeftOf -> "left of"
-        | Over -> "over"
+module Yaml =
 
-[<RequireQualifiedAccess>]
-type SubgraphType =
-| Subgraph
-| Box of color: string option
-| Loop 
-| Alt
-| Else
-| Opt
-| Par
-| And
-| Critical
-| Option
-| Break
-| Rect
-    member this.toFormatString() =
-        let start =
-            match this with
-            | Subgraph -> "subgraph"
-            | Box color -> if color.IsSome then sprintf "box %s" color.Value else "box"
-            | Loop -> "loop"
-            | Alt -> "alt"
-            | Else -> "else"
-            | Opt -> "opt"
-            | Par -> "par"
-            | And -> "and"
-            | Critical -> "critical"
-            | Option -> "option"
-            | Break -> "break"
-            | Rect -> "rect"
-        let end_ = "end"
-        start, end_
-
-[<RequireQualifiedAccess>]
-type LinkTypes =
-    | Arrow         of text: string option * addlength: int option
-    | Open          of text: string option * addlength: int option
-    | Dotted        of text: string option * addlength: int option
-    | DottedArrow   of text: string option * addlength: int option
-    | Thick         of text: string option * addlength: int option
-    | ThickArrow    of text: string option * addlength: int option
-    | Invisible     of text: string option * addlength: int option
-    | CircleEdge    of text: string option * addlength: int option
-    | CrossEdge     of text: string option * addlength: int option
-    | ArrowDouble   of text: string option * addlength: int option
-    | CircleDouble  of text: string option * addlength: int option
-    | CrossDouble   of text: string option * addlength: int option
-
-    static member appendTextOption (txt: string option) (arrow:string) =
-        if txt.IsSome then
-            sprintf "%s|%s|" arrow txt.Value
-        else
-            arrow
-
-    member this.AddedLengthLinker (addedLength: int option) =
-        let addedLength = defaultArg addedLength 1
-        if addedLength < 1 then failwithf "Minimum length of a link was set below 1: %i" addedLength
-        let char = this.GetAddLengthChar()
-        String.init addedLength (fun i -> char)
-
-    member private this.GetAddLengthChar() =
-        match this with
-        | Open _ | Arrow _  | CircleEdge _ | CrossEdge _ | ArrowDouble _ | CircleDouble _ | CrossDouble _ -> "-"
-        | Dotted _ | DottedArrow _ -> "."
-        | Thick _ | ThickArrow _ -> "="
-        | Invisible _ -> "~"
-
-[<RequireQualifiedAccess>]
-type MessageTypes =
-    | Solid
-    | Dotted
-    | Arrow
-    | DottedArrow
-    | CrossEdge
-    | DottedCrossEdge
-    | OpenArrow
-    | DottedOpenArrow
-
-[<RequireQualifiedAccess>]
-type RelationshipTypes =
-    | Inheritance
-    | Composition
-    | Aggregation
-    | Association
-    | Solid // solid
-    | Dependency
-    | Realization
-    | Dashed
-    | Custom of string
-
-[<RequireQualifiedAccess>]
-type target =
-    | _self
-    | _blank
-    | _parent
-    | _top
-
-    override this.ToString() =
-        match this with
-        | target._self     -> "_self"
-        | target._blank    -> "_blank"
-        | target._parent   -> "_parent"
-        | target._top      -> "_top"
-
-type ClickTypes =
-    | Href of url:string * target: target option
-    | Callback of callbackName: string
-
-module rec Types =
-
-    type Config = {
-        WhiteSpaces: int
-        Level: int
-    } with
-        static member init(?whitespaces) = {
-            WhiteSpaces = defaultArg whitespaces 4
-            Level = 0
-        }
-
-        member this.GetWhiteSpaceString() =
-            String.init (this.WhiteSpaces * this.Level) (fun _ -> " ")
-
-        member this.GetIncreasedLevel() = 
-            {this with Level = this.Level + 1}
-
-    type Node = {
-        Id: string
-        Name: string
-        NodeType: NodeTypes
-    } with
-        static member create (id, ?name, ?t) = {
-            Id = id
-            Name = defaultArg name id
-            NodeType = defaultArg t NodeTypes.Default
-        }
-
-    type Connection = {
-        Node1: Element
-        Node2: Element
-        LinkType: LinkTypes
-    } with
-        static member create (node1, node2, t) = {
-            Node1 = node1
-            Node2 = node2
-            LinkType = t
-        }
-
-    type Message = {
-        Id1: Element
-        Id2: Element
-        MessageType: MessageTypes
-        Message: string
-        // if None then ignore, if true then "activate", if false then "deactivate"
-        Active: bool option
-    } with
-        static member create(id1, id2, mt, msg, ?active) = {
-            Id1 = id1
-            Id2 = id2
-            MessageType = mt
-            Message = msg
-            Active = active
-        }
-
-    type Relationship = {
-        Id1: Element
-        Id2: Element
-        RelationshipType: RelationshipTypes
-        Label: string option
-    } with
-        static member create(id1, id2, rt, ?label) = {
-            Id1 = id1
-            Id2 = id2
-            RelationshipType = rt
-            Label = label
-        }
-
-    type Click = {
-        NodeId: string
-        Type: ClickTypes
-        Tooltip: string option
-    } with
-        static member create (id, t, ?tooltip) = {
-            NodeId = id
-            Type = t
-            Tooltip = tooltip
-        }
-
-    type Subgraph = {
-        Type: SubgraphType
-        Id: string
-        Name: string option
-        Children: Children
-    } with
-        static member create (type_, id, name, children) = 
-            {
-                Type = type_
-                Id = id
-                Name = name
-                Children = children
-            }
-
-    type Children = Element list
-
-    and Element =
-        | Empty
-        | Raw of string
-        | Comment of string
-        | KeyValue of key: string * value: string
-        | Click of Click
-        | Message of Message
-        | Relationship of Relationship
-        | Node of Node
-        | Connection of Connection
-        | Subgraph of Subgraph
-        | SubgraphChain of Subgraph list
-        | Graph of name:string * Children
-
-        member this.GetId() =
-            match this with 
-            | Empty -> failwith "Cannot get ID from `Empty` Element."
-            | Raw _ -> failwith "Cannot get ID from `Raw` Element."
-            | Comment _ -> failwith "Cannot get ID from `Comment` Element."
-            | KeyValue _ -> failwith "Cannot get ID from `KeyValue` Element."
-            | Click c -> c.NodeId
-            | Node n -> n.Id
-            | Message _ -> failwith "Cannot get ID from `Message` Element."
-            | Relationship _ -> failwith "Cannot get ID from `Relationship` Element."
-            | Connection _ -> failwith "Cannot get ID from `Connection` Element."
-            | Subgraph sg -> sg.Id
-            | SubgraphChain _ -> failwith "Cannot get ID from `SubgraphChain` Element."
-            | Graph _ -> failwith "Cannot get ID from `Graph` Element."
-
-module rec Formatter =
-    open Types
     open System.Text
 
-    let formatSequenceDiagramAlias (id: string) (alias: string option) = if alias.IsSome then sprintf "%s as %s" id alias.Value else id
+    type Config = {
+        Whitespace: int
+        Level: int
+    } with
+        static member init(?whitespace) : Config = {
+            Whitespace = defaultArg whitespace 4
+            Level = 0
+        }
+        member this.WhitespaceString =
+            String.init (this.Level*this.Whitespace) (fun _ -> " ")
+    
+    type AST =
+        | Root of AST list
+        | Level of AST list
+        | Line of string
 
-    let writeComment (txt: string) = sprintf "%%%% %s" txt
-    let writeRaw (txt: string) = txt
-    let writeKeyValue (key: string) (v: string) = sprintf "%s %s" key v
-    let writeClick (click: Click) =
+        static member write(rootElement:AST, ?fconfig: Config -> Config) =
+            let config = Config.init() |> fun config -> if fconfig.IsSome then fconfig.Value config else config
+            let sb = new StringBuilder()
+            let rec loop (current: AST) (sb: StringBuilder) (config: Config) =
+                match current with
+                | Line line ->
+                    sb.AppendLine(config.WhitespaceString+line) |> ignore
+                | Level children ->
+                    let nextConfig = {config with Level = config.Level + 1}
+                    for child in children do
+                        loop child sb nextConfig
+                | Root children ->
+                    for child in children do
+                        loop child sb config
+            loop rootElement sb config
+            sb.ToString()
+            
+
+    let line (line:string) = Line line
+
+    let level (children: #seq<AST>) = List.ofSeq children |> Level 
+
+    let root (children: #seq<AST>) = List.ofSeq children |> Root
+
+    let write rootElement = AST.write(rootElement)
+
+module Types =
+
+    type Direction = 
+        | TB
+        | TD
+        | BT
+        | RL
+        | LR
+        | Custom of string 
+
+        override this.ToString() =
+            match this with
+            | TB -> "TB"
+            | TD -> "TD"
+            | BT -> "BT"
+            | RL -> "RL"
+            | LR -> "LR"
+            | Custom str -> str
+
+    type IYamlConvertible =
+        abstract ToYamlAst: unit -> Yaml.AST list
+
+    let writeYamlASTBasicWrapper opener closer children =
         [
-            "click"
-            click.NodeId
-            match click.Type with
-            | Href (url, None) ->
-                "href"
-                url
-            | Href (url, Some target) ->
-                "href"
-                url
-                target.ToString()
-            | Callback callback ->
-                "call"
-                callback
-            if click.Tooltip.IsSome then
-                click.Tooltip.Value
+            Yaml.line opener
+            Yaml.level [
+                for child in children do 
+                    yield! child :> IYamlConvertible |> _.ToYamlAst()
+            ]
+            if closer <> "" then Yaml.line closer
         ]
-        |> String.concat " "
 
-    let formatMinimalNamedNode (id:string) (name:string) = $"{id}[{name}]"
+    let writeYamlDiagramRoot opener children =
+        Yaml.root [
+            Yaml.line opener
+            Yaml.level [
+                for child in children do
+                    yield! child :> IYamlConvertible |> _.ToYamlAst()
+            ]
+        ]
 
-    let internal formatNodeType (nodetype: NodeTypes) =
-        let this = nodetype
-        match this with
-        | NodeTypes.Id -> fun id _ -> id
+    type FlowchartElement =
+        | FlowchartElement of string
+        | FlowchartSubgraph of opener:string * closer: string * FlowchartElement list
+        interface IYamlConvertible with
+            
+            member this.ToYamlAst() = 
+                match this with
+                | FlowchartElement line -> [Yaml.line line]
+                | FlowchartSubgraph (opener, closer, children) ->
+                    writeYamlASTBasicWrapper opener closer children
+
+    type SequenceElement = 
+        | SequenceElement of string
+        | SequenceWrapper of opener: string * closer: string * SequenceElement list
+        | SequenceWrapperList of SequenceElement list
+
+        interface IYamlConvertible with
+            member this.ToYamlAst() = 
+                match this with
+                | SequenceElement line -> [Yaml.line line]
+                | SequenceWrapper (opener, closer, children) ->
+                    writeYamlASTBasicWrapper opener closer children
+                | SequenceWrapperList children ->
+                    [
+                        for child in children do
+                            yield! child :> IYamlConvertible |> _.ToYamlAst()
+                    ]
+
+    type ClassDiagramElement = 
+        | ClassDiagramElement of string
+        | ClassDiagramWrapper of opener: string * closer: string * ClassDiagramElement list
+        | ClassDiagramNone
+
+        interface IYamlConvertible with
+            
+            member this.ToYamlAst() = 
+                match this with
+                | ClassDiagramElement line -> [Yaml.line line]
+                | ClassDiagramWrapper (opener, closer, children) ->
+                    writeYamlASTBasicWrapper opener closer children
+                | ClassDiagramNone -> []
+
+    type StateDiagramElement =
+        | StateDiagramElement of string
+        | StateDiagramWrapper of opener: string * closer: string * StateDiagramElement list
+        interface IYamlConvertible with
+            
+            member this.ToYamlAst() = 
+                match this with
+                | StateDiagramElement line -> [Yaml.line line]
+                | StateDiagramWrapper (opener, closer, children) ->
+                    writeYamlASTBasicWrapper opener closer children
+
+    type ERDiagramElement =
+        | ERDiagramElement of string
+        | ERDiagramWrapper of opener: string * closer: string * ERDiagramElement list
+        interface IYamlConvertible with
+            
+            member this.ToYamlAst() = 
+                match this with
+                | ERDiagramElement line -> [Yaml.line line]
+                | ERDiagramWrapper (opener, closer, children) ->
+                    writeYamlASTBasicWrapper opener closer children
+
+    type JourneyElement =
+        | JourneyElement of string
+        interface IYamlConvertible with
+
+            member this.ToYamlAst() = 
+                match this with
+                | JourneyElement line -> [Yaml.line line]
+
+    type GanttElement =
+        | GanttElement of string
+        interface IYamlConvertible with
+            
+            member this.ToYamlAst() = 
+                match this with
+                | GanttElement line -> [Yaml.line line]
+
+    type PieChartElement =
+        | PieChartElement of string
+        interface IYamlConvertible with
+            
+            member this.ToYamlAst() = 
+                match this with
+                | PieChartElement line -> [Yaml.line line]
+
+    type QuadrantElement =
+        | QuadrantElement of string
+        interface IYamlConvertible with
+            
+            member this.ToYamlAst() = 
+                match this with
+                | QuadrantElement line -> [Yaml.line line]
+
+    type RequirementDiagramElement =
+        | RequirementDiagramElement of string
+        | RequirementDiagramWrapper of opener:string * closer:string * RequirementDiagramElement list
+        interface IYamlConvertible with
+            
+            member this.ToYamlAst() = 
+                match this with
+                | RequirementDiagramElement line -> [Yaml.line line]
+                | RequirementDiagramWrapper (opener, closer, children) ->
+                    writeYamlASTBasicWrapper opener closer children
+        
+    type GitGraphElement =
+        | GitGraphElement of string
+        | GitGraphWrapper of opener:string * closer:string * GitGraphElement list
+        interface IYamlConvertible with
+            
+            member this.ToYamlAst() = 
+                match this with
+                | GitGraphElement line -> [Yaml.line line]
+                | GitGraphWrapper (opener, closer, children) ->
+                    writeYamlASTBasicWrapper opener closer children
+
+    type MindmapElement =
+        | MindmapElement of string
+        | MindmapWrapper of opener:string * closer:string * MindmapElement list
+        interface IYamlConvertible with
+            
+            member this.ToYamlAst() = 
+                match this with
+                | MindmapElement line -> [Yaml.line line]
+                | MindmapWrapper (opener, closer, children) ->
+                    writeYamlASTBasicWrapper opener closer children
+
+    type TimelineElement =
+        | TimelineElement of string
+        | TimelineWrapper of opener:string * closer:string * TimelineElement list
+        interface IYamlConvertible with
+            
+            member this.ToYamlAst() = 
+                match this with
+                | TimelineElement line -> [Yaml.line line]
+                | TimelineWrapper (opener, closer, children) ->
+                    writeYamlASTBasicWrapper opener closer children
+
+    type SankeyElement =
+        | SankeyElement of string
+        | SankeyElementList of SankeyElement list
+        interface IYamlConvertible with
+            
+            member this.ToYamlAst() = 
+                match this with
+                | SankeyElement line -> [Yaml.line line]
+                | SankeyElementList elements -> [
+                    for ele in elements do 
+                        yield! ele :> IYamlConvertible |> _.ToYamlAst()
+                ]
+
+    type XYChartElement =
+        | XYChartElement of string
+        interface IYamlConvertible with
+            
+            member this.ToYamlAst() = 
+                match this with
+                | XYChartElement line -> [Yaml.line line]
+
+    [<RequireQualifiedAccess>]
+    type SirenElement =
+    | Flowchart of Direction * FlowchartElement list 
+    | Sequence of SequenceElement list
+    | Class of ClassDiagramElement list
+    | State of StateDiagramElement list
+    | StateV2 of StateDiagramElement list
+    | ERDiagram of ERDiagramElement list
+    | Journey of JourneyElement list
+    | Gantt of GanttElement list
+    | PieChart of PieChartElement list
+    | Quadrant of QuadrantElement list
+    | RequirementDiagram of RequirementDiagramElement list
+    | GitGraph of GitGraphElement list
+    | Mindmap of MindmapElement list
+    | Timeline of TimelineElement list
+    | Sankey of SankeyElement list
+    | XYChart of isHorizontal:bool * XYChartElement list
+
+open Types
+
+module Generic =
+
+    type NotePosition =
+    | Over
+    | RightOf
+    | LeftOf
+        member this.ToFormatString() =
+            match this with
+            | Over      -> "over"
+            | RightOf   -> "right of"
+            | LeftOf    -> "left of"
+    
+    let formatComment (txt: string) = sprintf "%%%% %s" txt
+
+    let formatDirection (direction: Direction) =
+        sprintf "direction %s" (direction.ToString())
+
+    let formatClickHref id url (tooltip:string option) =
+        let tooltip = tooltip |> Option.map (fun s -> sprintf " \"%s\"" s) |> Option.defaultValue ""
+        sprintf """click %s href "%s"%s""" id url tooltip
+
+    let formatNote (id) (position: NotePosition option) (msg: string) =
+        let position = defaultArg position NotePosition.RightOf |> _.ToFormatString()
+        sprintf "note %s %s : %s" position id msg
+
+[<AttachMembers>]
+type formatting =
+    //static member escaped (txt: string) = // idea for escaping for example quotes
+    static member unicode (txt: string) = string '"' + txt + string '"'
+    static member markdown (txt: string) = "\"`" + txt + "`\""
+    static member comment (txt: string) = Generic.formatComment txt
+
+[<AttachMembers>]
+type direction =
+    static member tb = Direction.TB
+    static member td = Direction.TD
+    static member bt = Direction.BT
+    static member rl = Direction.RL
+    static member lr = Direction.LR
+    static member topToBottom = direction.tb
+    static member topDown = direction.td
+    static member bottomToTop = direction.bt
+    static member rightToLeft = direction.rl
+    static member leftToRight = direction.lr
+    static member custom (str: string) = Direction.Custom str
+
+module Flowchart =
+
+    [<RequireQualifiedAccess>]
+    type NodeTypes =
+        | Default
+        | Round
+        | Stadium
+        | Subroutine
+        | Cylindrical 
+        | Circle 
+        | Asymmetric
+        | Rhombus
+        | Hexagon
+        | Parallelogram
+        | ParallelogramAlt
+        | Trapezoid
+        | TrapezoidAlt
+        | DoubleCircle
+
+    [<RequireQualifiedAccess>]
+    type LinkTypes =
+        | Arrow
+        | Open
+        | Dotted
+        | DottedArrow
+        | Thick
+        | ThickArrow
+        | Invisible
+        | CircleEdge
+        | CrossEdge
+        | ArrowDouble
+        | CircleDouble
+        | CrossDouble
+
+        static member appendTextOption (txt: string option) (arrow:string) =
+            if txt.IsSome then
+                sprintf "%s|%s|" arrow txt.Value
+            else
+                arrow
+
+        member this.AddedLengthLinker (addedLength: int option) =
+            let addedLength = defaultArg addedLength 1
+            if addedLength < 1 then failwithf "Minimum length of a link was set below 1: %i" addedLength
+            let char = this.GetAddLengthChar()
+            String.init addedLength (fun i -> char)
+
+        member private this.GetAddLengthChar() =
+            match this with
+            | Open | Arrow | CircleEdge | CrossEdge | ArrowDouble | CircleDouble | CrossDouble -> "-"
+            | Dotted | DottedArrow -> "."
+            | Thick | ThickArrow -> "="
+            | Invisible -> "~"
+
+    let private formatMinimalNamedNode (id:string) (name:string) = $"{id}[{name}]"
+
+    let private nodeTypeToFormatter (nodetype: NodeTypes) =
+        match nodetype with
         | NodeTypes.Default -> fun id name -> formatMinimalNamedNode id name
         | NodeTypes.Round -> fun id name -> $"{id}({name})"
         | NodeTypes.Stadium -> fun id name -> $"{id}([{name}])"
@@ -313,11 +400,94 @@ module rec Formatter =
         | NodeTypes.TrapezoidAlt -> fun id name -> sprintf "%s[\%s/]" id name
         | NodeTypes.DoubleCircle -> fun id name -> sprintf "%s(((%s)))" id name
 
-    let writeNode (node: Node) =
-        let formatter = formatNodeType node.NodeType
-        formatter node.Id node.Name
+    let formatNode (id: string) (name: string option) (shape: NodeTypes) =
+        let formatter = nodeTypeToFormatter shape
+        let name = defaultArg name id
+        formatter id name
 
-    let internal formatMessageType (msgType: MessageTypes) =
+    let private formatLinkType (link: LinkTypes) (msg: string option) (addedLength: int option) =
+        match link with
+        | LinkTypes.Arrow -> $"-{link.AddedLengthLinker(addedLength)}>" 
+        | LinkTypes.Open -> $"-{link.AddedLengthLinker(addedLength)}-"
+        | LinkTypes.Dotted -> $"-{link.AddedLengthLinker(addedLength)}-"
+        | LinkTypes.DottedArrow -> $"-{link.AddedLengthLinker(addedLength)}->"
+        | LinkTypes.Thick -> $"={link.AddedLengthLinker(addedLength)}="
+        | LinkTypes.ThickArrow -> $"={link.AddedLengthLinker(addedLength)}>"
+        | LinkTypes.Invisible -> $"~{link.AddedLengthLinker(addedLength)}~"
+        | LinkTypes.CircleEdge -> $"-{link.AddedLengthLinker(addedLength)}o"
+        | LinkTypes.CrossEdge -> $"-{link.AddedLengthLinker(addedLength)}x"
+        | LinkTypes.ArrowDouble -> $"<-{link.AddedLengthLinker(addedLength)}>"
+        | LinkTypes.CircleDouble -> $"o-{link.AddedLengthLinker(addedLength)}o"
+        | LinkTypes.CrossDouble -> $"x-{link.AddedLengthLinker(addedLength)}x"
+        |> LinkTypes.appendTextOption msg
+
+    let formatLink (n1: string) (n2: string) (link: LinkTypes) (msg: string option) (addedLength: int option) =
+        let link = formatLinkType link msg addedLength
+        n1 + link + n2
+
+    let formatSubgraph (id) (name: string option) = 
+        let nameStr = if name.IsSome then sprintf "[%s]" name.Value else ""
+        let opener = sprintf "subgraph %s%s" id nameStr 
+        opener
+
+
+
+[<AttachMembers>]
+type flowchart =
+    static member raw (txt: string) = FlowchartElement txt
+    static member id (txt: string) = FlowchartElement txt
+    static member node (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name Flowchart.NodeTypes.Default |> FlowchartElement
+    static member nodeRound (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name Flowchart.NodeTypes.Round |> FlowchartElement
+    static member nodeStadium (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name Flowchart.NodeTypes.Stadium |> FlowchartElement
+    static member nodeSubroutine (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name Flowchart.NodeTypes.Subroutine |> FlowchartElement
+    static member nodeCylindrical  (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name Flowchart.NodeTypes.Cylindrical |> FlowchartElement
+    static member nodeCircle (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name Flowchart.NodeTypes.Circle |> FlowchartElement
+    static member nodeAsymmetric (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name Flowchart.NodeTypes.Asymmetric |> FlowchartElement
+    static member nodeRhombus (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name Flowchart.NodeTypes.Rhombus |> FlowchartElement
+    static member nodeHexagon (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name Flowchart.NodeTypes.Hexagon |> FlowchartElement
+    static member nodeParallelogram (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name Flowchart.NodeTypes.Parallelogram |> FlowchartElement
+    static member nodeParallelogramAlt (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name Flowchart.NodeTypes.ParallelogramAlt |> FlowchartElement
+    static member nodeTrapezoid (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name Flowchart.NodeTypes.Trapezoid |> FlowchartElement
+    static member nodeTrapezoidAlt (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name Flowchart.NodeTypes.TrapezoidAlt |> FlowchartElement
+    static member nodeDoubleCircle (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name Flowchart.NodeTypes.DoubleCircle |> FlowchartElement
+    static member linkArrow (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 Flowchart.LinkTypes.Arrow message addedLength |> FlowchartElement
+    static member linkArrowDouble (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 Flowchart.LinkTypes.ArrowDouble message addedLength |> FlowchartElement
+    static member linkOpen (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 Flowchart.LinkTypes.Open message addedLength |> FlowchartElement
+    static member linkDotted (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 Flowchart.LinkTypes.Dotted message addedLength |> FlowchartElement
+    static member linkDottedArrow (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 Flowchart.LinkTypes.DottedArrow message addedLength |> FlowchartElement
+    static member linkThick (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 Flowchart.LinkTypes.Thick message addedLength |> FlowchartElement
+    static member linkThickArrow (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 Flowchart.LinkTypes.ThickArrow message addedLength |> FlowchartElement
+    static member linkInvisible (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 Flowchart.LinkTypes.Invisible message addedLength |> FlowchartElement
+    static member linkCircleEdge (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 Flowchart.LinkTypes.CircleEdge message addedLength |> FlowchartElement
+    static member linkCircleDouble (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 Flowchart.LinkTypes.CircleDouble message addedLength |> FlowchartElement
+    static member linkCrossEdge (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 Flowchart.LinkTypes.CrossEdge message addedLength |> FlowchartElement
+    static member linkCrossDouble (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 Flowchart.LinkTypes.CrossDouble message addedLength |> FlowchartElement
+    static member direction (direction: Direction) = Generic.formatDirection direction |> FlowchartElement
+    static member directionTB = Generic.formatDirection Direction.TB |> FlowchartElement
+    static member directionTD = Generic.formatDirection Direction.TD |> FlowchartElement
+    static member directionBT = Generic.formatDirection Direction.BT |> FlowchartElement
+    static member directionRL = Generic.formatDirection Direction.RL |> FlowchartElement
+    static member directionLR = Generic.formatDirection Direction.LR |> FlowchartElement
+    static member subgraphNamed (id: string, name: string, children: #seq<FlowchartElement>) = FlowchartSubgraph (Flowchart.formatSubgraph id (Some name),"end",List.ofSeq children)
+    static member subgraph (id: string, children: #seq<FlowchartElement>) = FlowchartSubgraph (Flowchart.formatSubgraph id None ,"end",List.ofSeq children)
+    static member clickHref(id: string, url: string, ?tooltip: string) = Generic.formatClickHref id url tooltip |> FlowchartElement
+    static member comment(txt:string) = Generic.formatComment txt |> FlowchartElement
+    //static member clickCallback() = failwith "TODO"
+
+module Sequence =
+
+    [<RequireQualifiedAccess>]
+    type MessageTypes =
+        | Solid
+        | Dotted
+        | Arrow
+        | DottedArrow
+        | CrossEdge
+        | DottedCrossEdge
+        | OpenArrow
+        | DottedOpenArrow
+
+    let private formatMessageType (msgType: MessageTypes) =
         match msgType with
         | MessageTypes.Solid             -> "->"
         | MessageTypes.Dotted            -> "-->"
@@ -328,371 +498,974 @@ module rec Formatter =
         | MessageTypes.OpenArrow         -> "-)"
         | MessageTypes.DottedOpenArrow   -> "--)"
 
-    let internal formatLinkType (link: LinkTypes) =
-        let this = link
-        match this with
-        | LinkTypes.Arrow (txt, l) -> txt, $"-{this.AddedLengthLinker(l)}>" 
-        | LinkTypes.Open (txt, l) -> txt, $"-{this.AddedLengthLinker(l)}-"
-        | LinkTypes.Dotted (txt, l) -> txt, $"-{this.AddedLengthLinker(l)}-"
-        | LinkTypes.DottedArrow (txt, l) -> txt, $"-{this.AddedLengthLinker(l)}->"
-        | LinkTypes.Thick (txt, l) -> txt, $"={this.AddedLengthLinker(l)}="
-        | LinkTypes.ThickArrow (txt, l) -> txt, $"={this.AddedLengthLinker(l)}>"
-        | LinkTypes.Invisible (txt, l) -> txt, $"~{this.AddedLengthLinker(l)}~"
-        | LinkTypes.CircleEdge (txt, l) -> txt, $"-{this.AddedLengthLinker(l)}o"
-        | LinkTypes.CrossEdge (txt, l) -> txt, $"-{this.AddedLengthLinker(l)}x"
-        | LinkTypes.ArrowDouble (txt, l) -> txt, $"<-{this.AddedLengthLinker(l)}>"
-        | LinkTypes.CircleDouble (txt, l) -> txt, $"o-{this.AddedLengthLinker(l)}o"
-        | LinkTypes.CrossDouble (txt, l) -> txt, $"x-{this.AddedLengthLinker(l)}x"
-        ||> LinkTypes.appendTextOption
+    let formatMessage a1 a2 type' msg (activate: bool option) =
+        let active = match activate with |None -> "" | Some true -> "+"| Some false -> "-"
+        sprintf "%s%s%s%s: %s" a1 (formatMessageType type') active a2 msg
 
-    let internal formatRelationshipType (rs: RelationshipTypes) =
-        match rs with
-        | RelationshipTypes.Inheritance     -> "--|>"
-        | RelationshipTypes.Composition     -> "--*"
-        | RelationshipTypes.Aggregation     -> "--o"
-        | RelationshipTypes.Association     -> "-->"
-        | RelationshipTypes.Solid           -> "--"
-        | RelationshipTypes.Dependency      -> "..>"
-        | RelationshipTypes.Realization     -> "..|>"
-        | RelationshipTypes.Dashed          -> ".."
-        | RelationshipTypes.Custom str      -> str
+    let formatParticipant (name) (alias: string option) =
+        let alias = alias |> Option.formatString (fun s -> sprintf " as %s" s) 
+        sprintf "participant %s%s" name alias
 
-    let writeMessage (msg: Message) =
-        let active = match msg.Active with |None -> "" | Some true -> "+"| Some false -> "-"
-        sprintf "%s%s%s%s: %s" (msg.Id1.GetId()) (formatMessageType msg.MessageType) active (msg.Id2.GetId()) msg.Message
+    let formatActor (name) (alias: string option) =
+        let alias = alias |> Option.formatString (fun s -> sprintf " as %s" s) 
+        sprintf "actor %s%s" name alias
 
-    let writeRelationship (rs:Relationship) =
-        let label = rs.Label |> Option.map (fun label -> sprintf " : %s" label)
-        sprintf "%s %s %s" (rs.Id1.GetId()) (formatRelationshipType rs.RelationshipType) (rs.Id2.GetId())
-        |> fun b -> if label.IsSome then b + label.Value else b
+    let formatCreate (formatter: string -> string option -> string) name alias =
+        sprintf "create %s" (formatter name alias)
 
-    let formatConnectionElement (e:Element) =
-        match e with
-        | Element.Node node -> writeNode node
-        | Element.Subgraph {Id = id} -> id
-        | _ -> failwith "todo"
+    let formatDestroy (id: string) = sprintf "destroy %s" id
 
+    let formatBox name (color: string option) = 
+        let color = color |> Option.formatString (sprintf "%s ")
+        sprintf "box %s%s" color name
 
-    let writeConnection (connection: Connection) =
-        let link = formatLinkType connection.LinkType
-        let n1 = formatConnectionElement connection.Node1
-        let n2 = formatConnectionElement connection.Node2
-        n1 + link + n2 
+    let formatNoteSpanning id1 id2 (position: Generic.NotePosition option) (msg: string) =
+        let position = defaultArg position Generic.NotePosition.RightOf |> _.ToFormatString()
+        sprintf "note %s %s,%s : %s" position id1 id2 msg
 
-    let writeSubgraph (subgraph: Subgraph) =
-        let prefix, suffix = subgraph.Type.toFormatString()
-        let start =
-            if subgraph.Name.IsSome then
-                sprintf "%s %s[%s]" prefix subgraph.Id subgraph.Name.Value
-            else
-                sprintf "%s %s" prefix subgraph.Id 
-        start, suffix
-
-    let rec writeElement (e:Element) (sb: StringBuilder) (config: Config) = 
-        let whitespaceString = config.GetWhiteSpaceString()
-        sb.Append(whitespaceString) |> ignore
-        match e with
-        | Element.Empty -> sb
-        | Element.Raw txt -> sb.AppendLine(writeRaw txt)
-        | Element.Comment txt -> sb.AppendLine(writeComment txt)
-        | Element.KeyValue (k,v) -> sb.AppendLine(writeKeyValue k v)
-        | Element.Click c -> sb.AppendLine(writeClick c)
-        | Element.Node n -> sb.AppendLine(writeNode n)
-        | Element.Connection c -> 
-            let str = writeConnection c
-            sb.AppendLine(str)
-        | Element.Message msg ->
-            let str = writeMessage msg
-            sb.AppendLine(str)
-        | Element.Relationship rt ->
-            let str = writeRelationship rt
-            sb.AppendLine(str)
-        | Element.Subgraph sg ->
-            let prefix, suffix = writeSubgraph sg
-            sb.AppendLine(prefix) |> ignore
-            let nextConfig = config.GetIncreasedLevel()
-            for child in sg.Children do
-                let _: StringBuilder = writeElement child sb nextConfig
-                ()
-            sb.Append(whitespaceString) |> ignore
-            sb.AppendLine(suffix)
-        | Element.SubgraphChain subgraphs ->
-            for subgraph in subgraphs do
-                let prefix, _ = writeSubgraph subgraph
-                sb.AppendLine(prefix) |> ignore
-                let nextConfig = config.GetIncreasedLevel()
-                for child in subgraph.Children do
-                    let _: StringBuilder = writeElement child sb nextConfig
-                    ()
-                sb.Append(whitespaceString) |> ignore
-            sb.AppendLine("end")
-        | Element.Graph (name, children) ->
-            let nextConfig = config.GetIncreasedLevel()
-            sb.AppendLine(name) |> ignore
-            for child in children do
-                let _: StringBuilder = writeElement child sb nextConfig
-                ()
-            sb
-
-    let writeElementFast (e: Element) =
-        let sb = StringBuilder()
-        (writeElement e sb (Config.init())).ToString()
-
-module Interop =
-
-    open Types
-
-    let mkKeyValue (key: string) (v: string) : Element = KeyValue (key, v)
-
-    let mkLineRaw (txt: string) = Raw txt
-
-    let mkComment (comment: string) = Comment comment
-
-    let mkNote (id: string) (position: NotePosition) (msg: string) = 
-        let v = sprintf "%s %s: %s" (position.toFormatString()) (id: string) msg
-        KeyValue ("note", v)
-    
-    // link
-    let mkConnection node1 node2 linkType = Connection.create(node1, node2, linkType) |> Element.Connection
-    let mkMessage node1 node2 messageType message active = Message.create(node1, node2, messageType, message, ?active=active) |> Element.Message
-    let mkRelationship node1 node2 rt label = Relationship.create(node1, node2, rt, ?label = label) |> Element.Relationship
-
-    // nodes
-    let mkNodeId (id: string) : Element = Node <| Node.create(id, id, NodeTypes.Id)
-    let mkNodeSimple (id: string) : Element = Node <| Node.create(id)
-    let mkNode (id: string) (name: string) = Node <| Node.create (id, name)
-    let mkNodeRound (id: string) (name: string) = Node <| Node.create (id, name, NodeTypes.Round)
-    let mkNodeStadium (id: string) (name: string) = Node <| Node.create (id, name, NodeTypes.Stadium)
-    let mkNodeSubroutine (id: string) (name: string) = Node <| Node.create (id, name, NodeTypes.Subroutine)
-    let mkNodeCylindrical (id: string) (name: string) = Node <| Node.create (id, name, NodeTypes.Cylindrical)
-    let mkNodeCircle (id: string) (name: string) = Node <| Node.create (id, name, NodeTypes.Circle)
-    let mkNodeAsymmetric (id: string) (name: string) = Node <| Node.create (id, name, NodeTypes.Asymmetric)
-    let mkNodeRhombus (id: string) (name: string) = Node <| Node.create (id, name, NodeTypes.Rhombus)
-    let mkNodeHexagon (id: string) (name: string) = Node <| Node.create (id, name, NodeTypes.Hexagon)
-    let mkNodeParallelogram (id: string) (name: string) = Node <| Node.create (id, name, NodeTypes.Parallelogram)
-    let mkNodeParallelogramAlt (id: string) (name: string) = Node <| Node.create (id, name, NodeTypes.ParallelogramAlt)
-    let mkNodeTrapezoid (id: string) (name: string) = Node <| Node.create (id, name, NodeTypes.Trapezoid)
-    let mkNodeTrapezoidAlt (id: string) (name: string) = Node <| Node.create (id, name, NodeTypes.TrapezoidAlt)
-    let mkNodeDoubleCircle (id: string) (name: string) = Node <| Node.create (id, name, NodeTypes.DoubleCircle)    
-    
-    // subgraph
-    let mkSubgraph (id: string) (children: #seq<Element>) : Element = Subgraph <| Subgraph.create(SubgraphType.Subgraph, id, None, List.ofSeq children)
-    let mkSubgraphNamed (id: string) (name:string) (children: #seq<Element>) : Element = Subgraph <| Subgraph.create(SubgraphType.Subgraph, id, Some name, List.ofSeq children)
-    let mkBox (name: string) (color: string option) (children: #seq<Element>) = Subgraph <| Subgraph.create(SubgraphType.Box color, name, None, List.ofSeq children)
-    let mkLoop (name: string) (children: #seq<Element>) = Subgraph <| Subgraph.create(SubgraphType.Loop, name, None, List.ofSeq children)
-    let mkAlt (name: string) (children: #seq<Element>) = Subgraph <| Subgraph.create(SubgraphType.Alt, name, None, List.ofSeq children)
-    let mkElse (name: string) (children: #seq<Element>) = Subgraph <| Subgraph.create(SubgraphType.Else, name, None, List.ofSeq children)
-    let mkOpt (name: string) (children: #seq<Element>) = Subgraph <| Subgraph.create(SubgraphType.Opt, name, None, List.ofSeq children)
-    let mkCustomSubgraphType (type',name,id,children) = Subgraph <| Subgraph.create(type',name, id,List.ofSeq children)
-    let mkSubgraphChain (children: #seq<Element>) = 
-        [
-            for child in children do
-                match child with
-                | Subgraph s -> s
-                | anyElse -> failwithf "Error. Found non subgraph element in subgraph chain: %A" anyElse
-        ]
-        |> SubgraphChain
-
-    // click
-    let mkClickHref (nodeid: string) (url:string) (target: target option) (tooltip: string option) = 
-        let t = Href (url, target)
-        Click.create(nodeid,t,?tooltip=tooltip)
-    let mkClickCallback (nodeid: string) (callbackName: string) (tooltip: string option) = 
-        let t = Callback callbackName
-        Click.create(nodeid,t,?tooltip=tooltip)
-
-    let mkGraph (name: string) (children: #seq<Element>) : Element =
-        Graph (name, List.ofSeq children)
-
-open Types    
-
-[<AttachMembers>]
-type formatting =
-    //static member escaped (txt: string) = // idea for escaping for example quotes
-    static member unicode (txt: string) = string '"' + txt + string '"'
-    static member markdown (txt: string) = string """ "` """ + txt + string """ `" """
+    let [<Literal>] BoxCloser = "end"
 
 [<AttachMembers>]
 type notePosition =
-    static member rightOf = NotePosition.RightOf
-    static member leftOf = NotePosition.LeftOf
-    static member over = NotePosition.Over
+    static member over = Generic.NotePosition.Over
+    static member rightOf = Generic.NotePosition.RightOf
+    static member leftOf = Generic.NotePosition.LeftOf
 
 [<AttachMembers>]
-type comment =
-    static member comment (txt: string) = Interop.mkComment txt
-
-[<AttachMembers>]
-type node =
-    static member id (id: string) = Interop.mkNodeSimple id
-    static member simple (id: string) = Interop.mkNodeSimple id
-    static member node (id: string) (name: string) = Interop.mkNode id name
-    static member unicode (id: string) (name: string) = Interop.mkNode id (formatting.unicode name)
-    static member markdown (id: string) (name: string) = Interop.mkNode id (formatting.markdown name)
-    //
-    static member round (id: string) (name: string) = Interop.mkNodeRound id name
-    static member stadium (id: string) (name: string) = Interop.mkNodeStadium id name
-    static member subroutine (id: string) (name: string) = Interop.mkNodeSubroutine id name
-    static member cylindrical (id: string) (name: string) = Interop.mkNodeCylindrical id name
-    static member circle (id: string) (name: string) = Interop.mkNodeCircle id name
-    static member asymmetric (id: string) (name: string) = Interop.mkNodeAsymmetric id name
-    static member rhombus (id: string) (name: string) = Interop.mkNodeRhombus id name
-    static member hexagon (id: string) (name: string) = Interop.mkNodeHexagon id name
-    static member parallelogram (id: string) (name: string) = Interop.mkNodeParallelogram id name
-    static member parallelogramAlt (id: string) (name: string) = Interop.mkNodeParallelogramAlt id name
-    static member trapezoid (id: string) (name: string) = Interop.mkNodeTrapezoid id name
-    static member trapezoidAlt (id: string) (name: string) = Interop.mkNodeTrapezoidAlt id name
-    static member doubleCircle (id: string) (name: string) = Interop.mkNodeDoubleCircle id name
-
-[<AttachMembers>]
-type click =
-    static member href (nodeid: string, url: string, ?target, ?tooltip) = Interop.mkClickHref nodeid url target tooltip
-    static member callback (nodeid: string, callbackName: string, ?tooltip) = Interop.mkClickCallback nodeid callbackName tooltip
-
-[<AttachMembers>]
-type style =
-    static member styleString (nodeid: string) (styleString: string) = Interop.mkKeyValue "style" (nodeid + " " + styleString)
-    static member style (nodeid: string) (keyValueStyles: #seq<string*string>) = 
-        let styleString = keyValueStyles |> List.ofSeq |> List.fold (fun acc (k,v) -> acc + sprintf ",%s:%s" k v) ""
-        style.styleString nodeid styleString
-
-[<AttachMembers>]
-type direction =
-    static member custom (v: string) = Interop.mkKeyValue "direction" v
-    static member tb = direction.custom "TB"
-    static member td = direction.custom "TD"
-    static member bt = direction.custom "BT"
-    static member rl = direction.custom "RL"
-    static member lr = direction.custom "LR"
-
-[<AttachMembers>]
-type subgraph =
-    static member subgraph (id: string) (children: #seq<Element>) = Interop.mkSubgraph id children
-    static member subgraphNamed (id: string) (name:string) (children: #seq<Element>) = Interop.mkSubgraphNamed id name children
-    static member chain (children: #seq<Element>) = Interop.mkSubgraphChain children
-
-[<AttachMembers>]
-type flowchart() = 
-    member this.td (children: #seq<Element>) = Interop.mkGraph "flowchart TD" children
-    member this.tb (children: #seq<Element>) = this.td children
-    member this.lr (children: #seq<Element>) = Interop.mkGraph "flowchart LR" children
-    member this.bt (children: #seq<Element>) = Interop.mkGraph "flowchart BT" children
-    member this.rl (children: #seq<Element>) = Interop.mkGraph "flowchart RL" children
-
-[<AttachMembers>]
-type line =
-    static member raw txt = Interop.mkLineRaw txt
-
-[<AttachMembers>]
-type link =
-    static member arrow (node1,node2,?text:string,?addedLength: int) = 
-        Interop.mkConnection node1 node2 <| LinkTypes.Arrow (text, addedLength)
-    static member open_ (node1,node2,?text:string,?addedLength: int) =
-        Interop.mkConnection node1 node2 <| LinkTypes.Open (text, addedLength)
-    static member simple (node1,node2,?text:string,?addedLength: int) =
-        link.open_(node1,node2,?text=text,?addedLength=addedLength)
-    static member dotted (node1,node2,?text:string,?addedLength: int) =
-        Interop.mkConnection node1 node2 <| LinkTypes.Dotted (text, addedLength)
-    static member dottedArrow (node1,node2,?text:string,?addedLength: int) =
-        Interop.mkConnection node1 node2 <| LinkTypes.DottedArrow (text, addedLength)
-    static member thick (node1,node2,?text:string,?addedLength: int) =
-        Interop.mkConnection node1 node2 <| LinkTypes.Thick (text, addedLength)
-    static member thickArrow (node1,node2,?text:string,?addedLength: int) =
-        Interop.mkConnection node1 node2 <| LinkTypes.ThickArrow (text, addedLength)
-    static member invisible (node1,node2,?text:string,?addedLength: int) =
-        Interop.mkConnection node1 node2 <| LinkTypes.Invisible (text, addedLength)
-    static member circleEdge (node1,node2,?text:string,?addedLength: int) =
-        Interop.mkConnection node1 node2 <| LinkTypes.CircleEdge (text, addedLength)
-    static member crossEdge (node1,node2,?text:string,?addedLength: int) =
-        Interop.mkConnection node1 node2 <| LinkTypes.CrossEdge (text, addedLength)
-    static member arrowDouble (node1,node2,?text:string,?addedLength: int) =
-        Interop.mkConnection node1 node2 <| LinkTypes.ArrowDouble (text, addedLength)
-    static member circleDouble (node1,node2,?text:string,?addedLength: int) =
-        Interop.mkConnection node1 node2 <| LinkTypes.CircleDouble (text, addedLength)
-    static member crossDouble (node1,node2,?text:string,?addedLength: int) =
-        Interop.mkConnection node1 node2 <| LinkTypes.CrossDouble (text, addedLength)
-
-[<AttachMembers>]
-type message =
-    static member solid (node1, node2, msg, ?active: bool) = Interop.mkMessage node1 node2 MessageTypes.Solid msg active
-    static member arrow (node1, node2, msg, ?active: bool) = Interop.mkMessage node1 node2 MessageTypes.Arrow msg active
-    static member dotted (node1, node2, msg, ?active: bool) = Interop.mkMessage node1 node2 MessageTypes.Dotted msg active
-    static member dottedArrow (node1, node2, msg, ?active: bool) = Interop.mkMessage node1 node2 MessageTypes.DottedArrow msg active
-    static member cross (node1, node2, msg, ?active: bool) = Interop.mkMessage node1 node2 MessageTypes.CrossEdge msg active
-    static member dottedCross (node1, node2, msg, ?active: bool) = Interop.mkMessage node1 node2 MessageTypes.DottedCrossEdge msg active
-    static member openArrow (node1, node2, msg, ?active: bool) = Interop.mkMessage node1 node2 MessageTypes.OpenArrow msg active
-    static member dottedOpenArrow (node1, node2, msg, ?active: bool) = Interop.mkMessage node1 node2 MessageTypes.DottedOpenArrow msg active
-
-[<AttachMembers>]
-type relationship =
-    static member inheritance (node1, node2, ?label) = Interop.mkRelationship node1 node2 RelationshipTypes.Inheritance label
-    static member composition (node1, node2, ?label) = Interop.mkRelationship node1 node2 RelationshipTypes.Composition label
-    static member aggregation (node1, node2, ?label) = Interop.mkRelationship node1 node2 RelationshipTypes.Aggregation label
-    static member association (node1, node2, ?label) = Interop.mkRelationship node1 node2 RelationshipTypes.Association label
-    static member solid (node1, node2, ?label) = Interop.mkRelationship node1 node2 RelationshipTypes.Solid label
-    static member dependency (node1, node2, ?label) = Interop.mkRelationship node1 node2 RelationshipTypes.Dependency label
-    static member realization (node1, node2, ?label) = Interop.mkRelationship node1 node2 RelationshipTypes.Realization label
-    static member dashed (node1, node2, ?label) = Interop.mkRelationship node1 node2 RelationshipTypes.Dashed label
-    static member custom (node1, node2, relationship: string, ?label) = Interop.mkRelationship node1 node2 (RelationshipTypes.Custom relationship) label
-
-[<AttachMembers>]
-type sequenceDiagram =
-    static member participant (id: string, ?alias: string) = Interop.mkKeyValue "participant" (Formatter.formatSequenceDiagramAlias id alias)
-    static member actor (id: string, ?alias: string) = Interop.mkKeyValue "actor" (Formatter.formatSequenceDiagramAlias id alias)
-    static member destroy (id: string) = Interop.mkKeyValue "destroy" id
-    static member createParticipant (id: string, ?alias: string) = Interop.mkKeyValue "create participant" (Formatter.formatSequenceDiagramAlias id alias)
-    static member createActor (id: string, ?alias: string) = Interop.mkKeyValue "create actor" (Formatter.formatSequenceDiagramAlias id alias)
-    static member box (name: string) (children: #seq<Element>) = Interop.mkBox name None children
-    static member boxColored (name: string) (color: string) (children: #seq<Element>) = Interop.mkBox name (Some color) children
-    static member activate (id: string) = Interop.mkKeyValue "activate" id
-    static member deactivate (id: string) = Interop.mkKeyValue "deactivate" id
-    static member note(id: string, position, msg) = Interop.mkNote id position msg
-    static member alt(name: string) (children: #seq<Element>) = Interop.mkAlt name children
-    static member else_ (name: string) (children: #seq<Element>) = Interop.mkElse name children
-    static member opt (name: string) (children: #seq<Element>) = Interop.mkOpt name children
-    static member par (name: string) (children: #seq<Element>) = Interop.mkCustomSubgraphType (SubgraphType.Par,name,None,children)
-    static member and_ (name: string) (children: #seq<Element>) = Interop.mkCustomSubgraphType (SubgraphType.And,name,None,children)
-    static member critical (name: string) (children: #seq<Element>) = Interop.mkCustomSubgraphType (SubgraphType.Critical,name,None,children)
-    static member option (name: string) (children: #seq<Element>) = Interop.mkCustomSubgraphType (SubgraphType.Option,name,None,children)
-    static member break_ (name: string) (children: #seq<Element>) = Interop.mkCustomSubgraphType (SubgraphType.Break,name,None,children)
-    static member rect (color: string) (children: #seq<Element>) = Interop.mkCustomSubgraphType (SubgraphType.Rect,color,None,children)
-    static member autoNumber = Interop.mkLineRaw "autonumber"
-    static member link (actor: string, urlLabel: string, url: string) = Interop.mkLineRaw (sprintf "link %s: %s @ %s" actor urlLabel url)
-    static member links (actor: string, urls: #seq<string*string>) = 
+type sequence =
+    static member raw (txt: string) = SequenceElement txt
+    static member participant (name: string, ?alias) = Sequence.formatParticipant name alias |> SequenceElement 
+    static member actor (name: string, ?alias) = Sequence.formatActor name alias |> SequenceElement 
+    static member createParticipant (name: string, ?alias) = Sequence.formatCreate Sequence.formatParticipant name alias |> SequenceElement
+    static member createActor (name: string, ?alias) = Sequence.formatCreate Sequence.formatActor name alias |> SequenceElement
+    static member destroy (id: string) = Sequence.formatDestroy id |> SequenceElement
+    static member box (name: string, children: #seq<SequenceElement>) = SequenceWrapper (Sequence.formatBox name None, Sequence.BoxCloser, List.ofSeq children)
+    static member boxColored (name: string, color: string, children: #seq<SequenceElement>) = SequenceWrapper (Sequence.formatBox name (Some color), Sequence.BoxCloser, List.ofSeq children)
+    static member message(a1, a2, message, ?activate: bool) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.Solid message activate |> SequenceElement 
+    static member messageSolid(a1, a2, message, ?activate: bool) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.Solid message activate |> SequenceElement 
+    static member messageDotted(a1, a2, message, ?activate: bool ) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.Dotted message activate |> SequenceElement 
+    static member messageArrow(a1, a2, message, ?activate: bool) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.Arrow message activate |> SequenceElement 
+    static member messageDottedArrow(a1, a2, message, ?activate: bool) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.DottedArrow message activate |> SequenceElement 
+    static member messageCross(a1, a2, message, ?activate: bool) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.CrossEdge message activate |> SequenceElement 
+    static member messageDottedCross(a1, a2, message, ?activate: bool) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.DottedCrossEdge message activate |> SequenceElement 
+    static member messageOpenArrow(a1, a2, message, ?activate: bool) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.OpenArrow message activate |> SequenceElement 
+    static member messageDottedOpenArrow(a1, a2, message, ?activate: bool) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.DottedOpenArrow message activate |> SequenceElement 
+    static member activate(id: string) = sprintf "activate %s" id |> SequenceElement
+    static member deactivate(id: string) = sprintf "deactivate %s" id |> SequenceElement
+    static member note(id: string, text: string, ?notePosition: Generic.NotePosition) = Generic.formatNote id notePosition text |> SequenceElement
+    static member noteSpanning(id1: string, id2, text: string, ?notePosition: Generic.NotePosition) = Sequence.formatNoteSpanning id1 id2 notePosition text |> SequenceElement
+    static member loop(name: string, children: #seq<SequenceElement>) = SequenceWrapper(sprintf "loop %s" name,"end", List.ofSeq children)
+    static member alt(name: string, children: #seq<SequenceElement>, elseList: #seq<string*#seq<SequenceElement>>) = 
+        let elseItems = elseList |> Seq.length
+        let altCloser = if elseItems = 0 then "end" else ""
+        let last = elseItems-1 
+        SequenceWrapperList [
+            SequenceWrapper (sprintf "alt %s" name, altCloser, List.ofSeq children)
+            if elseItems <> 0 then 
+                for i in 0 .. last do
+                    let name, children = elseList |> Seq.item i
+                    let closer = if i = last then "end" else ""
+                    SequenceWrapper(sprintf "else %s" name, closer, List.ofSeq children)                
+        ]
+    static member opt(name: string, children: #seq<SequenceElement>) = SequenceWrapper (sprintf "opt %s" name, "end", List.ofSeq children)
+    static member par(name: string, children: #seq<SequenceElement>, andList: #seq<string*#seq<SequenceElement>>) = 
+        let elseItems = andList |> Seq.length
+        let altCloser = if elseItems = 0 then "end" else ""
+        let last = elseItems-1 
+        SequenceWrapperList [
+            SequenceWrapper (sprintf "par %s" name, altCloser, List.ofSeq children)
+            if elseItems <> 0 then 
+                for i in 0 .. last do
+                    let name, children = andList |> Seq.item i
+                    let closer = if i = last then "end" else ""
+                    SequenceWrapper(sprintf "and %s" name, closer, List.ofSeq children)                
+        ]
+    static member critical(name: string, children: #seq<SequenceElement>, optionList: #seq<string*#seq<SequenceElement>>) = 
+        let elseItems = optionList |> Seq.length
+        let altCloser = if elseItems = 0 then "end" else ""
+        let last = elseItems-1 
+        SequenceWrapperList [
+            SequenceWrapper (sprintf "critical %s" name, altCloser, List.ofSeq children)
+            if elseItems <> 0 then 
+                for i in 0 .. last do
+                    let name, children = optionList |> Seq.item i
+                    let closer = if i = last then "end" else ""
+                    SequenceWrapper(sprintf "option %s" name, closer, List.ofSeq children)                
+        ]
+    static member breakSeq (name: string, children: #seq<SequenceElement>) = SequenceWrapper (sprintf "break %s" name, "end", List.ofSeq children)
+    static member rect (color: string, children: #seq<SequenceElement>) = SequenceWrapper (sprintf "rect %s" color, "end", List.ofSeq children)
+    static member comment (txt: string) = Generic.formatComment txt |> SequenceElement
+    static member autoNumber = SequenceElement "autonumber"
+    static member link (id: string, urlLabel: string, url: string) = sprintf "link %s: %s @ %s" id urlLabel url |> SequenceElement
+    static member links (id: string, urls: #seq<string*string>) = 
         let json0 = urls |> List.ofSeq |> List.map (fun (k,v) -> sprintf "\"%s\": \"%s\"" k v) |> String.concat ", "
         let json = "{" + json0 + "}"
-        Interop.mkLineRaw (sprintf "links %s: %s" actor json)
+        sprintf "links %s: %s" id json |> SequenceElement
 
-type classDiagram =
-    static member class_ (name: string) = Interop.mkKeyValue "class" name
+module ClassDiagram =
+    type MemberVisibility =
+    | Public
+    | Private
+    | Protected
+    | PackageInternal
+    | Custom of string
+        member this.ToFormatString() =
+            match this with
+            | Public            -> "+"
+            | Private           -> "-"
+            | Protected         -> "#"
+            | PackageInternal   -> "~"
+            | Custom string     -> string
+    type MemberClassifier = 
+    | Abstract
+    | Static
+    | Custom of string
+        member this.ToFormatString() =
+            match this with
+            | Abstract      -> "*"
+            | Static        -> "$"
+            | Custom string -> string
+
+    type ClassRelationshipDirection =
+    | Left
+    | Right
+    | TwoWay
+        member this.ToFormatString(left: string, right: string, center: string) =
+            match this with
+            | Left  -> left + center
+            | Right -> center + right
+            | TwoWay -> left + center + right
+        member this.ToFormatString(edge: string, center: string) =
+            match this with
+            | Left  -> edge + center
+            | Right -> center + edge
+            | TwoWay -> edge + center + edge
+
+    type ClassRelationshipType = 
+        | Inheritance
+        | Composition
+        | Aggregation
+        | Association
+        | Link
+        | Solid
+        | Dashed
+        | Dependency
+        | Realization
+
+        member this.ToFormatString(?direction: ClassRelationshipDirection, ?isDotted: bool) =
+            let isDotted = defaultArg isDotted false
+            let dotted = ".."
+            let solid = "--"
+            let center = if isDotted then dotted else solid
+            let direct = defaultArg direction ClassRelationshipDirection.Right
+            match this with
+            | Inheritance   -> direct.ToFormatString("<|", "|>", center)
+            | Composition   -> direct.ToFormatString("*",center)
+            | Aggregation   -> direct.ToFormatString("o", center)
+            | Association   -> direct.ToFormatString("<",">", center)
+            | Link          -> center
+            | Solid         -> solid
+            | Dashed        -> dotted
+            | Dependency    -> direct.ToFormatString("<",">", dotted)
+            | Realization   -> direct.ToFormatString("<|","|>", dotted)
+
+    type Cardinality = 
+        | One
+        | ZeroOrOne
+        | OneOrMore
+        | Many
+        | N
+        | ZeroToN
+        | OneToN
+        | Custom of string
+
+        member this.ToFormatString() =
+            match this with
+            | One       -> "1"
+            | ZeroOrOne -> "0..1"
+            | OneOrMore -> "1..*"
+            | Many      -> "*"
+            | N         -> "n"
+            | ZeroToN   -> "0..n"
+            | OneToN    -> "1..n"
+            | Custom s  -> s
+
+    let formatClass (id) (name) generic =
+        let name = name |> Option.formatString (fun s -> sprintf "[\"%s\"]" s)
+        let generic = generic |> Option.formatString (fun s -> sprintf "~%s~" s)
+        sprintf "class %s%s%s" id generic name
+
+    let formatMember id label (visibility: MemberVisibility option) (classifier: MemberClassifier option) =
+        let visibility = visibility |> Option.map _.ToFormatString() |> Option.formatString (fun x -> x)
+        let classifier = classifier |> Option.map _.ToFormatString() |> Option.formatString (fun x -> x)
+        sprintf "%s : %s%s%s" id visibility label classifier
+
+    let formatRelationship0 id1 id2 (link: string) (label: string option) (cardinality1: Cardinality option) (cardinality2: Cardinality option) =
+        //classI -- classJ : Link(Solid)
+        //Student "1" --> "1..*" Course
+        let car1 = cardinality1 |> Option.map _.ToFormatString() |> Option.formatString (fun s -> sprintf " \"%s\"" s)
+        let car2 = cardinality2 |> Option.map _.ToFormatString() |> Option.formatString (fun s -> sprintf "\"%s\" " s)
+        let label = label |> Option.formatString (fun l -> sprintf " : %s" l)
+        sprintf "%s%s %s %s%s%s" id1 car1 link car2 id2 label
+
+    let formatRelationship id1 id2 (type': ClassRelationshipType) (label: string option) (cardinality1: Cardinality option) (cardinality2: Cardinality option) =
+        let link = type'.ToFormatString()
+        formatRelationship0 id1 id2 link label cardinality1 cardinality2
+
+    let formatRelationshipCustom id1 id2 (type': ClassRelationshipType) (direction) (dotted) (label: string option) (cardinality1: Cardinality option) (cardinality2: Cardinality option) =
+        let link = type'.ToFormatString(?direction=direction, ?isDotted=dotted)
+        formatRelationship0 id1 id2 link label cardinality1 cardinality2
+
+    let formatAnnotation id (annotation: string) = sprintf "<<%s>> %s" annotation id
+
+    let formatNote txt (id: string option) =
+        if id.IsSome then
+            sprintf "note for %s \"%s\"" id.Value txt
+        else
+            sprintf "note \"%s\"" txt
+
 
 [<AttachMembers>]
-type diagram =
-    static member flowchart = flowchart()
-    static member sequence (children: #seq<Element>) = Interop.mkGraph "sequenceDiagram" children
-    static member classDiagram (children: #seq<Element>) = Interop.mkGraph "classDiagram" children
-    static member gantt (children: #seq<Element>) = Interop.mkGraph "gantt" children
-    static member git (children: #seq<Element>) = Interop.mkGraph "gitGraph" children
-    static member entityRelationship (children: #seq<Element>) = Interop.mkGraph "erDiagram" children
-    static member journey (children: #seq<Element>) = Interop.mkGraph "journey" children
-    static member quadrant (children: #seq<Element>) = Interop.mkGraph "quadrantChart" children
-    static member xy (children: #seq<Element>) = Interop.mkGraph "xychart-beta" children
+type memberVisibility =
+    static member public' = ClassDiagram.MemberVisibility.Public
+    static member private' = ClassDiagram.MemberVisibility.Private
+    static member protected' = ClassDiagram.MemberVisibility.Protected
+    static member packageInternal = ClassDiagram.MemberVisibility.PackageInternal
+    static member custom str = ClassDiagram.MemberVisibility.Custom str
 
-open Interop
+[<AttachMembers>]
+type memberClassifier =
+    static member abstract' = ClassDiagram.MemberClassifier.Abstract
+    static member static' = ClassDiagram.MemberClassifier.Static
+    static member custom str = ClassDiagram.MemberClassifier.Custom str
+
+[<AttachMembers>]
+type classDiagram =
+    static member raw (txt: string) = ClassDiagramElement txt
+    static member class' (id: string, ?name: string, ?generic: string, ?members: #seq<string>) = 
+        if members.IsSome then ClassDiagramWrapper (ClassDiagram.formatClass id name generic + "{","}", (List.ofSeq >> List.map ClassDiagramElement) members.Value) 
+        else ClassDiagram.formatClass id name generic |> ClassDiagramElement
+    static member classMember (id: string, label:string, ?visibility: ClassDiagram.MemberVisibility, ?classifier: ClassDiagram.MemberClassifier) = 
+        ClassDiagram.formatMember id label visibility classifier |> ClassDiagramElement
+    
+    static member relationshipInheritance (id1, id2, ?label: string, ?cardinality1: ClassDiagram.Cardinality, ?cardinality2: ClassDiagram.Cardinality) = 
+        ClassDiagram.formatRelationship id1 id2 ClassDiagram.ClassRelationshipType.Inheritance label cardinality1 cardinality2 |> ClassDiagramElement
+    static member relationshipComposition (id1, id2, ?label: string, ?cardinality1: ClassDiagram.Cardinality, ?cardinality2: ClassDiagram.Cardinality) = 
+        ClassDiagram.formatRelationship id1 id2 ClassDiagram.ClassRelationshipType.Composition label cardinality1 cardinality2 |> ClassDiagramElement
+    static member relationshipAggregation (id1, id2, ?label: string, ?cardinality1: ClassDiagram.Cardinality, ?cardinality2: ClassDiagram.Cardinality) = 
+        ClassDiagram.formatRelationship id1 id2 ClassDiagram.ClassRelationshipType.Aggregation label cardinality1 cardinality2 |> ClassDiagramElement
+    static member relationshipAssociation (id1, id2, ?label: string, ?cardinality1: ClassDiagram.Cardinality, ?cardinality2: ClassDiagram.Cardinality) = 
+        ClassDiagram.formatRelationship id1 id2 ClassDiagram.ClassRelationshipType.Association label cardinality1 cardinality2 |> ClassDiagramElement
+    static member relationshipSolid (id1, id2, ?label: string, ?cardinality1: ClassDiagram.Cardinality, ?cardinality2: ClassDiagram.Cardinality) = 
+        ClassDiagram.formatRelationship id1 id2 ClassDiagram.ClassRelationshipType.Solid label cardinality1 cardinality2 |> ClassDiagramElement
+    static member relationshipDependency (id1, id2, ?label: string, ?cardinality1: ClassDiagram.Cardinality, ?cardinality2: ClassDiagram.Cardinality) = 
+        ClassDiagram.formatRelationship id1 id2 ClassDiagram.ClassRelationshipType.Dependency label cardinality1 cardinality2 |> ClassDiagramElement
+    static member relationshipRealization (id1, id2, ?label: string, ?cardinality1: ClassDiagram.Cardinality, ?cardinality2: ClassDiagram.Cardinality) = 
+        ClassDiagram.formatRelationship id1 id2 ClassDiagram.ClassRelationshipType.Realization label cardinality1 cardinality2 |> ClassDiagramElement
+    static member relationshipDashed (id1, id2, ?label: string, ?cardinality1: ClassDiagram.Cardinality, ?cardinality2: ClassDiagram.Cardinality) = 
+        ClassDiagram.formatRelationship id1 id2 ClassDiagram.ClassRelationshipType.Dashed label cardinality1 cardinality2 |> ClassDiagramElement
+    static member relationshipCustom (id1, id2, rltsType, ?label: string, ?direction, ?isDotted, ?cardinality1: ClassDiagram.Cardinality, ?cardinality2: ClassDiagram.Cardinality) = 
+        ClassDiagram.formatRelationshipCustom id1 id2 rltsType direction isDotted label cardinality1 cardinality2 |> ClassDiagramElement
+
+    static member namespace' (name: string, children: #seq<ClassDiagramElement>) =
+        if Seq.isEmpty children then ClassDiagramNone 
+        else ClassDiagramWrapper (sprintf "namespace %s {" name,"}", List.ofSeq children)
+    static member annotation (id: string, annotation: string) = classDiagram.annotationString (id, annotation)
+    static member annotationString (id: string, annotation: string) : string = ClassDiagram.formatAnnotation id annotation
+    static member comment (txt:string) = Generic.formatComment txt
+    static member direction (direction: Direction) = Generic.formatDirection direction |> ClassDiagramElement
+    static member clickHref(id,url,?tooltip) = Generic.formatClickHref id url tooltip |> ClassDiagramElement
+    //static member clickCallback() = failwith "TODO"
+    static member note(txt:string, ?id: string) = ClassDiagram.formatNote txt id |> ClassDiagramElement
+    static member link(id: string, url: string, ?tooltip: string) = Generic.formatClickHref id url tooltip |> ClassDiagramElement
+    //static member callback(id: string, func: unit -> unit, ?tooltip: string) = failwith "TODO"
+
+module StateDiagram =
+
+    let formatState id (description: string option) = 
+        let description = description |> Option.formatString (fun s -> sprintf " : %s" s)
+        sprintf "%s%s" id description
+
+    let formatTransition id1 id2 (description: string option) =
+        let description = description |> Option.formatString (fun s -> sprintf " : %s" s)
+        sprintf "%s --> %s%s" id1 id2 description
+
+    let formatNoteWrapper (id) (position: Generic.NotePosition option) =
+        let position = defaultArg position Generic.RightOf |> _.ToFormatString()
+        sprintf "note %s %s" position id
+
+
+[<AttachMembers>]
+type stateDiagram =
+    static member state (id: string, ?description: string) = StateDiagram.formatState id description |> StateDiagramElement 
+    static member transition (id1: string, id2: string, ?description: string) = StateDiagram.formatTransition id1 id2 description |> StateDiagramElement
+    static member transitionStart (id: string, ?description: string) = StateDiagram.formatTransition stateDiagram.startEnd id description |> StateDiagramElement
+    static member transitionEnd (id: string, ?description: string) = StateDiagram.formatTransition id stateDiagram.startEnd description |> StateDiagramElement
+    static member startEnd : string = "[*]"
+    static member stateComposite (id: string, children: #seq<StateDiagramElement>) = StateDiagramWrapper (sprintf "state %s {" id,"}", List.ofSeq children)
+    static member stateChoice (id: string) = sprintf "state %s <<choice>>" id |> StateDiagramElement
+    static member stateFork (id: string) = sprintf "state %s <<fork>>" id |> StateDiagramElement
+    static member stateJoin (id: string) = sprintf "state %s <<join>>" id |> StateDiagramElement
+    static member note (id: string, msg: string, ?notePosition: Generic.NotePosition) = 
+        if notePosition.IsSome && notePosition.Value = Generic.NotePosition.Over then failwith "Error: Cannot use \"over\" for note in State Diagram!"
+        let lines = msg.Split([|"\r\n"; "\n";|], System.StringSplitOptions.RemoveEmptyEntries)
+        StateDiagramWrapper(StateDiagram.formatNoteWrapper id notePosition, "end note", [for line in lines do StateDiagramElement line])
+    static member noteMultiLine (id: string, lines: #seq<string>, ?notePosition: Generic.NotePosition) = 
+        if notePosition.IsSome && notePosition.Value = Generic.NotePosition.Over then failwith "Error: Cannot use \"over\" for note in State Diagram!"
+        //let lines = msg.Split([|"\r\n"; "\n";|], System.StringSplitOptions.RemoveEmptyEntries)
+        StateDiagramWrapper(StateDiagram.formatNoteWrapper id notePosition, "end note", [for line in lines do StateDiagramElement line])
+    static member noteLine (id: string, msg: string, ?notePosition: Generic.NotePosition) = 
+        if notePosition.IsSome && notePosition.Value = Generic.NotePosition.Over then failwith "Error: Cannot use \"over\" for note in State Diagram!"
+        Generic.formatNote id notePosition msg |> StateDiagramElement
+    /// Can only be used in stateComposite
+    static member concurrency = StateDiagramElement "--" 
+    static member direction (direction: Direction) = Generic.formatDirection direction |> StateDiagramElement
+    static member comment (txt: string) = Generic.formatComment txt |> StateDiagramElement
+
+[<RequireQualifiedAccess>]
+type IERCardinalityType = 
+    | OneOrZero
+    | OneOrMany
+    | ZeroOrMany
+    | OnlyOne
+    member this.ToFormatString() =
+        match this with
+        | OneOrZero -> "one or zero"
+        | OneOrMany -> "one or many"
+        | ZeroOrMany -> "zero or many"
+        | OnlyOne -> "only one"
+
+[<RequireQualifiedAccess>]
+type IERKeyType = 
+    | PK
+    | FK
+    | UK
+[<RequireQualifiedAccess>]
+type IERAttribute = {
+    Type : string
+    Name : string
+    Keys : IERKeyType list
+    Comment: string option
+} 
+
+module ERDiagram =
+
+    let formatEntityNode (id) (alias: string option) =
+        let alias = alias |> Option.formatString (fun s -> sprintf "[\"%s\"]" s)
+        sprintf "%s%s" id alias
+
+    let formatEntityWrapper (id) (alias: string option) =
+        formatEntityNode id alias + " {"
+
+    let formatAttribute (attr:IERAttribute) =
+        let keys = attr.Keys |> List.map _.ToString() |> String.concat ", "
+        let comment = attr.Comment |> Option.formatString (fun s -> sprintf "\"%s\"" s)
+        [
+            attr.Type
+            attr.Name
+            keys
+            comment
+        ]
+        |> List.filter (fun s -> s <> "")
+        |> String.concat " "
+
+    let formatRelationship (id1) (card1: IERCardinalityType) id2 (card2: IERCardinalityType) msg (isOptional: bool option) =
+        let isOptional = defaultArg isOptional false
+        let toString = if isOptional then "optionally to" else "to"
+        sprintf "%s %s %s %s %s : %s" id1 (card1.ToFormatString()) toString (card2.ToFormatString()) id2 msg
+        
+[<AttachMembers>]
+type erKey =
+    static member pk = IERKeyType.PK
+    static member fk = IERKeyType.FK
+    static member uk = IERKeyType.UK
+
+type erCardinality =
+    /// <summary>
+    /// }| or |{
+    /// </summary>
+    /// <param name="oneOrZero"></param>
+    static member oneOrMany = IERCardinalityType.OneOrMany
+    /// <summary>
+    /// |o or o|
+    /// </summary>
+    /// <param name="oneOrZero"></param>
+    static member oneOrZero = IERCardinalityType.OneOrZero
+    /// <summary>
+    /// ||
+    /// </summary>
+    /// <param name="oneOrMany"></param>
+    static member onlyOne = IERCardinalityType.OnlyOne
+    /// <summary>
+    /// }o or o{
+    /// </summary>
+    /// <param name="zeroOrMany"></param>
+    static member zeroOrMany = IERCardinalityType.ZeroOrMany
+    
+
+[<AttachMembers>]
+type erDiagram =
+    static member raw (line: string) = ERDiagramElement line
+    static member entity (id: string, ?alias: string, ?attr: #seq<IERAttribute>) = 
+        if attr.IsSome then 
+            let children = [for attr in attr.Value do ERDiagram.formatAttribute attr |> ERDiagramElement] // of attributes
+            ERDiagramWrapper (ERDiagram.formatEntityWrapper id alias, "}", children) 
+        else ERDiagram.formatEntityNode id alias |> ERDiagramElement
+    static member relationship(id1, erCardinality1, id2, erCardinality2, message, ?isOptional: bool) = 
+        ERDiagram.formatRelationship id1 erCardinality1 id2 erCardinality2 message isOptional |> ERDiagramElement
+    static member attribute(type': string, name: string, ?keys: #seq<IERKeyType>, ?comment: string) : IERAttribute = 
+        {Type=type'; Name=name;Keys=Option.map List.ofSeq keys |> Option.defaultValue []; Comment = comment}
+
+module UserJourney =
+
+    let formatTask name score actors =
+        let actors = actors |> Option.map (String.concat ", ")
+        List.choose id [
+            Some name
+            Some (string score)
+            actors
+        ]
+        |> String.concat ": "
+
+[<AttachMembers>]
+type journey =
+    static member raw (line: string) = JourneyElement line
+    static member title (name: string) = sprintf "title %s" name |> JourneyElement
+    static member section (name: string) = sprintf "section %s" name |> JourneyElement
+    static member task (name: string, score: int, ?actors: #seq<string>) = UserJourney.formatTask name score actors |> JourneyElement
+
+[<RequireQualifiedAccess>]
+type IGanttTags = 
+| Active
+| Done
+| Crit
+| Milestone
+    member this.ToFormatString() =
+        match this with
+        | Active    -> "active"
+        | Done      -> "done"
+        | Crit      -> "crit"
+        | Milestone -> "milestone"
+
+[<RequireQualifiedAccess>]
+type IGanttUnit =
+| Millisecond
+| Second
+| Minute
+| Hour
+| Day
+| Week
+| Month
+    member this.ToFormatString() =
+        string this |> _.ToLower()
+
+module Gantt =
+
+    let formatTask title (tags: IGanttTags list) (selfid: string option) (startDate: string option) (endDate: string option) =
+        let tags = tags |> Seq.map (fun x -> x.ToFormatString() |> Some) |> Seq.distinct 
+        let metadata =
+            [
+                yield! tags
+                selfid
+                startDate
+                endDate
+            ]
+            |> List.choose id
+            |> String.concat ", "
+        sprintf "%s : %s" title metadata
+
+[<AttachMembers>]
+type ganttTime =
+    static member length (timespan: string) : string = timespan
+    static member dateTime (datetime: string) : string = datetime
+    static member after (id) : string = sprintf "after %s" id
+    static member until (id) : string = sprintf "until %s" id
+
+[<AttachMembers>]
+type ganttTags =
+    static member active = IGanttTags.Active
+    static member done' = IGanttTags.Done
+    static member crit = IGanttTags.Crit
+    static member milestone = IGanttTags.Milestone
+
+[<AttachMembers>]
+type ganttUnit =
+    static member millisecond = IGanttUnit.Millisecond
+    static member second = IGanttUnit.Second
+    static member minute = IGanttUnit.Minute
+    static member hour = IGanttUnit.Hour
+    static member day = IGanttUnit.Day
+    static member week = IGanttUnit.Week
+    static member month = IGanttUnit.Month
+
+[<AttachMembers>]
+type gantt =
+    static member raw (line: string) = GanttElement line
+    static member title (name: string) = sprintf "title %s" name |> GanttElement
+    static member section (name: string) = sprintf "section %s" name |> GanttElement
+
+    static member task (title: string, id: string, startDate:string, endDate: string, ?tags: #seq<IGanttTags>) = 
+        Gantt.formatTask title (Option.defaultBind List.ofSeq [] tags) (Some id) (Some startDate) (Some endDate) |> GanttElement
+    static member taskStartEnd (title: string, startDate:string, endDate: string, ?tags: #seq<IGanttTags>) = 
+        Gantt.formatTask title (Option.defaultBind List.ofSeq [] tags) (None) (Some startDate) (Some endDate) |> GanttElement
+    static member taskEnd (title: string, endDate: string, ?tags: #seq<IGanttTags>) = 
+        Gantt.formatTask title (Option.defaultBind List.ofSeq [] tags) (None) (None) (Some endDate) |> GanttElement
+
+    static member milestone (title: string, id: string, startDate:string, endDate: string, ?tags: #seq<IGanttTags>) = 
+        Gantt.formatTask title (ganttTags.milestone::Option.defaultBind List.ofSeq [] tags) (Some id) (Some startDate) (Some endDate) |> GanttElement
+    static member milestoneStartEnd (title: string, startDate:string, endDate: string, ?tags: #seq<IGanttTags>) = 
+        Gantt.formatTask title (ganttTags.milestone::Option.defaultBind List.ofSeq [] tags) (None) (Some startDate) (Some endDate) |> GanttElement
+    static member milestoneEnd (title: string, endDate: string, ?tags: #seq<IGanttTags>) = 
+        Gantt.formatTask title (ganttTags.milestone::Option.defaultBind List.ofSeq [] tags) (None) (None) (Some endDate) |> GanttElement
+
+    static member dateFormat (formatString: string) = sprintf "dateFormat %s" formatString |> GanttElement
+    static member axisFormat (formatString: string) = sprintf "axisFormat %s" formatString |> GanttElement
+    static member tickInterval (interval: int, unit: IGanttUnit) = sprintf "tickInterval %i%s" interval (unit.ToFormatString()) |> GanttElement ///^([1-9][0-9]*)(millisecond|second|minute|hour|day|week|month)$/;
+
+    static member weekday (day: string) = sprintf "weekday %s" day |> GanttElement 
+    static member excludes (day: string) = sprintf "excludes %s" day |> GanttElement 
+    static member comment (txt: string) = Generic.formatComment txt |> GanttElement
+
+module PieChart =
+
+    let formatData name value =
+        sprintf "\"%s\" : %A" name value
+
+[<AttachMembers>]
+type pieChart =
+    static member raw (line: string) = PieChartElement line
+    static member showData = PieChartElement "showData"
+    static member title (title: string) = sprintf "title %s" title |> PieChartElement
+    static member data (name: string) (value: float) = PieChart.formatData name value |> PieChartElement
+
+module QuadrantChart =
+    let formatAxis (base0) (req: string) (opt: string option) =
+        match opt with
+        | Some v -> base0 + sprintf "%s --> %s" req v
+        | None -> base0 + req
+
+    let formatXAxis (left: string) (right: string option) =
+        let base0 = "x-axis "
+        formatAxis base0 left right
+
+    let formatYAxis (bottom: string) (top: string option) =
+        let base0 = "y-axis "
+        formatAxis base0 bottom top
+
+    let formatPoint (name) x y =
+        sprintf "%s: [%.2f, %.2f]" name x y
+
+
+[<AttachMembers>]
+type quadrant =
+    static member raw (txt: string) = QuadrantElement txt
+    static member title (title: string) = "title " + title |> QuadrantElement
+    static member xAxis (left:string, ?right: string) = QuadrantChart.formatXAxis left right |> QuadrantElement
+    static member yAxis (bottom:string, ?top: string) = QuadrantChart.formatYAxis bottom top |> QuadrantElement
+    static member quadrant1 (title: string) = "quadrant-1 " + title |> QuadrantElement
+    static member quadrant2 (title: string) = "quadrant-2 " + title |> QuadrantElement
+    static member quadrant3 (title: string) = "quadrant-3 " + title |> QuadrantElement
+    static member quadrant4 (title: string) = "quadrant-4 " + title |> QuadrantElement
+    static member point (name: string, xAxis: float, yAxis: float) = QuadrantChart.formatPoint name xAxis yAxis |> QuadrantElement
+    static member comment (txt: string) = Generic.formatComment txt |> QuadrantElement
+
+module RequirementDiagram =
+
+    type IRequirementType =
+        | Requirement
+        | FunctionalRequirement
+        | InterfaceRequirement
+        | PerformanceRequirement
+        | PhysicalRequirement
+        | DesignConstraint
+
+    type IRiskType = 
+        | Low
+        | Medium
+        | High
+        member this.ToFormatString() = this.ToString().ToLower()
+
+    type IVerifyMethod =
+        | Analysis
+        | Inspection
+        | Test
+        | Demonstration
+        member this.ToFormatString() = this.ToString().ToLower()
+
+    /// A relationship type can be one of contains, copies, derives, satisfies, verifies, refines, or traces.
+    type IRDRelationship = 
+        | Contains
+        | Copies
+        | Derives
+        | Satisfies
+        | Verifies
+        | Refines
+        | Traces
+        member this.ToFormatString() = this.ToString().ToLower()
+
+    let createRequirement type0 name id text (risk: IRiskType option) (methods: IVerifyMethod option) =
+        let children =
+            [
+                id |> Option.map (fun i -> sprintf "id: \"%s\"" i)
+                text |> Option.map (fun t -> sprintf "text: \"%s\"" t)
+                risk |> Option.map (fun r -> sprintf "risk: %s" <| r.ToFormatString())
+                methods |> Option.map (fun m -> sprintf "verifymethod: %s" <| m.ToFormatString())
+            ]
+            |> List.choose (fun x -> x)
+            |> List.map RequirementDiagramElement
+        RequirementDiagramWrapper(sprintf "%s %s {" type0 name, "}", children)
+
+    let createElement name type0 docref =
+        let children =
+            [
+                type0 |> Option.map (fun t -> sprintf "type: \"%s\"" t)
+                docref |> Option.map (fun d -> sprintf "docRef: \"%s\"" d)
+            ]
+            |> List.choose (fun x -> x)
+            |> List.map RequirementDiagramElement
+        RequirementDiagramWrapper(sprintf "element %s {" name,"}", children)
+        
+    let formatRelationship id1 id2 (rltsType: IRDRelationship) =
+        sprintf "%s - %s -> %s" id1 (rltsType.ToFormatString()) id2
+
+type rqRisk =
+    static member low = RequirementDiagram.IRiskType.Low
+    static member medium = RequirementDiagram.IRiskType.Medium
+    static member high = RequirementDiagram.IRiskType.High
+
+type rqMethod =
+    static member analysis = RequirementDiagram.IVerifyMethod.Analysis
+    static member inspection = RequirementDiagram.IVerifyMethod.Inspection
+    static member test = RequirementDiagram.IVerifyMethod.Test
+    static member demonstration = RequirementDiagram.IVerifyMethod.Demonstration
+
+
+[<AttachMembers>]
+type reqDia =
+    static member raw (txt: string) = RequirementDiagramElement txt
+
+    static member requirement (name, ?id: string, ?text: string, ?rqRisk: RequirementDiagram.IRiskType, ?rqMethod: RequirementDiagram.IVerifyMethod) =
+        RequirementDiagram.createRequirement "requirement" name id text rqRisk rqMethod
+    static member functionalRequirement (name, ?id: string, ?text: string, ?rqRisk: RequirementDiagram.IRiskType, ?rqMethod: RequirementDiagram.IVerifyMethod) =
+        RequirementDiagram.createRequirement "functionalRequirement" name id text rqRisk rqMethod
+    static member interfaceRequirement (name, ?id: string, ?text: string, ?rqRisk: RequirementDiagram.IRiskType, ?rqMethod: RequirementDiagram.IVerifyMethod) =
+        RequirementDiagram.createRequirement "interfaceRequirement" name id text rqRisk rqMethod
+    static member performanceRequirement (name, ?id: string, ?text: string, ?rqRisk: RequirementDiagram.IRiskType, ?rqMethod: RequirementDiagram.IVerifyMethod) =
+        RequirementDiagram.createRequirement "performanceRequirement" name id text rqRisk rqMethod
+    static member physicalRequirement (name, ?id: string, ?text: string, ?rqRisk: RequirementDiagram.IRiskType, ?rqMethod: RequirementDiagram.IVerifyMethod) = 
+        RequirementDiagram.createRequirement "physicalRequirement" name id text rqRisk rqMethod
+    static member designConstraint (name, ?id: string, ?text: string, ?rqRisk: RequirementDiagram.IRiskType, ?rqMethod: RequirementDiagram.IVerifyMethod) =
+        RequirementDiagram.createRequirement "designConstraint" name id text rqRisk rqMethod
+
+    static member element (name, ?type', ?docref) = RequirementDiagram.createElement name type' docref
+
+    static member contains (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RequirementDiagram.Contains |> RequirementDiagramElement
+    static member copies (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RequirementDiagram.Copies |> RequirementDiagramElement
+    static member derives (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RequirementDiagram.Derives |> RequirementDiagramElement
+    static member satisfies (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RequirementDiagram.Satisfies |> RequirementDiagramElement
+    static member verifies (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RequirementDiagram.Verifies |> RequirementDiagramElement
+    static member refines (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RequirementDiagram.Refines |> RequirementDiagramElement
+    static member traces (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RequirementDiagram.Traces |> RequirementDiagramElement
+
+type IGitOrientation = obj
+
+module Git =
+
+    type IGitCommitType =
+    | NORMAL
+    | REVERSE
+    | HIGHLIGHT
+        member this.ToFormatString() =
+            this.ToString().ToUpper()
+
+    let formatCommitType (commitType: IGitCommitType option) =
+        commitType |> Option.map (fun s -> sprintf "type: %s" <| s.ToFormatString())
+
+    let formatTag (tag: string option) =
+        tag |> Option.map (fun s -> sprintf "tag: \"%s\"" s)
+
+    let formatSelfID (selfid: string option) =
+        selfid |> Option.map (fun s -> sprintf "id: \"%s\"" s)
+
+    let formatParentID (aprentId: string option) =
+        aprentId |> Option.map (fun s -> sprintf "parent: \"%s\"" s)
+
+    let formatCommit (selfid: string option) (commitType: IGitCommitType option) (tag: string option) =
+        [
+            Some "commit"
+            selfid |> formatSelfID
+            commitType |> formatCommitType
+            tag |> formatTag
+        ]
+        |> List.choose id
+        |> String.concat " "
+
+    let formatMerge targetId mergeId (commitType: IGitCommitType option) tag =
+        [
+            Some "merge"
+            Some targetId
+            mergeId |> formatSelfID
+            commitType |> formatCommitType
+            tag |> formatTag
+        ]
+        |> List.choose id
+        |> String.concat " "
+
+    let formatCherryPick commitid parentid =
+        [
+            Some "cherry-pick"
+            Some commitid |> formatSelfID
+            parentid |> formatParentID
+        ]
+        |> List.choose id
+        |> String.concat " "
+
+
+type gitType =
+    static member normal = Git.IGitCommitType.NORMAL
+    static member reverse = Git.IGitCommitType.REVERSE
+    static member highlight = Git.IGitCommitType.HIGHLIGHT
+
+[<AttachMembers>]
+type git =
+    static member raw (line:string) = GitGraphElement line
+    static member commit (?id: string, ?gitType: Git.IGitCommitType, ?tag: string) = Git.formatCommit id gitType tag |> GitGraphElement
+    static member merge (targetBranchId: string, ?mergeid: string, ?gitType: Git.IGitCommitType, ?tag: string) = 
+        Git.formatMerge targetBranchId mergeid gitType tag |> GitGraphElement
+    static member cherryPick (commitid: string, ?parentId: string) = Git.formatCherryPick commitid parentId |> GitGraphElement
+    static member branch (id: string) = GitGraphElement ("branch " + id)
+    static member checkout (id: string) = GitGraphElement ("checkout " + id)
+    //static member title (title:string) = GitGraphTitle title
+    //static member showBranches (b: bool) = GitGraphConfig ("", "")
+    //static member rotateCommitLabel (b: bool) = GitGraphConfig ("", "")
+    //static member showCommitLabel (b: bool) = GitGraphConfig ("", "")
+    //static member mainBranchName (name: string) = GitGraphConfig ("", "")
+    //static member mainBranchOrder (order: int) = GitGraphConfig ("", "")
+    //static member orientation (orientation: IGitOrientation) = GitGraphOrientation "TODO"
+    //static member parallelCommits (b: bool) = GitGraphConfig ("", "")
+    //static member rawConfig (key, value) = GitGraphConfig (key, value)
+
+
+module Mindmap =
+
+    type IMindmapShape = 
+        | Square //id[I am a square]
+        | RoundedSquare //id(I am a rounded square)
+        | Circle //id((I am a circle))
+        | Bang //id))I am a bang((
+        | Cloud //id)I am a cloud(
+        | Hexagon //id{{I am a hexagon}}
+
+    let formatNode (id: string) (name: string option) t =
+        let name = defaultArg name id
+        match t with
+        | Square -> sprintf "%s[%s]" id name
+        | RoundedSquare -> sprintf "%s(%s)" id name
+        | Circle -> sprintf "%s((%s))" id name
+        | Bang -> sprintf "%s))%s((" id name
+        | Cloud -> sprintf "%s)%s(" id name
+        | Hexagon -> sprintf "%s{{%s}}" id name
+
+    let handleNodeChildren (children: #seq<MindmapElement> option) (opener: string)  =
+        if children.IsSome && Seq.isEmpty children.Value |> not then
+            MindmapWrapper (opener, "", List.ofSeq children.Value)
+        else
+            MindmapElement opener
+
+[<AttachMembers>]
+type mindmap =
+    static member raw (line: string) = MindmapElement line
+    static member node(name: string, ?children: #seq<MindmapElement>) = Mindmap.handleNodeChildren children name
+
+    static member square(name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode name None Mindmap.Square |> Mindmap.handleNodeChildren children
+    static member squareId(id, name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode id (Some name) Mindmap.Square |> Mindmap.handleNodeChildren children
+    
+    static member roundedSquare(name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode name None Mindmap.RoundedSquare |> Mindmap.handleNodeChildren children
+    static member roundedSquareId(id, name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode id (Some name) Mindmap.RoundedSquare |> Mindmap.handleNodeChildren children
+    
+    static member circle(name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode name None Mindmap.Circle |> Mindmap.handleNodeChildren children
+    static member circleId(id, name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode id (Some name) Mindmap.Circle |> Mindmap.handleNodeChildren children
+    
+    static member bang(name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode name None Mindmap.Bang |> Mindmap.handleNodeChildren children
+    static member bangId(id, name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode id (Some name) Mindmap.Bang |> Mindmap.handleNodeChildren children
+    
+    static member cloud(name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode name None Mindmap.Cloud |> Mindmap.handleNodeChildren children
+    static member cloudId(id, name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode id (Some name) Mindmap.Cloud |> Mindmap.handleNodeChildren children
+    
+    static member hexagon(name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode name None Mindmap.Hexagon |> Mindmap.handleNodeChildren children
+    static member hexagonId(id, name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode id (Some name) Mindmap.Hexagon |> Mindmap.handleNodeChildren children
+
+    static member icon(iconClass: string) = sprintf "::icon(%s)" iconClass |> MindmapElement
+    static member className(className: string) = sprintf "::: %s" className |> MindmapElement
+    static member classNames(classNames: #seq<string>) = classNames |> String.concat " " |> sprintf "::: %s" |> MindmapElement
+    static member comment (txt: string) = Generic.formatComment txt
+
+module Timeline =
+
+    let formatSingle header (data: string option) =
+        match data with
+        | None -> header
+        | Some event -> sprintf "%s : %s" header event
+
+    let createMultiple header (data: string list) =
+        let children = data |> List.map (fun s -> ": " + s |> TimelineElement)
+        TimelineWrapper(header,"", children)
+
+[<AttachMembers>]
+type timeline =
+    static member raw (line: string) = TimelineElement line
+    static member title (name: string) = "title " + name |> TimelineElement
+    static member period (name: string) = TimelineElement name
+    static member single (timePeriod: string, ?event: string) = Timeline.formatSingle timePeriod event |> TimelineElement
+    static member multiple (timePeriod: string, events: #seq<string>) = Timeline.createMultiple timePeriod (List.ofSeq events)
+    static member section (name: string, children: #seq<TimelineElement>) = TimelineWrapper ("section " + name,"",List.ofSeq children)
+    static member comment (txt: string) = Generic.formatComment txt |> TimelineElement
+
+module Sankey =
+
+    let formatLink (source: string) (target:string) (value:float) =
+        let source = source.Replace("\"","\"\"")
+        let target = target.Replace("\"","\"\"")
+        sprintf "\"%s\",\"%s\",%f" source target value
+
+    let createLinks (source: string) (targets: list<string*float>) =
+        [
+            for target, value in targets do
+                formatLink source target value |> SankeyElement
+        ] |> SankeyElementList
+
+[<AttachMembers>]
+type sankey =
+    static member raw(line: string) = SankeyElement line
+    static member comment (txt: string) = Generic.formatComment txt |> SankeyElement
+    static member link (source: string, target: string, value: float) = 
+        Sankey.formatLink source target value |> SankeyElement //remember to escape " and , for the user
+    static member links (source: string, targets: list<string*float>) = 
+        Sankey.createLinks source targets
+
+module XYChart =
+    let formatData (data: string list) =
+        ("[" + (data |> String.concat ", ") + "]")
+
+    let formatXAxis name data =
+        [
+            Some "x-axis"
+            name |> Option.map (fun name -> sprintf "\"%s\"" name)
+            Some (formatData data)
+        ]
+        |> List.choose id
+        |> String.concat " "
+
+    let formatXAxisRange (name: string option) (data: float*float) =
+        [
+            Some "x-axis"
+            name |> Option.map (fun name -> sprintf "\"%s\"" name)
+            Some (sprintf "%f --> %f" (fst data) (snd data))
+        ]
+        |> List.choose id
+        |> String.concat " "
+
+    let formatYAxis (name: string option) (data: (float*float) option) =
+        [
+            Some "y-axis"
+            name |> Option.map (fun name -> sprintf "\"%s\"" name)
+            data |> Option.map (fun data -> sprintf "%f --> %f" (fst data) (snd data))
+        ]
+        |> List.choose id
+        |> String.concat " "
+        
+    let formatLine (data: float list) = sprintf "line %s" (data |> List.map string |> formatData)
+    let formatBar (data: float list) = sprintf "bar %s" (data |> List.map string |> formatData)
+
+
+[<AttachMembers>]
+type xyChart =
+    static member raw(line: string) = XYChartElement line
+    static member title(name: string) = sprintf "title \"%s\"" name |> XYChartElement
+
+    static member xAxis (data: #seq<string>) = XYChart.formatXAxis None (List.ofSeq data) |> XYChartElement
+    static member xAxisNamed (name: string, data: #seq<string>) = XYChart.formatXAxis (Some name) (List.ofSeq data) |> XYChartElement
+    static member xAxisRange (start: float, end': float) = XYChart.formatXAxisRange (None) (start,end') |> XYChartElement
+    static member xAxisNamedRange (name: string, start: float, end': float) = XYChart.formatXAxisRange (Some name) (start,end') |> XYChartElement
+
+    static member yAxis (name: string) = XYChart.formatYAxis (Some name) None |> XYChartElement
+    static member yAxisRange (start: float, end': float) = XYChart.formatYAxis (None) (Some (start,end')) |> XYChartElement
+    static member yAxisNamedRange (name: string, start: float, end': float) = XYChart.formatYAxis (Some name) (Some (start,end')) |> XYChartElement
+
+    static member line (data: #seq<float>) = XYChart.formatLine (List.ofSeq data) |> XYChartElement
+    static member bar (data: #seq<float>) = XYChart.formatBar (List.ofSeq data) |> XYChartElement
+    static member comment (txt) = Generic.formatComment txt |> XYChartElement
 
 [<AttachMembers>]
 type siren =
-    static member write (element: Element, ?whitespaces: int) : string =
-        let whitespaces = defaultArg whitespaces 4
-        let sb = System.Text.StringBuilder()
-        Formatter.writeElement element sb (Config.init(whitespaces))
-        |> _.ToString()
-
-[<AutoOpen>]
-module Operators =
-    
-    let (---) (node1:Element) (node2:Element) : Element =
-        link.open_ (node1, node2)
-
-    let (-->) (node1:Element) (node2:Element) : Element =
-        link.arrow (node1, node2)
+    static member flowchart (direction:Direction, children: #seq<FlowchartElement>) = SirenElement.Flowchart (direction, List.ofSeq children)
+    static member sequence (children: #seq<SequenceElement>) = SirenElement.Sequence (List.ofSeq children)
+    static member classDiagram (children: #seq<ClassDiagramElement>) = SirenElement.Class(List.ofSeq children)
+    static member state (children: #seq<StateDiagramElement>) = SirenElement.State(List.ofSeq children)
+    static member stateV2 (children: #seq<StateDiagramElement>) = SirenElement.StateV2(List.ofSeq children)
+    static member erDiagram (children: #seq<ERDiagramElement>) = SirenElement.ERDiagram(List.ofSeq children)
+    static member journey (children: #seq<JourneyElement>) = SirenElement.Journey (List.ofSeq children)
+    static member gantt (children: #seq<GanttElement>) = SirenElement.Gantt(List.ofSeq children)
+    static member pieChart (children: #seq<PieChartElement>) = SirenElement.PieChart(List.ofSeq children)
+    static member quadrant (children: #seq<QuadrantElement>) = SirenElement.Quadrant (List.ofSeq children)
+    static member requirement (children: #seq<RequirementDiagramElement>) = SirenElement.RequirementDiagram (List.ofSeq children)
+    static member git (children: #seq<GitGraphElement>) = SirenElement.GitGraph (List.ofSeq children)
+    static member mindmap (children: #seq<MindmapElement>) = SirenElement.Mindmap (List.ofSeq children)
+    static member timeline (children: #seq<TimelineElement>) = SirenElement.Timeline (List.ofSeq children)
+    static member sankey (children: #seq<SankeyElement>) = SirenElement.Sankey (List.ofSeq children)
+    static member xyChart (children: #seq<XYChartElement>, ?isHorizontal: bool) = SirenElement.XYChart (defaultArg isHorizontal false, List.ofSeq children)
+    static member write(diagram: SirenElement) =
+        match diagram with
+        | SirenElement.Flowchart (direction, children) ->
+            let dia = "flowchart " + direction.ToString()
+            writeYamlDiagramRoot dia children
+        | SirenElement.Sequence (children) ->
+            let dia = "sequenceDiagram"
+            writeYamlDiagramRoot dia children
+        | SirenElement.Class children ->
+            let dia = "classDiagram"
+            writeYamlDiagramRoot dia children
+        | SirenElement.StateV2 children ->
+            let dia = "stateDiagram-v2"
+            writeYamlDiagramRoot dia children
+        | SirenElement.State children ->
+            let dia = "stateDiagram"
+            writeYamlDiagramRoot dia children
+        | SirenElement.ERDiagram children ->
+            let dia = "erDiagram"
+            writeYamlDiagramRoot dia children
+        | SirenElement.Journey children ->
+            let dia = "journey"
+            writeYamlDiagramRoot dia children
+        | SirenElement.Gantt children ->
+            let dia = "gantt"
+            writeYamlDiagramRoot dia children
+        | SirenElement.PieChart (children) ->
+            let dia = "pie " // This whitespace is important! without the pie chart is not correctly parsed when using "showData" or "title"
+            writeYamlDiagramRoot dia children
+        | SirenElement.Quadrant children ->
+            let dia = "quadrantChart"
+            writeYamlDiagramRoot dia children
+        | SirenElement.RequirementDiagram children ->
+            let dia = "requirementDiagram"
+            writeYamlDiagramRoot dia children
+        | SirenElement.GitGraph children ->
+            let dia = "gitGraph"
+            writeYamlDiagramRoot dia children
+        | SirenElement.Mindmap children ->
+            let dia = "mindmap"
+            writeYamlDiagramRoot dia children
+        | SirenElement.Timeline children ->
+            let dia = "timeline"
+            writeYamlDiagramRoot dia children
+        | SirenElement.Sankey children ->
+            let dia = "sankey-beta"
+            Yaml.root [
+                Yaml.line dia
+                for child in children do
+                    yield! child :> IYamlConvertible |> _.ToYamlAst()
+            ]
+        | SirenElement.XYChart (isHorizontal, children) ->
+            let dia = "xychart-beta"  + if isHorizontal then " horizontal" else ""
+            writeYamlDiagramRoot dia children
+        |> Yaml.write

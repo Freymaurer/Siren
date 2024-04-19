@@ -4,13 +4,22 @@ open Fable.Pyxpecto
 open Siren
 
 let all = testList "Main" [
-    Tests.Comment.main
-    Tests.Line.main
-    Tests.Node.main
-    Tests.Connection.main
-    Tests.Subgraph.main
+    Tests.Yaml.main
     Tests.Flowchart.main
     Tests.SequenceDiagram.main
+    Tests.ClassDiagram.main
+    Tests.StateDiagram.main
+    Tests.EntityRelationshipDiagram.main
+    Tests.Journey.main
+    Tests.Gantt.main
+    Tests.PieChart.main
+    Tests.Quadrant.main
+    Tests.RequirementDiagram.main
+    Tests.Git.main
+    Tests.Mindmap.main
+    Tests.Timeline.main
+    Tests.Sankey.main
+    Tests.XYChart.main
 ]
 
 [<EntryPoint>]

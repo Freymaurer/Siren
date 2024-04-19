@@ -2,32 +2,32 @@
 
 open Fable.Pyxpecto
 open Siren
+open Types
 
 let private tests_formatter = testList "Formatter" [
     testCase "empty" <| fun _ ->
         let actual = 
-            diagram.sequence [] 
-            |> Formatter.writeElementFast
+            siren.sequence [] 
+            |> siren.write
         let expected = """sequenceDiagram
 """
-        Expect.stringEqualF actual expected ""
+        Expect.trimEqual actual expected ""
     testCase "alt-else-opt" <| fun _ ->
         let actual = 
-            diagram.sequence [
-                message.arrow(node.id "Alice", node.id "Bob", "Hello Bob, how are you?")
-                subgraph.chain [
-                    sequenceDiagram.alt "is sick" [
-                        message.arrow(node.id "Bob", node.id "Alice", "Not so good :(")
+            siren.sequence [
+                sequence.messageArrow("Alice", "Bob", "Hello Bob, how are you?")
+                sequence.alt ("is sick", [
+                    sequence.messageArrow("Bob", "Alice", "Not so good :(")
+                ], [
+                    "is well", [
+                        sequence.messageArrow("Bob", "Alice", "Feeling fresh like a daisy")
                     ]
-                    sequenceDiagram.else_ "is well" [
-                        message.arrow(node.id "Bob", node.id "Alice", "Feeling fresh like a daisy")
-                    ]
-                ]
-                sequenceDiagram.opt "Extra response" [
-                    message.arrow(node.id "Bob", node.id "Alice", "Thanks for asking")
-                ]
+                ])
+                sequence.opt ("Extra response", [
+                    sequence.messageArrow("Bob", "Alice", "Thanks for asking")
+                ])
             ] 
-            |> Formatter.writeElementFast
+            |> siren.write
         let expected = """sequenceDiagram
     Alice->>Bob: Hello Bob, how are you?
     alt is sick
@@ -39,26 +39,25 @@ let private tests_formatter = testList "Formatter" [
         Bob->>Alice: Thanks for asking
     end
 """
-        Expect.stringEqualF actual expected ""
+        Expect.trimEqual actual expected ""
     testCase "parallel" <| fun _ ->
         let actual = 
-            diagram.sequence [
-                subgraph.chain [
-                    sequenceDiagram.par "Alice to Bob" [
-                        message.arrow(node.id "Alice", node.id "Bob", "Hello guys!")
+            siren.sequence [
+                sequence.par ("Alice to Bob", [
+                        sequence.messageArrow("Alice", "Bob", "Hello guys!")
+                ], [
+                    "Alice to John", [
+                        sequence.messageArrow("Alice", "John", "Hello guys!")
                     ]
-                    sequenceDiagram.and_ "Alice to John" [
-                        message.arrow(node.id "Alice", node.id "John", "Hello guys!")
+                    "Alice to Fred", [
+                        sequence.messageArrow("Alice", "Fred", "Hello guys!")
                     ]
-                    sequenceDiagram.and_ "Alice to Fred" [
-                        message.arrow(node.id "Alice", node.id "Fred", "Hello guys!")
-                    ]
-                ]
-                message.dottedArrow(node.id "Bob", node.id "Alice", "Hi Alice!")
-                message.dottedArrow(node.id "John", node.id "Alice", "Hi Alice!")
-                message.dottedArrow(node.id "Fred", node.id "Alice", "Hi Alice!")
+                ])
+                sequence.messageDottedArrow("Bob", "Alice", "Hi Alice!")
+                sequence.messageDottedArrow("John", "Alice", "Hi Alice!")
+                sequence.messageDottedArrow("Fred", "Alice", "Hi Alice!")
             ] 
-            |> Formatter.writeElementFast
+            |> siren.write
         let expected = """sequenceDiagram
     par Alice to Bob
         Alice->>Bob: Hello guys!
@@ -71,28 +70,26 @@ let private tests_formatter = testList "Formatter" [
     John-->>Alice: Hi Alice!
     Fred-->>Alice: Hi Alice!
 """
-        Expect.stringEqualF actual expected ""
+        Expect.trimEqual actual expected ""
     testCase "parallel-nested" <| fun _ ->
         let actual = 
-            diagram.sequence [
-                subgraph.chain [
-                    sequenceDiagram.par "Alice to Bob" [
-                        message.arrow(node.id "Alice", node.id "Bob", "Go help John")
-                    ]
-                    sequenceDiagram.and_ "Alice to John" [
-                        message.arrow(node.id "Alice", node.id "John", "I want this done today")
-                        subgraph.chain [
-                            sequenceDiagram.par "John to Charlie" [
-                                message.arrow(node.id "John", node.id "Charlie", "Can we do this today?")
+            siren.sequence [
+                sequence.par ("Alice to Bob", [
+                    sequence.messageArrow("Alice", "Bob", "Go help John")
+                ], [
+                    "Alice to John", [
+                        sequence.messageArrow("Alice", "John", "I want this done today")
+                        sequence.par ("John to Charlie", [
+                            sequence.messageArrow("John", "Charlie", "Can we do this today?")
+                        ], [
+                            "John to Diana", [
+                                sequence.messageArrow("John", "Diana", "Can you help us today?")
                             ]
-                            sequenceDiagram.and_ "John to Diana" [
-                                message.arrow(node.id "John", node.id "Diana", "Can you help us today?")
-                            ]
-                        ]
+                        ])
                     ]
-                ]
+                ])
             ] 
-            |> Formatter.writeElementFast
+            |> siren.write
         let expected = """sequenceDiagram
     par Alice to Bob
         Alice->>Bob: Go help John
@@ -105,24 +102,23 @@ let private tests_formatter = testList "Formatter" [
         end
     end
 """
-        Expect.stringEqualF actual expected ""
+        Expect.trimEqual actual expected ""
 
     testCase "critical-option" <| fun _ ->
         let actual =
-            diagram.sequence [
-                subgraph.chain [
-                    sequenceDiagram.critical "Establish a connection to the DB" [
-                        message.dotted(node.id "Service", node.id "DB", "connect")
+            siren.sequence [
+                sequence.critical("Establish a connection to the DB", [
+                    sequence.messageDotted("Service", "DB", "connect")
+                ], [
+                    "Network timeout", [
+                        sequence.messageDotted("Service", "Service", "Log error")
                     ]
-                    sequenceDiagram.option "Network timeout" [
-                        message.dotted(node.id "Service", node.id "Service", "Log error")
+                    "Credentials rejected", [
+                        sequence.messageDotted("Service", "Service", "Log different error")
                     ]
-                    sequenceDiagram.option "Credentials rejected" [
-                        message.dotted(node.id "Service", node.id "Service", "Log different error")
-                    ]
-                ]
+                ])
             ]
-            |> Formatter.writeElementFast
+            |> siren.write
         let expected = """sequenceDiagram
     critical Establish a connection to the DB
         Service-->DB: connect
@@ -132,19 +128,19 @@ let private tests_formatter = testList "Formatter" [
         Service-->Service: Log different error
     end
 """
-        Expect.stringEqualF actual expected ""
+        Expect.trimEqual actual expected ""
 
     testCase "break" <| fun _ ->
         let actual =
-            diagram.sequence [
-                message.dotted(node.id "Consumer", node.id "API", "Book something")
-                message.dotted(node.id "API", node.id "BookingService", "Start booking process")
-                sequenceDiagram.break_ "when the booking process fails" [
-                    message.dotted(node.id "API", node.id "Consumer", "show failure")
-                ]
-                message.dotted(node.id "API", node.id "BillingService", "Start billing process")
+            siren.sequence [
+                sequence.messageDotted("Consumer", "API", "Book something")
+                sequence.messageDotted("API", "BookingService", "Start booking process")
+                sequence.breakSeq ("when the booking process fails", [
+                    sequence.messageDotted("API", "Consumer", "show failure")
+                ])
+                sequence.messageDotted("API", "BillingService", "Start billing process")
             ]
-            |> Formatter.writeElementFast
+            |> siren.write
         let expected = """sequenceDiagram
     Consumer-->API: Book something
     API-->BookingService: Start booking process
@@ -153,31 +149,31 @@ let private tests_formatter = testList "Formatter" [
     end
     API-->BillingService: Start billing process
 """
-        Expect.stringEqualF actual expected ""
+        Expect.trimEqual actual expected ""
 
     testCase "rect" <| fun _ ->
         let actual =
-            diagram.sequence [
-                sequenceDiagram.participant "Alice"
-                sequenceDiagram.participant "John"
-                sequenceDiagram.rect "rgb(191, 223, 255)" [
-                    sequenceDiagram.note("Alice",notePosition.rightOf,"Alice calls John.")
-                    message.arrow(node.id "Alice", node.id "John", "Hello John, how are you?", true)
-                    sequenceDiagram.rect "rgb(200, 150, 255)" [
-                        message.arrow(node.id "Alice", node.id "John", "John, can you hear me?", true)
-                        message.dottedArrow(node.id "John", node.id "Alice", "Hi Alice, I can hear you!", false)
-                    ]
-                    message.dottedArrow(node.id "John", node.id "Alice", "I feel great!", false)
-                ]
-                message.arrow(node.id "Alice", node.id "John", "Did you want to go to the game tonight?", true)
-                message.dottedArrow(node.id "John", node.id "Alice", "Yeah! See you there.", false)
+            siren.sequence [
+                sequence.participant "Alice"
+                sequence.participant "John"
+                sequence.rect ("rgb(191, 223, 255)", [
+                    sequence.note("Alice","Alice calls John.")
+                    sequence.messageArrow("Alice", "John", "Hello John, how are you?", true)
+                    sequence.rect ("rgb(200, 150, 255)", [
+                        sequence.messageArrow("Alice", "John", "John, can you hear me?", true)
+                        sequence.messageDottedArrow("John", "Alice", "Hi Alice, I can hear you!", false)
+                    ])
+                    sequence.messageDottedArrow("John", "Alice", "I feel great!", false)
+                ])
+                sequence.messageArrow("Alice", "John", "Did you want to go to the game tonight?", true)
+                sequence.messageDottedArrow("John", "Alice", "Yeah! See you there.", false)
             ]
-            |> Formatter.writeElementFast
+            |> siren.write
         let expected = """sequenceDiagram
     participant Alice
     participant John
     rect rgb(191, 223, 255)
-        note right of Alice: Alice calls John.
+        note right of Alice : Alice calls John.
         Alice->>+John: Hello John, how are you?
         rect rgb(200, 150, 255)
             Alice->>+John: John, can you hear me?
@@ -188,33 +184,33 @@ let private tests_formatter = testList "Formatter" [
     Alice->>+John: Did you want to go to the game tonight?
     John-->>-Alice: Yeah! See you there.
 """
-        Expect.stringEqualF actual expected ""
+        Expect.trimEqual actual expected ""
     testCase "comment" <| fun _ ->
         let actual = 
-            diagram.sequence [
-                message.arrow(node.id "Alice", node.id "John", "Hello John, how are you?")
-                comment.comment "This is a comment"
-                message.dottedArrow(node.id "John", node.id "Alice", "Great!")
+            siren.sequence [
+                sequence.messageArrow("Alice", "John", "Hello John, how are you?")
+                sequence.comment "This is a comment"
+                sequence.messageDottedArrow("John", "Alice", "Great!")
             ]
-            |> Formatter.writeElementFast
+            |> siren.write
         let expected = """sequenceDiagram
     Alice->>John: Hello John, how are you?
     %% This is a comment
     John-->>Alice: Great!
 """
-        Expect.stringEqualF actual expected ""
+        Expect.trimEqual actual expected ""
     testCase "actor-links" <| fun _ ->
         let actual = 
-            diagram.sequence [
-                sequenceDiagram.participant "Alice"
-                sequenceDiagram.participant "John"
-                sequenceDiagram.link("Alice", "Dashboard", "https://dashboard.contoso.com/alice")
-                sequenceDiagram.link("Alice", "Wiki", "https://wiki.contoso.com/alice")
-                sequenceDiagram.link("John", "Dashboard", "https://dashboard.contoso.com/john")
-                sequenceDiagram.link("John", "Wiki", "https://wiki.contoso.com/john")
-                message.arrow(node.id "Alice", node.id "John", "Hello John, how are you?")
+            siren.sequence [
+                sequence.participant "Alice"
+                sequence.participant "John"
+                sequence.link("Alice", "Dashboard", "https://dashboard.contoso.com/alice")
+                sequence.link("Alice", "Wiki", "https://wiki.contoso.com/alice")
+                sequence.link("John", "Dashboard", "https://dashboard.contoso.com/john")
+                sequence.link("John", "Wiki", "https://wiki.contoso.com/john")
+                sequence.messageArrow( "Alice",  "John", "Hello John, how are you?")
             ]
-            |> Formatter.writeElementFast
+            |> siren.write
         let expected = """sequenceDiagram
     participant Alice
     participant John
@@ -224,17 +220,17 @@ let private tests_formatter = testList "Formatter" [
     link John: Wiki @ https://wiki.contoso.com/john
     Alice->>John: Hello John, how are you?
 """
-        Expect.stringEqualF actual expected ""
+        Expect.trimEqual actual expected ""
     testCase "actor-links" <| fun _ ->
         let actual = 
-            diagram.sequence [
-                sequenceDiagram.participant "Alice"
-                sequenceDiagram.participant "John"
-                sequenceDiagram.links("Alice", ["Dashboard", "https://dashboard.contoso.com/alice"; "Wiki", "https://wiki.contoso.com/alice"])
-                sequenceDiagram.links("John", ["Dashboard", "https://dashboard.contoso.com/john"; "Wiki", "https://wiki.contoso.com/john"])
-                message.arrow(node.id "Alice", node.id "John", "Hello John, how are you?")
+            siren.sequence [
+                sequence.participant "Alice"
+                sequence.participant "John"
+                sequence.links("Alice", ["Dashboard", "https://dashboard.contoso.com/alice"; "Wiki", "https://wiki.contoso.com/alice"])
+                sequence.links("John", ["Dashboard", "https://dashboard.contoso.com/john"; "Wiki", "https://wiki.contoso.com/john"])
+                sequence.messageArrow( "Alice",  "John", "Hello John, how are you?")
             ]
-            |> Formatter.writeElementFast
+            |> siren.write
         let expected = """sequenceDiagram
     participant Alice
     participant John
@@ -242,7 +238,7 @@ let private tests_formatter = testList "Formatter" [
     links John: {"Dashboard": "https://dashboard.contoso.com/john", "Wiki": "https://wiki.contoso.com/john"}
     Alice->>John: Hello John, how are you?
 """
-        Expect.stringEqualF actual expected ""
+        Expect.trimEqual actual expected ""
 ]
 
 let main = testList "SequenceDiagram" [
