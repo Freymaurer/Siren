@@ -430,8 +430,6 @@ module Flowchart =
         let opener = sprintf "subgraph %s%s" id nameStr 
         opener
 
-
-
 [<AttachMembers>]
 type flowchart =
     static member raw (txt: string) = FlowchartElement txt
@@ -525,6 +523,10 @@ module Sequence =
 
     let [<Literal>] BoxCloser = "end"
 
+
+#if FABLE_COMPILER_PYTHON
+[<CompiledName("note_position")>]
+#endif
 [<AttachMembers>]
 type notePosition =
     static member over = Generic.NotePosition.Over
@@ -724,7 +726,9 @@ module ClassDiagram =
         else
             sprintf "note \"%s\"" txt
 
-
+#if FABLE_COMPILER_PYTHON
+[<CompiledName("member_visibility")>]
+#endif
 [<AttachMembers>]
 type memberVisibility =
     static member public' = ClassDiagram.MemberVisibility.Public
@@ -733,12 +737,18 @@ type memberVisibility =
     static member packageInternal = ClassDiagram.MemberVisibility.PackageInternal
     static member custom str = ClassDiagram.MemberVisibility.Custom str
 
+#if FABLE_COMPILER_PYTHON
+[<CompiledName("member_classifier")>]
+#endif
 [<AttachMembers>]
 type memberClassifier =
     static member abstract' = ClassDiagram.MemberClassifier.Abstract
     static member static' = ClassDiagram.MemberClassifier.Static
     static member custom str = ClassDiagram.MemberClassifier.Custom str
 
+#if FABLE_COMPILER_PYTHON
+[<CompiledName("class_diagram")>]
+#endif
 [<AttachMembers>]
 type classDiagram =
     static member raw (txt: string) = ClassDiagramElement txt
@@ -794,7 +804,9 @@ module StateDiagram =
         let position = defaultArg position Generic.RightOf |> _.ToFormatString()
         sprintf "note %s %s" position id
 
-
+#if FABLE_COMPILER_PYTHON
+[<CompiledName("state_diagram")>]
+#endif
 [<AttachMembers>]
 type stateDiagram =
     static member state (id: string, ?description: string) = StateDiagram.formatState id description |> StateDiagramElement 
@@ -873,13 +885,20 @@ module ERDiagram =
         let isOptional = defaultArg isOptional false
         let toString = if isOptional then "optionally to" else "to"
         sprintf "%s %s %s %s %s : %s" id1 (card1.ToFormatString()) toString (card2.ToFormatString()) id2 msg
-        
+     
+#if FABLE_COMPILER_PYTHON
+[<CompiledName("er_key")>]
+#endif
 [<AttachMembers>]
 type erKey =
     static member pk = IERKeyType.PK
     static member fk = IERKeyType.FK
     static member uk = IERKeyType.UK
 
+#if FABLE_COMPILER_PYTHON
+[<CompiledName("er_cardinality")>]
+#endif
+[<AttachMembers>]
 type erCardinality =
     /// <summary>
     /// }| or |{
@@ -902,7 +921,9 @@ type erCardinality =
     /// <param name="zeroOrMany"></param>
     static member zeroOrMany = IERCardinalityType.ZeroOrMany
     
-
+#if FABLE_COMPILER_PYTHON
+[<CompiledName("er_diagram")>]
+#endif
 [<AttachMembers>]
 type erDiagram =
     static member raw (line: string) = ERDiagramElement line
@@ -974,6 +995,9 @@ module Gantt =
             |> String.concat ", "
         sprintf "%s : %s" title metadata
 
+#if FABLE_COMPILER_PYTHON
+[<CompiledName("gantt_time")>]
+#endif
 [<AttachMembers>]
 type ganttTime =
     static member length (timespan: string) : string = timespan
@@ -981,6 +1005,9 @@ type ganttTime =
     static member after (id) : string = sprintf "after %s" id
     static member until (id) : string = sprintf "until %s" id
 
+#if FABLE_COMPILER_PYTHON
+[<CompiledName("gantt_tags")>]
+#endif
 [<AttachMembers>]
 type ganttTags =
     static member active = IGanttTags.Active
@@ -988,6 +1015,9 @@ type ganttTags =
     static member crit = IGanttTags.Crit
     static member milestone = IGanttTags.Milestone
 
+#if FABLE_COMPILER_PYTHON
+[<CompiledName("gantt_unit")>]
+#endif
 [<AttachMembers>]
 type ganttUnit =
     static member millisecond = IGanttUnit.Millisecond
@@ -1031,10 +1061,14 @@ module PieChart =
     let formatData name value =
         sprintf "\"%s\" : %A" name value
 
+#if FABLE_COMPILER_PYTHON
+[<CompiledName("pie_chart")>]
+#endif
 [<AttachMembers>]
 type pieChart =
     static member raw (line: string) = PieChartElement line
-    static member data (name: string) (value: float) = PieChart.formatData name value |> PieChartElement
+    static member data (name: string, value: float) = PieChart.formatData name value |> PieChartElement
+    static member data (name: string, value: int) = PieChart.formatData name value |> PieChartElement
 
 module QuadrantChart =
     let formatAxis (base0) (req: string) (opt: string option) =
@@ -1126,18 +1160,28 @@ module RequirementDiagram =
     let formatRelationship id1 id2 (rltsType: IRDRelationship) =
         sprintf "%s - %s -> %s" id1 (rltsType.ToFormatString()) id2
 
+#if FABLE_COMPILER_PYTHON
+[<CompiledName("rq_risk")>]
+#endif
+[<AttachMembers>]
 type rqRisk =
     static member low = RequirementDiagram.IRiskType.Low
     static member medium = RequirementDiagram.IRiskType.Medium
     static member high = RequirementDiagram.IRiskType.High
 
+#if FABLE_COMPILER_PYTHON
+[<CompiledName("rq_method")>]
+#endif
+[<AttachMembers>]
 type rqMethod =
     static member analysis = RequirementDiagram.IVerifyMethod.Analysis
     static member inspection = RequirementDiagram.IVerifyMethod.Inspection
     static member test = RequirementDiagram.IVerifyMethod.Test
     static member demonstration = RequirementDiagram.IVerifyMethod.Demonstration
 
-
+#if FABLE_COMPILER_PYTHON
+[<CompiledName("req_dia")>]
+#endif
 [<AttachMembers>]
 type reqDia =
     static member raw (txt: string) = RequirementDiagramElement txt
@@ -1164,8 +1208,6 @@ type reqDia =
     static member verifies (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RequirementDiagram.Verifies |> RequirementDiagramElement
     static member refines (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RequirementDiagram.Refines |> RequirementDiagramElement
     static member traces (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RequirementDiagram.Traces |> RequirementDiagramElement
-
-type IGitOrientation = obj
 
 module Git =
 
@@ -1218,7 +1260,10 @@ module Git =
         |> List.choose id
         |> String.concat " "
 
-
+#if FABLE_COMPILER_PYTHON
+[<CompiledName("git_type")>]
+#endif
+[<AttachMembers>]
 type gitType =
     static member normal = Git.IGitCommitType.NORMAL
     static member reverse = Git.IGitCommitType.REVERSE
@@ -1375,7 +1420,9 @@ module XYChart =
     let formatLine (data: float list) = sprintf "line %s" (data |> List.map string |> formatData)
     let formatBar (data: float list) = sprintf "bar %s" (data |> List.map string |> formatData)
 
-
+#if FABLE_COMPILER_PYTHON
+[<CompiledName("xy_chart")>]
+#endif
 [<AttachMembers>]
 type xyChart =
     static member raw(line: string) = XYChartElement line

@@ -23,6 +23,17 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Siren.Tests", "tests\Core\S
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{4AC2249E-9CDF-4A34-9EC3-CBC2F22FEC6A}"
 EndProject
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "App", "docs\src\App.fsproj", "{E33CFE2C-2CC4-4552-9BEA-9F23291D7F08}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{F7C3CCB8-7CAC-4F37-BCD7-307C1334B20F}"
+	ProjectSection(SolutionItems) = preProject
+		docs\package.json = docs\package.json
+		docs\postcss.config.js = docs\postcss.config.js
+		docs\README.md = docs\README.md
+		docs\tailwind.config.js = docs\tailwind.config.js
+		docs\vite.config.js = docs\vite.config.js
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,12 +52,17 @@ Global
 		{A1FAF9E8-BFD9-487E-BAF3-C77520268CC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A1FAF9E8-BFD9-487E-BAF3-C77520268CC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A1FAF9E8-BFD9-487E-BAF3-C77520268CC7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E33CFE2C-2CC4-4552-9BEA-9F23291D7F08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E33CFE2C-2CC4-4552-9BEA-9F23291D7F08}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E33CFE2C-2CC4-4552-9BEA-9F23291D7F08}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E33CFE2C-2CC4-4552-9BEA-9F23291D7F08}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{A1FAF9E8-BFD9-487E-BAF3-C77520268CC7} = {4AC2249E-9CDF-4A34-9EC3-CBC2F22FEC6A}
+		{E33CFE2C-2CC4-4552-9BEA-9F23291D7F08} = {F7C3CCB8-7CAC-4F37-BCD7-307C1334B20F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4A5AB7E0-1514-40A8-B5C0-FE62BB49ECD6}

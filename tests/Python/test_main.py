@@ -5,28 +5,28 @@ class TestSyntax:
       
     def test_moon_rocket_example(self):
         def chart():
-            return siren.flowchart().bt([
-                siren.subgraph.subgraph("space", [
-                    siren.direction.bt(),
-                    siren.link.dotted_arrow(
-                        siren.node.simple("earth"),
-                        siren.node.simple("moon"),
+            return siren.siren.flowchart(siren.direction.bt(), [
+                siren.flowchart.subgraph("space", [
+                    siren.flowchart.direction_bt(),
+                    siren.flowchart.link_dotted_arrow(
+                        "earth",
+                        "moon",
                         siren.formatting.unicode("🚀"),
                         6
                     ),
-                    siren.node.round("moon","moon"),
-                    siren.subgraph.subgraph("atmosphere",[
-                        siren.node.circle("earth", "earth")
+                    siren.flowchart.node_round("moon"),
+                    siren.flowchart.subgraph("atmosphere",[
+                        siren.flowchart.node_circle("earth")
                     ])
                 ])
             ])
         actual = siren.siren.write(chart())
         expected = """flowchart BT
-    subgraph space[space]
+    subgraph space
         direction BT
-        earth[earth]-......->|"🚀"|moon[moon]
+        earth-......->|"🚀"|moon
         moon(moon)
-        subgraph atmosphere[atmosphere]
+        subgraph atmosphere
             earth((earth))
         end
     end
