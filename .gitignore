@@ -401,3 +401,4 @@ js/
 tests/JavaScript/siren/
 tests/Python/siren/
 .venv
+/docs/.vscode
