@@ -4,8 +4,7 @@ open SimpleExec
 open BlackFox.CommandLine
 open Build
 
-[<LiteralAttribute>]
-let private outDir = "py"
+let private outDir = System.IO.Path.Combine [|ProjectInfo.TestPaths.CoreDirectory; "py"|]
 let private entryPoint = System.IO.Path.Combine([|outDir; "main.py"|])
 
 let python = @".venv\Scripts\python.exe"

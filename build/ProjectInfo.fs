@@ -21,5 +21,5 @@ module Packages =
 
 module Projects =
 
-    let Siren = "./src/Siren.fsproj"
+    let Siren = "./src/Siren/Siren.fsproj"
     let TestsSiren = System.IO.Path.Combine(TestPaths.CoreDirectory, "Siren.Tests.fsproj")

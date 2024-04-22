@@ -7,10 +7,10 @@ module Option =
     let formatString (format: string -> string) (str: string option) =
         match str with |None -> "" | Some str -> format str
 
-    let defaultBind (mapping: 'A -> 'T) (default': 'T) (opt: 'A option) =
+    let defaultBind (mapping: 'A -> 'T) (def: 'T) (opt: 'A option) =
         match opt with
         | Some a -> mapping a
-        | None -> default'
+        | None -> def
 
 [<RequireQualifiedAccess>]
 module Yaml =
@@ -496,9 +496,9 @@ module Sequence =
         | MessageTypes.OpenArrow         -> "-)"
         | MessageTypes.DottedOpenArrow   -> "--)"
 
-    let formatMessage a1 a2 type' msg (activate: bool option) =
+    let formatMessage a1 a2 msgType msg (activate: bool option) =
         let active = match activate with |None -> "" | Some true -> "+"| Some false -> "-"
-        sprintf "%s%s%s%s: %s" a1 (formatMessageType type') active a2 msg
+        sprintf "%s%s%s%s: %s" a1 (formatMessageType msgType) active a2 msg
 
     let formatParticipant (name) (alias: string option) =
         let alias = alias |> Option.formatString (fun s -> sprintf " as %s" s) 
@@ -710,12 +710,12 @@ module ClassDiagram =
         let label = label |> Option.formatString (fun l -> sprintf " : %s" l)
         sprintf "%s%s %s %s%s%s" id1 car1 link car2 id2 label
 
-    let formatRelationship id1 id2 (type': ClassRelationshipType) (label: string option) (cardinality1: Cardinality option) (cardinality2: Cardinality option) =
-        let link = type'.ToFormatString()
+    let formatRelationship id1 id2 (rltsType: ClassRelationshipType) (label: string option) (cardinality1: Cardinality option) (cardinality2: Cardinality option) =
+        let link = rltsType.ToFormatString()
         formatRelationship0 id1 id2 link label cardinality1 cardinality2
 
-    let formatRelationshipCustom id1 id2 (type': ClassRelationshipType) (direction) (dotted) (label: string option) (cardinality1: Cardinality option) (cardinality2: Cardinality option) =
-        let link = type'.ToFormatString(?direction=direction, ?isDotted=dotted)
+    let formatRelationshipCustom id1 id2 (rltsType: ClassRelationshipType) (direction) (dotted) (label: string option) (cardinality1: Cardinality option) (cardinality2: Cardinality option) =
+        let link = rltsType.ToFormatString(?direction=direction, ?isDotted=dotted)
         formatRelationship0 id1 id2 link label cardinality1 cardinality2
 
     let formatAnnotation id (annotation: string) = sprintf "<<%s>> %s" annotation id
@@ -731,9 +731,9 @@ module ClassDiagram =
 #endif
 [<AttachMembers>]
 type memberVisibility =
-    static member public' = ClassDiagram.MemberVisibility.Public
-    static member private' = ClassDiagram.MemberVisibility.Private
-    static member protected' = ClassDiagram.MemberVisibility.Protected
+    static member ``public`` = ClassDiagram.MemberVisibility.Public
+    static member ``private`` = ClassDiagram.MemberVisibility.Private
+    static member ``protected`` = ClassDiagram.MemberVisibility.Protected
     static member packageInternal = ClassDiagram.MemberVisibility.PackageInternal
     static member custom str = ClassDiagram.MemberVisibility.Custom str
 
@@ -742,8 +742,8 @@ type memberVisibility =
 #endif
 [<AttachMembers>]
 type memberClassifier =
-    static member abstract' = ClassDiagram.MemberClassifier.Abstract
-    static member static' = ClassDiagram.MemberClassifier.Static
+    static member ``abstract`` = ClassDiagram.MemberClassifier.Abstract
+    static member ``static`` = ClassDiagram.MemberClassifier.Static
     static member custom str = ClassDiagram.MemberClassifier.Custom str
 
 #if FABLE_COMPILER_PYTHON
@@ -752,11 +752,15 @@ type memberClassifier =
 [<AttachMembers>]
 type classDiagram =
     static member raw (txt: string) = ClassDiagramElement txt
-    static member class' (id: string, ?name: string, ?generic: string, ?members: #seq<string>) = 
+    static member ``class`` (id: string, ?name: string, ?generic: string, ?members: #seq<string>) = 
         if members.IsSome then ClassDiagramWrapper (ClassDiagram.formatClass id name generic + "{","}", (List.ofSeq >> List.map ClassDiagramElement) members.Value) 
         else ClassDiagram.formatClass id name generic |> ClassDiagramElement
-    static member classMember (id: string, label:string, ?visibility: ClassDiagram.MemberVisibility, ?classifier: ClassDiagram.MemberClassifier) = 
-        ClassDiagram.formatMember id label visibility classifier |> ClassDiagramElement
+    static member ``member`` (id: string, label:string, ?memberVisibility: ClassDiagram.MemberVisibility, ?memberClassifier: ClassDiagram.MemberClassifier) = 
+        ClassDiagram.formatMember id label memberVisibility memberClassifier |> ClassDiagramElement
+    static member memberAbstract(id: string, label:string, ?memberVisibility: ClassDiagram.MemberVisibility) =
+        ClassDiagram.formatMember id label memberVisibility (Some ClassDiagram.MemberClassifier.Abstract) |> ClassDiagramElement
+    static member memberStatic(id: string, label:string, ?memberVisibility: ClassDiagram.MemberVisibility) =
+        ClassDiagram.formatMember id label memberVisibility (Some ClassDiagram.MemberClassifier.Static) |> ClassDiagramElement
     
     static member relationshipInheritance (id1, id2, ?label: string, ?cardinality1: ClassDiagram.Cardinality, ?cardinality2: ClassDiagram.Cardinality) = 
         ClassDiagram.formatRelationship id1 id2 ClassDiagram.ClassRelationshipType.Inheritance label cardinality1 cardinality2 |> ClassDiagramElement
@@ -934,8 +938,8 @@ type erDiagram =
         else ERDiagram.formatEntityNode id alias |> ERDiagramElement
     static member relationship(id1, erCardinality1, id2, erCardinality2, message, ?isOptional: bool) = 
         ERDiagram.formatRelationship id1 erCardinality1 id2 erCardinality2 message isOptional |> ERDiagramElement
-    static member attribute(type': string, name: string, ?keys: #seq<IERKeyType>, ?comment: string) : IERAttribute = 
-        {Type=type'; Name=name;Keys=Option.map List.ofSeq keys |> Option.defaultValue []; Comment = comment}
+    static member attribute(attrType: string, name: string, ?keys: #seq<IERKeyType>, ?comment: string) : IERAttribute = 
+        {Type=attrType; Name=name;Keys=Option.map List.ofSeq keys |> Option.defaultValue []; Comment = comment}
 
 module UserJourney =
 
@@ -1011,7 +1015,7 @@ type ganttTime =
 [<AttachMembers>]
 type ganttTags =
     static member active = IGanttTags.Active
-    static member done' = IGanttTags.Done
+    static member ``done`` = IGanttTags.Done
     static member crit = IGanttTags.Crit
     static member milestone = IGanttTags.Milestone
 
@@ -1199,7 +1203,7 @@ type reqDia =
     static member designConstraint (name, ?id: string, ?text: string, ?rqRisk: RequirementDiagram.IRiskType, ?rqMethod: RequirementDiagram.IVerifyMethod) =
         RequirementDiagram.createRequirement "designConstraint" name id text rqRisk rqMethod
 
-    static member element (name, ?type', ?docref) = RequirementDiagram.createElement name type' docref
+    static member element (name, ?elementType, ?docref) = RequirementDiagram.createElement name elementType docref
 
     static member contains (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RequirementDiagram.Contains |> RequirementDiagramElement
     static member copies (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RequirementDiagram.Copies |> RequirementDiagramElement
@@ -1430,12 +1434,12 @@ type xyChart =
 
     static member xAxis (data: #seq<string>) = XYChart.formatXAxis None (List.ofSeq data) |> XYChartElement
     static member xAxisNamed (name: string, data: #seq<string>) = XYChart.formatXAxis (Some name) (List.ofSeq data) |> XYChartElement
-    static member xAxisRange (start: float, end': float) = XYChart.formatXAxisRange (None) (start,end') |> XYChartElement
-    static member xAxisNamedRange (name: string, start: float, end': float) = XYChart.formatXAxisRange (Some name) (start,end') |> XYChartElement
+    static member xAxisRange (rangeStart: float, rangeEnd: float) = XYChart.formatXAxisRange (None) (rangeStart,rangeEnd) |> XYChartElement
+    static member xAxisNamedRange (name: string, rangeStart: float, rangeEnd: float) = XYChart.formatXAxisRange (Some name) (rangeStart,rangeEnd) |> XYChartElement
 
     static member yAxis (name: string) = XYChart.formatYAxis (Some name) None |> XYChartElement
-    static member yAxisRange (start: float, end': float) = XYChart.formatYAxis (None) (Some (start,end')) |> XYChartElement
-    static member yAxisNamedRange (name: string, start: float, end': float) = XYChart.formatYAxis (Some name) (Some (start,end')) |> XYChartElement
+    static member yAxisRange (rangeStart: float, rangeEnd: float) = XYChart.formatYAxis (None) (Some (rangeStart,rangeEnd)) |> XYChartElement
+    static member yAxisNamedRange (name: string, rangeStart: float, rangeEnd: float) = XYChart.formatYAxis (Some name) (Some (rangeStart,rangeEnd)) |> XYChartElement
 
     static member line (data: #seq<float>) = XYChart.formatLine (List.ofSeq data) |> XYChartElement
     static member bar (data: #seq<float>) = XYChart.formatBar (List.ofSeq data) |> XYChartElement

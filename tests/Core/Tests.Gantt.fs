@@ -25,8 +25,8 @@ let private tests_task = testList "task" [
             siren.gantt [
                 gantt.task (apple,apple, "0", "6d", [ganttTags.active])
                 gantt.taskStartEnd("banana", ganttTime.after apple, "6d", [ganttTags.crit])
-                gantt.taskEnd("cherry", "6d", [ganttTags.done'])
-                gantt.taskEnd("coconut", "6d", [ganttTags.done'; ganttTags.crit; ganttTags.milestone; ganttTags.active])
+                gantt.taskEnd("cherry", "6d", [ganttTags.``done``])
+                gantt.taskEnd("coconut", "6d", [ganttTags.``done``; ganttTags.crit; ganttTags.milestone; ganttTags.active])
             ]
             |> siren.write
         let expected = """gantt
@@ -42,8 +42,8 @@ let private tests_task = testList "task" [
             siren.gantt [
                 gantt.milestone (apple,apple, "0", "6d", [ganttTags.active])
                 gantt.milestoneStartEnd("banana", ganttTime.after apple, "6d", [ganttTags.crit])
-                gantt.milestoneEnd("cherry", "6d", [ganttTags.done'])
-                gantt.milestoneEnd("coconut", "6d", [ganttTags.done'; ganttTags.crit; ganttTags.milestone; ganttTags.active])
+                gantt.milestoneEnd("cherry", "6d", [ganttTags.``done``])
+                gantt.milestoneEnd("coconut", "6d", [ganttTags.``done``; ganttTags.crit; ganttTags.milestone; ganttTags.active])
             ]
             |> siren.write
         let expected = """gantt
@@ -65,15 +65,15 @@ let private test_complex = testCase "complex" <| fun _ ->
 
             let des1 = "des1"
             gantt.section "A section"
-            gantt.task("Completed task", des1, "2014-01-06", "2014-01-08", [ganttTags.done'])
+            gantt.task("Completed task", des1, "2014-01-06", "2014-01-08", [ganttTags.``done``])
             gantt.task("Active task", "des2", "2014-01-09", "3d", [ganttTags.active])
             gantt.task("Future task", "des3", "after des2", "5d")
             gantt.task("Future task2", "des4", "after des3", "5d")
 
             let isadded = "isadded"
             gantt.section "section Critical tasks"
-            gantt.taskStartEnd("Completed task in the critical line", "2014-01-06", "24h", [ganttTags.done'; ganttTags.crit])
-            gantt.taskStartEnd("Implement parser and jison", ganttTime.after des1, "2d", [ganttTags.done'; ganttTags.crit])
+            gantt.taskStartEnd("Completed task in the critical line", "2014-01-06", "24h", [ganttTags.``done``; ganttTags.crit])
+            gantt.taskStartEnd("Implement parser and jison", ganttTime.after des1, "2d", [ganttTags.``done``; ganttTags.crit])
             gantt.taskEnd("Create tests for parser", "3d", [ganttTags.active; ganttTags.crit])
             gantt.taskEnd("Future task in critical line", "2d", [ganttTags.crit])
             gantt.taskEnd("Create tests for renderer", "2d")

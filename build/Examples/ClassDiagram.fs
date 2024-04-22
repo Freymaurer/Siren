@@ -43,25 +43,25 @@ siren.classDiagram [
             classDiagram.note(@"can fly\ncan swim\ncan dive\ncan help in debugging", duck)
             classDiagram.relationshipInheritance(fish, animal)
             classDiagram.relationshipInheritance(zebra, animal)
-            classDiagram.classMember(animal,"+int age")
-            classDiagram.classMember(animal,"+String gender")
-            classDiagram.classMember(animal,"+isMammal()")
-            classDiagram.classMember(animal,"+mate()")
-            classDiagram.class'(duck,members=[
+            classDiagram.``member``(animal,"+int age")
+            classDiagram.``member``(animal,"+String gender")
+            classDiagram.``member``(animal,"+isMammal()")
+            classDiagram.``member``(animal,"+mate()")
+            classDiagram.``class``(duck,members=[
                 "+String beakColor"
                 "+swim()"
                 "+quack()"
             ])
-            classDiagram.class'(fish,members=[
+            classDiagram.``class``(fish,members=[
                 "-int sizeInFeet"
                 "-canEat()"
             ])
-            classDiagram.class'(zebra,members=[
+            classDiagram.``class``(zebra,members=[
                 "+bool is_wild"
                 "+run()"
             ])
-            classDiagram.namespace'("Mammals", [
-                classDiagram.class'(zebra)
+            classDiagram.``namespace`` ("Mammals", [
+                classDiagram.``class``(zebra)
             ])
         ]
         |> siren.write

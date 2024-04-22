@@ -8,7 +8,7 @@ let private tests_click = testList "click" [
     testCase "href" <| fun _ ->
         let actual =
             siren.classDiagram [
-                classDiagram.class' "ClassA"
+                classDiagram.``class`` "ClassA"
                 classDiagram.clickHref ("ClassA", @"https://mermaid.js.org/syntax/classDiagram.html#setting-the-direction-of-the-diagram")
             ]
             |> siren.write
@@ -23,7 +23,7 @@ let private tests_namespace = testList "namespace" [
     testCase "empty" <| fun _ ->
         let actual =
             siren.classDiagram [
-                classDiagram.namespace'("BaseShapes", [])
+                classDiagram.``namespace``("BaseShapes", [])
             ]
             |> siren.write
         let expected = """classDiagram
@@ -32,8 +32,8 @@ let private tests_namespace = testList "namespace" [
     testCase "simple" <| fun _ ->
         let actual =
             siren.classDiagram [
-                classDiagram.namespace'("BaseShapes", [
-                    classDiagram.class'("classA")
+                classDiagram.``namespace``("BaseShapes", [
+                    classDiagram.``class``("classA")
                 ])
             ]
             |> siren.write
@@ -93,10 +93,10 @@ let private tests_member = testList "member" [
         let actual = 
             let ba = "BankAccount"
             siren.classDiagram [
-                classDiagram.class' ba
-                classDiagram.classMember(ba,"String owner")
-                classDiagram.classMember(ba,"+BigDecimal balance")
-                classDiagram.classMember(ba,"deposit(amount)", memberVisibility.public')
+                classDiagram.``class`` ba
+                classDiagram.``member``(ba,"String owner")
+                classDiagram.``member``(ba,"+BigDecimal balance")
+                classDiagram.``member``(ba,"deposit(amount)", memberVisibility.``public``)
             ]
             |> siren.write
         let expected = """classDiagram
@@ -110,9 +110,9 @@ let private tests_member = testList "member" [
         let actual = 
             let ba = "BankAccount"
             siren.classDiagram [
-                classDiagram.class' ba
-                classDiagram.classMember(ba,"String owner", classifier=memberClassifier.abstract')
-                classDiagram.classMember(ba,"float owner", classifier=memberClassifier.static')
+                classDiagram.``class`` ba
+                classDiagram.memberAbstract(ba,"String owner")
+                classDiagram.memberStatic(ba,"float owner")
             ]
             |> siren.write
         let expected = """classDiagram
@@ -125,9 +125,9 @@ let private tests_member = testList "member" [
         let actual = 
             let ba = "BankAccount"
             siren.classDiagram [
-                classDiagram.class' ba
-                classDiagram.classMember(ba,"String owner",memberVisibility.packageInternal,memberClassifier.abstract')
-                classDiagram.classMember(ba,"float owner", memberVisibility.public', memberClassifier.static')
+                classDiagram.``class`` ba
+                classDiagram.``member``(ba,"String owner",memberVisibility.packageInternal, memberClassifier.``abstract``)
+                classDiagram.``member``(ba,"float owner", memberVisibility.``public`` , memberClassifier.``static`` )
             ]
             |> siren.write
         let expected = """classDiagram
@@ -142,7 +142,7 @@ let private tests_class = testList "class" [
     testCase "id-only" <| fun _ ->
         let actual = 
             siren.classDiagram [
-                classDiagram.class'("Animal")
+                classDiagram.``class``("Animal")
             ]
             |> siren.write
         let expected = """classDiagram
@@ -152,7 +152,7 @@ let private tests_class = testList "class" [
     testCase "id+name" <| fun _ ->
         let actual = 
             siren.classDiagram [
-                classDiagram.class'("Animal", "Such a cool thing")
+                classDiagram.``class``("Animal", "Such a cool thing")
             ]
             |> siren.write
         let expected = """classDiagram
@@ -162,8 +162,8 @@ let private tests_class = testList "class" [
     testCase "id+name+generic" <| fun _ ->
         let actual = 
             siren.classDiagram [
-                classDiagram.class'("Animal", "Such a cool thing","Animal")
-                classDiagram.classMember("Animal", "sex", memberVisibility.public', memberClassifier.static')
+                classDiagram.``class``("Animal", "Such a cool thing","Animal")
+                classDiagram.memberStatic("Animal", "sex", memberVisibility.``public``)
             ]
             |> siren.write
         let expected = """classDiagram
@@ -174,7 +174,7 @@ let private tests_class = testList "class" [
     testCase "members" <| fun _ ->
         let actual = 
             siren.classDiagram [
-                classDiagram.class'("BankAccount", "Treasure chest",members=[
+                classDiagram.``class``("BankAccount", "Treasure chest",members=[
                     "+String owner"
                     "+BigDecimal balance"
                     "+deposit(amount) bool"
@@ -203,25 +203,25 @@ let private tests_complex = testList "complex" [
                 classDiagram.note(@"can fly\ncan swim\ncan dive\ncan help in debugging", duck)
                 classDiagram.relationshipInheritance(fish, animal)
                 classDiagram.relationshipInheritance(zebra, animal)
-                classDiagram.classMember(animal,"+int age")
-                classDiagram.classMember(animal,"+String gender")
-                classDiagram.classMember(animal,"+isMammal()")
-                classDiagram.classMember(animal,"+mate()")
-                classDiagram.class'(duck,members=[
+                classDiagram.``member``(animal,"+int age")
+                classDiagram.``member``(animal,"+String gender")
+                classDiagram.``member``(animal,"+isMammal()")
+                classDiagram.``member``(animal,"+mate()")
+                classDiagram.``class``(duck,members=[
                     "+String beakColor"
                     "+swim()"
                     "+quack()"
                 ])
-                classDiagram.class'(fish,members=[
+                classDiagram.``class``(fish,members=[
                     "-int sizeInFeet"
                     "-canEat()"
                 ])
-                classDiagram.class'(zebra,members=[
+                classDiagram.``class``(zebra,members=[
                     "+bool is_wild"
                     "+run()"
                 ])
-                classDiagram.namespace'("Mammals", [
-                    classDiagram.class'(zebra)
+                classDiagram.``namespace``("Mammals", [
+                    classDiagram.``class``(zebra)
                 ])
             ]
             |> siren.write

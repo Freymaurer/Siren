@@ -31,7 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Siren.fsproj" />
+    <ProjectReference Include="..\..\src\Siren\Siren.fsproj" />
   </ItemGroup>
 
 </Project>
