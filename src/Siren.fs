@@ -777,7 +777,7 @@ type classDiagram =
     static member relationshipCustom (id1, id2, rltsType, ?label: string, ?direction, ?isDotted, ?cardinality1: ClassDiagram.Cardinality, ?cardinality2: ClassDiagram.Cardinality) = 
         ClassDiagram.formatRelationshipCustom id1 id2 rltsType direction isDotted label cardinality1 cardinality2 |> ClassDiagramElement
 
-    static member namespace' (name: string, children: #seq<ClassDiagramElement>) =
+    static member ``namespace`` (name: string, children: #seq<ClassDiagramElement>) =
         if Seq.isEmpty children then ClassDiagramNone 
         else ClassDiagramWrapper (sprintf "namespace %s {" name,"}", List.ofSeq children)
     static member annotation (id: string, annotation: string) = classDiagram.annotationString (id, annotation)

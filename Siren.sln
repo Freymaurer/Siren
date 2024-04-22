@@ -34,6 +34,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{F7C3CCB8-7
 		docs\vite.config.js = docs\vite.config.js
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Siren.See", "src\Siren.See\Siren.See\Siren.See.csproj", "{76E88C62-9CF3-4D7D-A7E6-A6C00BCF2173}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -56,6 +58,10 @@ Global
 		{E33CFE2C-2CC4-4552-9BEA-9F23291D7F08}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E33CFE2C-2CC4-4552-9BEA-9F23291D7F08}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E33CFE2C-2CC4-4552-9BEA-9F23291D7F08}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76E88C62-9CF3-4D7D-A7E6-A6C00BCF2173}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76E88C62-9CF3-4D7D-A7E6-A6C00BCF2173}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76E88C62-9CF3-4D7D-A7E6-A6C00BCF2173}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76E88C62-9CF3-4D7D-A7E6-A6C00BCF2173}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
