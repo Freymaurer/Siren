@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Util.fs" />
+    <Compile Include="Yaml.fs" />
+    <Compile Include="Types.fs" />
+    <Compile Include="Formatting.fs" />
     <Compile Include="Siren.fs" />
   </ItemGroup>
 

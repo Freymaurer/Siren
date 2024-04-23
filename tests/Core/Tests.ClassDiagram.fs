@@ -74,12 +74,12 @@ let private tests_rlts = testList "Relationship" [
         let actual = 
             siren.classDiagram [
                 classDiagram.relationshipCustom("classA","classB", 
-                    ClassDiagram.ClassRelationshipType.Aggregation,
+                    classRltsType.aggregation,
                     "Test Label",
-                    ClassDiagram.ClassRelationshipDirection.TwoWay,
+                    classDirection.twoWay,
                     true,
-                    ClassDiagram.Cardinality.One,
-                    ClassDiagram.Cardinality.Custom "many")
+                    classCardinality.one,
+                    classCardinality.custom "many")
             ]
             |> siren.write
         let expected = """classDiagram
