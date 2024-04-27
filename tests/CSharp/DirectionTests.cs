@@ -1,4 +1,3 @@
-using Siren;
 using Siren.Sea;
 using Xunit;
 
@@ -7,7 +6,7 @@ namespace CSharp
     public class Direction
     {
         [Fact]
-        public void NameAliasWorking()
+        public void DirectionAccessSuccessful()
         {
             var actual = direction.topDown == direction.td;
             Assert.True(actual);

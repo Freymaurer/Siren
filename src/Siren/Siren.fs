@@ -247,9 +247,9 @@ type classDiagram =
     static member ``namespace`` (name: string, children: #seq<ClassDiagramElement>) =
         if Seq.isEmpty children then ClassDiagramNone 
         else ClassDiagramWrapper (sprintf "namespace %s {" name,"}", List.ofSeq children)
-    static member annotation (id: string, annotation: string) = classDiagram.annotationString (id, annotation)
+    static member annotation (id: string, annotation: string) : ClassDiagramElement = classDiagram.annotationString (id, annotation) |> ClassDiagramElement
     static member annotationString (id: string, annotation: string) : string = ClassDiagram.formatAnnotation id annotation
-    static member comment (txt:string) = Generic.formatComment txt
+    static member comment (txt:string) = Generic.formatComment txt |> ClassDiagramElement
     static member direction (direction: Direction) = Generic.formatDirection direction |> ClassDiagramElement
     static member clickHref(id,url,?tooltip) = Generic.formatClickHref id url tooltip |> ClassDiagramElement
     //static member clickCallback() = failwith "TODO"
@@ -294,9 +294,9 @@ type stateDiagram =
 #endif
 [<AttachMembers>]
 type erKey =
-    static member pk = ERDiagram.IERKeyType.PK
-    static member fk = ERDiagram.IERKeyType.FK
-    static member uk = ERDiagram.IERKeyType.UK
+    static member pk = ERDiagram.ERKeyType.PK
+    static member fk = ERDiagram.ERKeyType.FK
+    static member uk = ERDiagram.ERKeyType.UK
 
 #if FABLE_COMPILER_PYTHON
 [<CompiledName("er_cardinality")>]
@@ -307,22 +307,22 @@ type erCardinality =
     /// }| or |{
     /// </summary>
     /// <param name="oneOrZero"></param>
-    static member oneOrMany = ERDiagram.IERCardinalityType.OneOrMany
+    static member oneOrMany = ERDiagram.ERCardinalityType.OneOrMany
     /// <summary>
     /// |o or o|
     /// </summary>
     /// <param name="oneOrZero"></param>
-    static member oneOrZero = ERDiagram.IERCardinalityType.OneOrZero
+    static member oneOrZero = ERDiagram.ERCardinalityType.OneOrZero
     /// <summary>
     /// ||
     /// </summary>
     /// <param name="oneOrMany"></param>
-    static member onlyOne = ERDiagram.IERCardinalityType.OnlyOne
+    static member onlyOne = ERDiagram.ERCardinalityType.OnlyOne
     /// <summary>
     /// }o or o{
     /// </summary>
     /// <param name="zeroOrMany"></param>
-    static member zeroOrMany = ERDiagram.IERCardinalityType.ZeroOrMany
+    static member zeroOrMany = ERDiagram.ERCardinalityType.ZeroOrMany
     
 #if FABLE_COMPILER_PYTHON
 [<CompiledName("er_diagram")>]
@@ -330,14 +330,14 @@ type erCardinality =
 [<AttachMembers>]
 type erDiagram =
     static member raw (line: string) = ERDiagramElement line
-    static member entity (id: string, ?alias: string, ?attr: #seq<ERDiagram.IERAttribute>) = 
+    static member entity (id: string, ?alias: string, ?attr: #seq<ERDiagram.ERAttribute>) = 
         if attr.IsSome then 
             let children = [for attr in attr.Value do ERDiagram.formatAttribute attr |> ERDiagramElement] // of attributes
             ERDiagramWrapper (ERDiagram.formatEntityWrapper id alias, "}", children) 
         else ERDiagram.formatEntityNode id alias |> ERDiagramElement
     static member relationship(id1, erCardinality1, id2, erCardinality2, message, ?isOptional: bool) = 
         ERDiagram.formatRelationship id1 erCardinality1 id2 erCardinality2 message isOptional |> ERDiagramElement
-    static member attribute(attrType: string, name: string, ?keys: #seq<ERDiagram.IERKeyType>, ?comment: string) : ERDiagram.IERAttribute = 
+    static member attribute(attrType: string, name: string, ?keys: #seq<ERDiagram.ERKeyType>, ?comment: string) : ERDiagram.ERAttribute = 
         {Type=attrType; Name=name;Keys=Option.map List.ofSeq keys |> Option.defaultValue []; Comment = comment}
 
 
@@ -364,23 +364,23 @@ type ganttTime =
 #endif
 [<AttachMembers>]
 type ganttTags =
-    static member active = Gantt.IGanttTags.Active
-    static member ``done`` = Gantt.IGanttTags.Done
-    static member crit = Gantt.IGanttTags.Crit
-    static member milestone = Gantt.IGanttTags.Milestone
+    static member active = Gantt.GanttTags.Active
+    static member ``done`` = Gantt.GanttTags.Done
+    static member crit = Gantt.GanttTags.Crit
+    static member milestone = Gantt.GanttTags.Milestone
 
 #if FABLE_COMPILER_PYTHON
 [<CompiledName("gantt_unit")>]
 #endif
 [<AttachMembers>]
 type ganttUnit =
-    static member millisecond = Gantt.IGanttUnit.Millisecond
-    static member second = Gantt.IGanttUnit.Second
-    static member minute = Gantt.IGanttUnit.Minute
-    static member hour = Gantt.IGanttUnit.Hour
-    static member day = Gantt.IGanttUnit.Day
-    static member week = Gantt.IGanttUnit.Week
-    static member month = Gantt.IGanttUnit.Month
+    static member millisecond = Gantt.GanttUnit.Millisecond
+    static member second = Gantt.GanttUnit.Second
+    static member minute = Gantt.GanttUnit.Minute
+    static member hour = Gantt.GanttUnit.Hour
+    static member day = Gantt.GanttUnit.Day
+    static member week = Gantt.GanttUnit.Week
+    static member month = Gantt.GanttUnit.Month
 
 [<AttachMembers>]
 type gantt =
@@ -388,23 +388,23 @@ type gantt =
     static member title (name: string) = sprintf "title %s" name |> GanttElement
     static member section (name: string) = sprintf "section %s" name |> GanttElement
 
-    static member task (title: string, id: string, startDate:string, endDate: string, ?tags: #seq<Gantt.IGanttTags>) = 
+    static member task (title: string, id: string, startDate:string, endDate: string, ?tags: #seq<Gantt.GanttTags>) = 
         Gantt.formatTask title (Option.defaultBind List.ofSeq [] tags) (Some id) (Some startDate) (Some endDate) |> GanttElement
-    static member taskStartEnd (title: string, startDate:string, endDate: string, ?tags: #seq<Gantt.IGanttTags>) = 
+    static member taskStartEnd (title: string, startDate:string, endDate: string, ?tags: #seq<Gantt.GanttTags>) = 
         Gantt.formatTask title (Option.defaultBind List.ofSeq [] tags) (None) (Some startDate) (Some endDate) |> GanttElement
-    static member taskEnd (title: string, endDate: string, ?tags: #seq<Gantt.IGanttTags>) = 
+    static member taskEnd (title: string, endDate: string, ?tags: #seq<Gantt.GanttTags>) = 
         Gantt.formatTask title (Option.defaultBind List.ofSeq [] tags) (None) (None) (Some endDate) |> GanttElement
 
-    static member milestone (title: string, id: string, startDate:string, endDate: string, ?tags: #seq<Gantt.IGanttTags>) = 
+    static member milestone (title: string, id: string, startDate:string, endDate: string, ?tags: #seq<Gantt.GanttTags>) = 
         Gantt.formatTask title (ganttTags.milestone::Option.defaultBind List.ofSeq [] tags) (Some id) (Some startDate) (Some endDate) |> GanttElement
-    static member milestoneStartEnd (title: string, startDate:string, endDate: string, ?tags: #seq<Gantt.IGanttTags>) = 
+    static member milestoneStartEnd (title: string, startDate:string, endDate: string, ?tags: #seq<Gantt.GanttTags>) = 
         Gantt.formatTask title (ganttTags.milestone::Option.defaultBind List.ofSeq [] tags) (None) (Some startDate) (Some endDate) |> GanttElement
-    static member milestoneEnd (title: string, endDate: string, ?tags: #seq<Gantt.IGanttTags>) = 
+    static member milestoneEnd (title: string, endDate: string, ?tags: #seq<Gantt.GanttTags>) = 
         Gantt.formatTask title (ganttTags.milestone::Option.defaultBind List.ofSeq [] tags) (None) (None) (Some endDate) |> GanttElement
 
     static member dateFormat (formatString: string) = sprintf "dateFormat %s" formatString |> GanttElement
     static member axisFormat (formatString: string) = sprintf "axisFormat %s" formatString |> GanttElement
-    static member tickInterval (interval: int, unit: Gantt.IGanttUnit) = sprintf "tickInterval %i%s" interval (unit.ToFormatString()) |> GanttElement ///^([1-9][0-9]*)(millisecond|second|minute|hour|day|week|month)$/;
+    static member tickInterval (interval: int, unit: Gantt.GanttUnit) = sprintf "tickInterval %i%s" interval (unit.ToFormatString()) |> GanttElement ///^([1-9][0-9]*)(millisecond|second|minute|hour|day|week|month)$/;
 
     static member weekday (day: string) = sprintf "weekday %s" day |> GanttElement 
     static member excludes (day: string) = sprintf "excludes %s" day |> GanttElement 
@@ -441,19 +441,19 @@ type quadrant =
 #endif
 [<AttachMembers>]
 type rqRisk =
-    static member low = RequirementDiagram.IRiskType.Low
-    static member medium = RequirementDiagram.IRiskType.Medium
-    static member high = RequirementDiagram.IRiskType.High
+    static member low = RequirementDiagram.RiskType.Low
+    static member medium = RequirementDiagram.RiskType.Medium
+    static member high = RequirementDiagram.RiskType.High
 
 #if FABLE_COMPILER_PYTHON
 [<CompiledName("rq_method")>]
 #endif
 [<AttachMembers>]
 type rqMethod =
-    static member analysis = RequirementDiagram.IVerifyMethod.Analysis
-    static member inspection = RequirementDiagram.IVerifyMethod.Inspection
-    static member test = RequirementDiagram.IVerifyMethod.Test
-    static member demonstration = RequirementDiagram.IVerifyMethod.Demonstration
+    static member analysis = RequirementDiagram.VerifyMethod.Analysis
+    static member inspection = RequirementDiagram.VerifyMethod.Inspection
+    static member test = RequirementDiagram.VerifyMethod.Test
+    static member demonstration = RequirementDiagram.VerifyMethod.Demonstration
 
 #if FABLE_COMPILER_PYTHON
 [<CompiledName("req_dia")>]
@@ -462,17 +462,17 @@ type rqMethod =
 type reqDia =
     static member raw (txt: string) = RequirementDiagramElement txt
 
-    static member requirement (name, ?id: string, ?text: string, ?rqRisk: RequirementDiagram.IRiskType, ?rqMethod: RequirementDiagram.IVerifyMethod) =
+    static member requirement (name, ?id: string, ?text: string, ?rqRisk: RequirementDiagram.RiskType, ?rqMethod: RequirementDiagram.VerifyMethod) =
         RequirementDiagram.createRequirement "requirement" name id text rqRisk rqMethod
-    static member functionalRequirement (name, ?id: string, ?text: string, ?rqRisk: RequirementDiagram.IRiskType, ?rqMethod: RequirementDiagram.IVerifyMethod) =
+    static member functionalRequirement (name, ?id: string, ?text: string, ?rqRisk: RequirementDiagram.RiskType, ?rqMethod: RequirementDiagram.VerifyMethod) =
         RequirementDiagram.createRequirement "functionalRequirement" name id text rqRisk rqMethod
-    static member interfaceRequirement (name, ?id: string, ?text: string, ?rqRisk: RequirementDiagram.IRiskType, ?rqMethod: RequirementDiagram.IVerifyMethod) =
+    static member interfaceRequirement (name, ?id: string, ?text: string, ?rqRisk: RequirementDiagram.RiskType, ?rqMethod: RequirementDiagram.VerifyMethod) =
         RequirementDiagram.createRequirement "interfaceRequirement" name id text rqRisk rqMethod
-    static member performanceRequirement (name, ?id: string, ?text: string, ?rqRisk: RequirementDiagram.IRiskType, ?rqMethod: RequirementDiagram.IVerifyMethod) =
+    static member performanceRequirement (name, ?id: string, ?text: string, ?rqRisk: RequirementDiagram.RiskType, ?rqMethod: RequirementDiagram.VerifyMethod) =
         RequirementDiagram.createRequirement "performanceRequirement" name id text rqRisk rqMethod
-    static member physicalRequirement (name, ?id: string, ?text: string, ?rqRisk: RequirementDiagram.IRiskType, ?rqMethod: RequirementDiagram.IVerifyMethod) = 
+    static member physicalRequirement (name, ?id: string, ?text: string, ?rqRisk: RequirementDiagram.RiskType, ?rqMethod: RequirementDiagram.VerifyMethod) = 
         RequirementDiagram.createRequirement "physicalRequirement" name id text rqRisk rqMethod
-    static member designConstraint (name, ?id: string, ?text: string, ?rqRisk: RequirementDiagram.IRiskType, ?rqMethod: RequirementDiagram.IVerifyMethod) =
+    static member designConstraint (name, ?id: string, ?text: string, ?rqRisk: RequirementDiagram.RiskType, ?rqMethod: RequirementDiagram.VerifyMethod) =
         RequirementDiagram.createRequirement "designConstraint" name id text rqRisk rqMethod
 
     static member element (name, ?elementType, ?docref) = RequirementDiagram.createElement name elementType docref
@@ -491,15 +491,15 @@ type reqDia =
 #endif
 [<AttachMembers>]
 type gitType =
-    static member normal = Git.IGitCommitType.NORMAL
-    static member reverse = Git.IGitCommitType.REVERSE
-    static member highlight = Git.IGitCommitType.HIGHLIGHT
+    static member normal = Git.GitCommitType.NORMAL
+    static member reverse = Git.GitCommitType.REVERSE
+    static member highlight = Git.GitCommitType.HIGHLIGHT
 
 [<AttachMembers>]
 type git =
     static member raw (line:string) = GitGraphElement line
-    static member commit (?id: string, ?gitType: Git.IGitCommitType, ?tag: string) = Git.formatCommit id gitType tag |> GitGraphElement
-    static member merge (targetBranchId: string, ?mergeid: string, ?gitType: Git.IGitCommitType, ?tag: string) = 
+    static member commit (?id: string, ?gitType: Git.GitCommitType, ?tag: string) = Git.formatCommit id gitType tag |> GitGraphElement
+    static member merge (targetBranchId: string, ?mergeid: string, ?gitType: Git.GitCommitType, ?tag: string) = 
         Git.formatMerge targetBranchId mergeid gitType tag |> GitGraphElement
     static member cherryPick (commitid: string, ?parentId: string) = Git.formatCherryPick commitid parentId |> GitGraphElement
     static member branch (id: string) = GitGraphElement ("branch " + id)

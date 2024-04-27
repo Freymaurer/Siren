@@ -21,8 +21,6 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Siren.Tests", "tests\Core\S
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{4AC2249E-9CDF-4A34-9EC3-CBC2F22FEC6A}"
 EndProject
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "App", "docs\src\App.fsproj", "{E33CFE2C-2CC4-4552-9BEA-9F23291D7F08}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{F7C3CCB8-7CAC-4F37-BCD7-307C1334B20F}"
 	ProjectSection(SolutionItems) = preProject
 		docs\package.json = docs\package.json
@@ -36,7 +34,7 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Siren", "src\Siren\Siren.fs
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Siren.Sea", "src\Siren.Sea\Siren.Sea.csproj", "{DCDC2993-FC0B-40AF-A193-16B0A50DE62A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharp", "tests\CSharp\CSharp.csproj", "{1ACC2A20-DE15-41BA-B128-0846BE2BCD3F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Siren.Sea.Tests", "tests\CSharp\Siren.Sea.Tests.csproj", "{1ACC2A20-DE15-41BA-B128-0846BE2BCD3F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -52,10 +50,6 @@ Global
 		{A1FAF9E8-BFD9-487E-BAF3-C77520268CC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A1FAF9E8-BFD9-487E-BAF3-C77520268CC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A1FAF9E8-BFD9-487E-BAF3-C77520268CC7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E33CFE2C-2CC4-4552-9BEA-9F23291D7F08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E33CFE2C-2CC4-4552-9BEA-9F23291D7F08}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E33CFE2C-2CC4-4552-9BEA-9F23291D7F08}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E33CFE2C-2CC4-4552-9BEA-9F23291D7F08}.Release|Any CPU.Build.0 = Release|Any CPU
 		{09755491-67B7-4C6C-9177-D3DC5371BCD0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{09755491-67B7-4C6C-9177-D3DC5371BCD0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{09755491-67B7-4C6C-9177-D3DC5371BCD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -74,7 +68,6 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{A1FAF9E8-BFD9-487E-BAF3-C77520268CC7} = {4AC2249E-9CDF-4A34-9EC3-CBC2F22FEC6A}
-		{E33CFE2C-2CC4-4552-9BEA-9F23291D7F08} = {F7C3CCB8-7CAC-4F37-BCD7-307C1334B20F}
 		{1ACC2A20-DE15-41BA-B128-0846BE2BCD3F} = {4AC2249E-9CDF-4A34-9EC3-CBC2F22FEC6A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution

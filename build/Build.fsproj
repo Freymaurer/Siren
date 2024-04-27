@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="CodeGen.fs" />
     <Compile Include="Util.fs" />
     <Compile Include="ProjectInfo.fs" />
     <Compile Include="Test\Python.fs" />

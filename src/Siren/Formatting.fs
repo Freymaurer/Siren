@@ -321,7 +321,7 @@ module StateDiagram =
 module ERDiagram =
 
     [<RequireQualifiedAccess>]
-    type IERCardinalityType = 
+    type ERCardinalityType = 
         | OneOrZero
         | OneOrMany
         | ZeroOrMany
@@ -334,15 +334,15 @@ module ERDiagram =
             | OnlyOne -> "only one"
 
     [<RequireQualifiedAccess>]
-    type IERKeyType = 
+    type ERKeyType = 
         | PK
         | FK
         | UK
     [<RequireQualifiedAccess>]
-    type IERAttribute = {
+    type ERAttribute = {
         Type : string
         Name : string
-        Keys : IERKeyType list
+        Keys : ERKeyType list
         Comment: string option
     } 
 
@@ -353,7 +353,7 @@ module ERDiagram =
     let formatEntityWrapper (id) (alias: string option) =
         formatEntityNode id alias + " {"
 
-    let formatAttribute (attr:IERAttribute) =
+    let formatAttribute (attr:ERAttribute) =
         let keys = attr.Keys |> List.map _.ToString() |> String.concat ", "
         let comment = attr.Comment |> Option.formatString (fun s -> sprintf "\"%s\"" s)
         [
@@ -365,7 +365,7 @@ module ERDiagram =
         |> List.filter (fun s -> s <> "")
         |> String.concat " "
 
-    let formatRelationship (id1) (card1: IERCardinalityType) id2 (card2: IERCardinalityType) msg (isOptional: bool option) =
+    let formatRelationship (id1) (card1: ERCardinalityType) id2 (card2: ERCardinalityType) msg (isOptional: bool option) =
         let isOptional = defaultArg isOptional false
         let toString = if isOptional then "optionally to" else "to"
         sprintf "%s %s %s %s %s : %s" id1 (card1.ToFormatString()) toString (card2.ToFormatString()) id2 msg
@@ -386,7 +386,7 @@ module UserJourney =
 module Gantt =
 
     [<RequireQualifiedAccess>]
-    type IGanttTags = 
+    type GanttTags = 
     | Active
     | Done
     | Crit
@@ -399,7 +399,7 @@ module Gantt =
             | Milestone -> "milestone"
 
     [<RequireQualifiedAccess>]
-    type IGanttUnit =
+    type GanttUnit =
     | Millisecond
     | Second
     | Minute
@@ -410,7 +410,7 @@ module Gantt =
         member this.ToFormatString() =
             string this |> _.ToLower()
 
-    let formatTask title (tags: IGanttTags list) (selfid: string option) (startDate: string option) (endDate: string option) =
+    let formatTask title (tags: GanttTags list) (selfid: string option) (startDate: string option) (endDate: string option) =
         let tags = tags |> Seq.map (fun x -> x.ToFormatString() |> Some) |> Seq.distinct 
         let metadata =
             [
@@ -450,7 +450,7 @@ module QuadrantChart =
 
 module RequirementDiagram =
 
-    type IRequirementType =
+    type RequirementType =
         | Requirement
         | FunctionalRequirement
         | InterfaceRequirement
@@ -458,13 +458,13 @@ module RequirementDiagram =
         | PhysicalRequirement
         | DesignConstraint
 
-    type IRiskType = 
+    type RiskType = 
         | Low
         | Medium
         | High
         member this.ToFormatString() = this.ToString().ToLower()
 
-    type IVerifyMethod =
+    type VerifyMethod =
         | Analysis
         | Inspection
         | Test
@@ -472,7 +472,7 @@ module RequirementDiagram =
         member this.ToFormatString() = this.ToString().ToLower()
 
     /// A relationship type can be one of contains, copies, derives, satisfies, verifies, refines, or traces.
-    type IRDRelationship = 
+    type RDRelationship = 
         | Contains
         | Copies
         | Derives
@@ -482,7 +482,7 @@ module RequirementDiagram =
         | Traces
         member this.ToFormatString() = this.ToString().ToLower()
 
-    let createRequirement type0 name id text (risk: IRiskType option) (methods: IVerifyMethod option) =
+    let createRequirement type0 name id text (risk: RiskType option) (methods: VerifyMethod option) =
         let children =
             [
                 id |> Option.map (fun i -> sprintf "id: \"%s\"" i)
@@ -504,20 +504,20 @@ module RequirementDiagram =
             |> List.map RequirementDiagramElement
         RequirementDiagramWrapper(sprintf "element %s {" name,"}", children)
         
-    let formatRelationship id1 id2 (rltsType: IRDRelationship) =
+    let formatRelationship id1 id2 (rltsType: RDRelationship) =
         sprintf "%s - %s -> %s" id1 (rltsType.ToFormatString()) id2
 
 
 module Git =
 
-    type IGitCommitType =
+    type GitCommitType =
     | NORMAL
     | REVERSE
     | HIGHLIGHT
         member this.ToFormatString() =
             this.ToString().ToUpper()
 
-    let formatCommitType (commitType: IGitCommitType option) =
+    let formatCommitType (commitType: GitCommitType option) =
         commitType |> Option.map (fun s -> sprintf "type: %s" <| s.ToFormatString())
 
     let formatTag (tag: string option) =
@@ -529,7 +529,7 @@ module Git =
     let formatParentID (aprentId: string option) =
         aprentId |> Option.map (fun s -> sprintf "parent: \"%s\"" s)
 
-    let formatCommit (selfid: string option) (commitType: IGitCommitType option) (tag: string option) =
+    let formatCommit (selfid: string option) (commitType: GitCommitType option) (tag: string option) =
         [
             Some "commit"
             selfid |> formatSelfID
@@ -539,7 +539,7 @@ module Git =
         |> List.choose id
         |> String.concat " "
 
-    let formatMerge targetId mergeId (commitType: IGitCommitType option) tag =
+    let formatMerge targetId mergeId (commitType: GitCommitType option) tag =
         [
             Some "merge"
             Some targetId
@@ -562,7 +562,7 @@ module Git =
 
 module Mindmap =
 
-    type IMindmapShape = 
+    type MindmapShape = 
         | Square //id[I am a square]
         | RoundedSquare //id(I am a rounded square)
         | Circle //id((I am a circle))

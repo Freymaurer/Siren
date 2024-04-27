@@ -19,6 +19,33 @@ siren.flowchart(direction.bt, [
 ```
 
 </TabItem>
+<TabItem value="csharp" label="C#">
+
+```csharp
+using Siren.Sea;
+using static Siren.Types;
+
+public class MoonRocket
+{
+    public static SirenElement graph = siren.flowchart(direction.bt, [
+        flowchart.subgraph("space", [
+            flowchart.directionBT,
+            flowchart.linkDottedArrow("earth", "moon", formatting.unicode("🚀"), 6),
+            flowchart.nodeRound("moon"),
+            flowchart.subgraph("atmosphere",[
+                flowchart.nodeCircle("earth")
+            ])
+        ])
+    ]);
+    public static void Log()
+    {
+        var md = siren.write(graph);
+        Console.WriteLine(md);
+    }
+}
+```
+
+</TabItem>
 <TabItem value="py" label="Python">
 
 ```py

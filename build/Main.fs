@@ -45,6 +45,10 @@ let main argv =
         Examples.Flowchart.writeMoonRocketExample()
         Examples.ClassDiagram.writeAnimalExample()
         Examples.EntityRelationshipDiagram.writeCarExample()
+    | "codegen" :: args ->
+        printfn "STARTING CODEGEN..."
+        CodeGen.test() 
+        printfn "ENDING CODEGEN..."
     | _ -> printHelp ()
 
     0
