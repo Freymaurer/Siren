@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 /// From Plotly.NET: 
 /// https://github.com/plotly/Plotly.NET/blob/csharp-object-bindings/src/Plotly.NET.CSharp/Optional.cs
-namespace Siren.Sea
+namespace Siren.Sea.Util
 {
     /// <summary>
     /// Helper type for handling the special way the Plotly.NET core API uses generics.

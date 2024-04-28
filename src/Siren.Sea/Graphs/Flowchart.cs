@@ -1,8 +1,9 @@
 ﻿namespace Siren.Sea;
 
 using static Siren.Types;
+using Util;
 
-public class flowchart
+public static class flowchart
 {
     public static FlowchartElement raw(string txt) => Siren.flowchart.raw(txt);
 

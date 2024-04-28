@@ -1,7 +1,7 @@
 ﻿namespace Siren.Sea;
 using static Siren.Types;
 
-public class sankey
+public static class sankey
 {
     public static SankeyElement raw(string line)
          => Siren.sankey.raw(line);

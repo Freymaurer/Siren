@@ -2,7 +2,7 @@
 
 using static Siren.Types;
 
-public class xyChart
+public static class xyChart
 {
     public static XYChartElement raw(string line)
          => Siren.xyChart.raw(line);

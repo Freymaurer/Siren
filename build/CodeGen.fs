@@ -36,7 +36,7 @@ let generateCSharpCode<'A>() =
     let t = typeof<'A>
     let members = t.GetMethods(BindingFlags.Static ||| BindingFlags.Public)
 
-    let mutable csharpCode = sprintf "public class %s\n{\n" t.Name
+    let mutable csharpCode = sprintf "public static class %s\n{\n" t.Name
     for m in members do
         let methodName = 
             let name0 = m.Name

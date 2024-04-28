@@ -1,7 +1,7 @@
 ﻿namespace Siren.Sea;
 using static Siren.Types;
-
-public class mindmap
+using Util;
+public static class mindmap
 {
     public static MindmapElement raw(string line)
          => Siren.mindmap.raw(line);
@@ -35,7 +35,7 @@ public class mindmap
          => Siren.mindmap.icon(iconClass);
     public static MindmapElement className(string className)
          => Siren.mindmap.className(className);
-    public static MindmapElement classNames(a classNames)
+    public static MindmapElement classNames(IEnumerable<string> classNames)
          => Siren.mindmap.classNames(classNames);
     public static String comment(string txt)
          => Siren.mindmap.comment(txt);

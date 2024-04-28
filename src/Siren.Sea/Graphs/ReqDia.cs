@@ -2,8 +2,8 @@
 
 using static Siren.Formatting.RequirementDiagram;
 using static Siren.Types;
-
-public class rqRisk
+using Util;
+public static class rqRisk
 {
     public static RiskType low
          => Siren.rqRisk.low;
@@ -13,7 +13,7 @@ public class rqRisk
          => Siren.rqRisk.high;
 }
 
-public class rqMethod
+public static class rqMethod
 {
     public static VerifyMethod analysis
          => Siren.rqMethod.analysis;
@@ -24,7 +24,7 @@ public class rqMethod
     public static VerifyMethod demonstration
          => Siren.rqMethod.demonstration;
 }
-public class reqDia
+public static class reqDia
 {
     public static RequirementDiagramElement raw(string txt)
          => Siren.reqDia.raw(txt);

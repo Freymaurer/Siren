@@ -2,8 +2,8 @@
 
 using static Siren.Types;
 using static Formatting.Generic;
-
-public class stateDiagram
+using Util;
+public static class stateDiagram
 {
     public static StateDiagramElement state(string id, Optional<string> description = default)
          => Siren.stateDiagram.state(id, description.ToOption());

@@ -2,8 +2,9 @@
 
 using static Siren.Types;
 using static Formatting.ERDiagram;
+using Util;
 
-public class erKey
+public static class erKey
 {
     public static ERKeyType pk
          => Siren.erKey.pk;
@@ -13,7 +14,7 @@ public class erKey
          => Siren.erKey.uk;
 }
 
-public class erCardinality
+public static class erCardinality
 {
     public static ERCardinalityType oneOrMany
          => Siren.erCardinality.oneOrMany;
@@ -24,7 +25,7 @@ public class erCardinality
     public static ERCardinalityType zeroOrMany
          => Siren.erCardinality.zeroOrMany;
 }
-public class erDiagram
+public static class erDiagram
 {
     public static ERDiagramElement raw(string line)
          => Siren.erDiagram.raw(line);

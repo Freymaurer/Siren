@@ -3,8 +3,8 @@
 using System.Collections.Generic;
 using static Siren.Types;
 using static Siren.Sea.Util.TupleExtensions;
-
-public class sequence
+using Util;
+public static class sequence
 {
     public static SequenceElement raw(string txt) => Siren.sequence.raw(txt);
     public static SequenceElement participant(string name, Optional<string> alias = default) =>

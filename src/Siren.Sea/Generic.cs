@@ -7,21 +7,21 @@ using System.Threading.Tasks;
 using static Siren.Formatting;
 using static Siren.Types;
 
-public class notePosition
+public static class notePosition
 {
     public static Generic.NotePosition over => Siren.notePosition.over;
     public static Generic.NotePosition rightOf => Siren.notePosition.rightOf;
     public static Generic.NotePosition leftOf => Siren.notePosition.leftOf;
 }
 
-public class formatting
+public static class formatting
 {
     public static string unicode(string txt) => Siren.formatting.unicode(txt);
     public static string markdown(string txt) => Siren.formatting.markdown(txt);
     public static string comment(string txt) => Siren.formatting.comment(txt);
 }
 
-public class direction
+public static class direction
 {
     public static Direction tb => Siren.direction.tb;
     public static Direction td => Siren.direction.td;

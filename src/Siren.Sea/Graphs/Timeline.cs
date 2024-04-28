@@ -1,7 +1,8 @@
 ﻿namespace Siren.Sea;
 using static Siren.Types;
+using Util;
 
-public class timeline
+public static class timeline
 {
     public static TimelineElement raw(string line)
          => Siren.timeline.raw(line);

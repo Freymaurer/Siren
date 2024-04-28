@@ -1,8 +1,9 @@
 ﻿namespace Siren.Sea;
 
 using static Siren.Types;
+using Util;
 
-public class siren
+public static class siren
 {
     public static SirenElement flowchart(Direction direction, IEnumerable<FlowchartElement> children)
          => Siren.siren.flowchart(direction, children);
@@ -38,26 +39,4 @@ public class siren
          => Siren.siren.xyChart(children, isHorizontal.ToOption());
     public static String write(SirenElement diagram)
          => Siren.siren.write(diagram);
-}
-
-public class Testing
-{
-    public void Test()
-    {
-        SirenElement graph = siren.classDiagram
-        ([
-            classDiagram.@class("Test1"),
-            classDiagram.@class("Test2"),
-            classDiagram.relationshipCustom
-            (
-                "Test1", "Test2",
-                classRltsType.association,
-                direction: classDirection.twoWay,
-                isDotted: true,
-                cardinality1: classCardinality.one,
-                cardinality2: classCardinality.zeroToN
-            )
-        ]);
-        return;
-    }
 }

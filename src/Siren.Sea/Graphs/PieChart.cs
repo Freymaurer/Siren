@@ -2,7 +2,7 @@
 
 using static Siren.Types;
 
-public class pieChart
+public static class pieChart
 {
     public static PieChartElement raw(string line)
          => Siren.pieChart.raw(line);

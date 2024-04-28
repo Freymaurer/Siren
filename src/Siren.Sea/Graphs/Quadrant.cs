@@ -1,8 +1,8 @@
 ﻿namespace Siren.Sea;
 
 using static Siren.Types;
-
-public class quadrant
+using Util;
+public static class quadrant
 {
     public static QuadrantElement raw(string txt)
          => Siren.quadrant.raw(txt);

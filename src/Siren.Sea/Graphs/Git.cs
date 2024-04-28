@@ -2,8 +2,9 @@
 
 using static Siren.Formatting.Git;
 using static Siren.Types;
+using Util;
 
-public class gitType
+public static class gitType
 {
     public static GitCommitType normal
          => Siren.gitType.normal;
@@ -12,7 +13,7 @@ public class gitType
     public static GitCommitType highlight
          => Siren.gitType.highlight;
 }
-public class git
+public static class git
 {
     public static GitGraphElement raw(string line)
          => Siren.git.raw(line);

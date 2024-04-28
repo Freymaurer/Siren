@@ -2,10 +2,11 @@
 
 using static Siren.Formatting;
 using static Siren.Types;
+using Util;
 
 using static Formatting.ClassDiagram;
 
-public class classRltsType
+public static class classRltsType
 {
     public static ClassRelationshipType inheritance
          => Siren.classRltsType.inheritance;
@@ -27,7 +28,7 @@ public class classRltsType
          => Siren.classRltsType.solid;
 }
 
-public class classCardinality
+public static class classCardinality
 {
     public static Cardinality n
          => Siren.classCardinality.n;
@@ -47,7 +48,7 @@ public class classCardinality
          => Siren.classCardinality.custom(cardinality);
 }
 
-public class classDirection
+public static class classDirection
 {
     public static ClassRelationshipDirection twoWay
          => Siren.classDirection.twoWay;
@@ -57,7 +58,7 @@ public class classDirection
          => Siren.classDirection.right;
 }
 
-public class memberClassifier
+public static class memberClassifier
 {
     public static MemberClassifier @abstract
         => Siren.memberClassifier.@abstract;
@@ -67,7 +68,7 @@ public class memberClassifier
         => Siren.memberClassifier.custom(str);
 }
 
-public class memberVisibility
+public static class memberVisibility
 {
     public static MemberVisibility @public
         => Siren.memberVisibility.@public;
@@ -81,7 +82,7 @@ public class memberVisibility
         => Siren.memberVisibility.custom(str);
 }
 
-public class classDiagram
+public static class classDiagram
 {
     public static ClassDiagramElement raw(string txt) => Siren.classDiagram.raw(txt);
     public static ClassDiagramElement @class(string id, Optional<string> name = default, Optional<string> generic = default, Optional<string[]> members = default) =>

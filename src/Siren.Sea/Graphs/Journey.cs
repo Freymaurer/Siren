@@ -1,8 +1,8 @@
 ﻿namespace Siren.Sea;
 
 using static Siren.Types;
-
-public class journey
+using Util;
+public static class journey
 {
     public static JourneyElement raw(string line)
          => Siren.journey.raw(line);

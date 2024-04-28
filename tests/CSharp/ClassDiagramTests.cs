@@ -24,7 +24,7 @@ namespace Tests
                     classDiagram.relationshipInheritance(fish, animal),
                     classDiagram.relationshipInheritance(zebra, animal),
                     classDiagram.member(animal, "+int age"),
-                    classDiagram.member(animal, "String gender",memberVisibility.@public),
+                    classDiagram.member(animal, "String gender", memberVisibility.@public),
                     classDiagram.member(animal, "isMammal()", memberVisibility.@public),
                     classDiagram.member(animal, "mate()", memberVisibility.@public),
                     classDiagram.@class(duck, members: new string[] {

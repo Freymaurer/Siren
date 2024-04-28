@@ -2,7 +2,8 @@
 
 using static Siren.Formatting.Gantt;
 using static Siren.Types;
-public class ganttTime
+using Util;
+public static class ganttTime
 {
     public static String length(string timespan)
          => Siren.ganttTime.length(timespan);
@@ -14,7 +15,7 @@ public class ganttTime
          => Siren.ganttTime.until(id);
 }
 
-public class ganttTags
+public static class ganttTags
 {
     public static GanttTags active
          => Siren.ganttTags.active;
@@ -26,7 +27,7 @@ public class ganttTags
          => Siren.ganttTags.milestone;
 }
 
-public class ganttUnit
+public static class ganttUnit
 {
     public static GanttUnit millisecond
          => Siren.ganttUnit.millisecond;
@@ -44,7 +45,7 @@ public class ganttUnit
          => Siren.ganttUnit.month;
 }
 
-public class gantt
+public static class gantt
 {
     public static GanttElement raw(string line)
          => Siren.gantt.raw(line);
