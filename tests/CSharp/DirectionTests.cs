@@ -1,7 +1,7 @@
 using Siren.Sea;
 using Xunit;
 
-namespace CSharp
+namespace Siren.Sea.Tests
 {
     public class Direction
     {

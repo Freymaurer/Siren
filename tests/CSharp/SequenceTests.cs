@@ -5,10 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static Siren.Types;
-using Siren.Sea;
-using static Siren.Yaml.AST;
 
-namespace CSharp
+namespace Siren.Sea.Tests
 {
     public class Sequence
     {
@@ -51,5 +49,14 @@ namespace CSharp
 ";
             Assert.Equal(expected, actual);
         }
+
+        [Fact]
+        public void CompletenessTest()
+        {
+            Type csharpType = typeof(Siren.Sea.sequence);
+            Type fsharpType = typeof(Siren.sequence);
+            Utils.CompareClasses(csharpType, fsharpType);
+        }
     }
+
 }
