@@ -1,7 +1,6 @@
 ﻿namespace Siren.Sea;
 
 using static Siren.Formatting;
-using static Siren.Types;
 using Util;
 
 using static Formatting.ClassDiagram;
@@ -30,21 +29,21 @@ public static class classRltsType
 
 public static class classCardinality
 {
-    public static Cardinality n
+    public static ClassCardinality n
          => Siren.classCardinality.n;
-    public static Cardinality many
+    public static ClassCardinality many
          => Siren.classCardinality.many;
-    public static Cardinality one
+    public static ClassCardinality one
          => Siren.classCardinality.one;
-    public static Cardinality oneOrMore
+    public static ClassCardinality oneOrMore
          => Siren.classCardinality.oneOrMore;
-    public static Cardinality oneToN
+    public static ClassCardinality oneToN
          => Siren.classCardinality.oneToN;
-    public static Cardinality zeroOrOne
+    public static ClassCardinality zeroOrOne
          => Siren.classCardinality.zeroOrOne;
-    public static Cardinality zeroToN
+    public static ClassCardinality zeroToN
          => Siren.classCardinality.zeroToN;
-    public static Cardinality custom(string cardinality)
+    public static ClassCardinality custom(string cardinality)
          => Siren.classCardinality.custom(cardinality);
 }
 
@@ -60,71 +59,71 @@ public static class classDirection
 
 public static class memberClassifier
 {
-    public static MemberClassifier @abstract
+    public static ClassMemberClassifier @abstract
         => Siren.memberClassifier.@abstract;
-    public static MemberClassifier @static
+    public static ClassMemberClassifier @static
         => Siren.memberClassifier.@static;
-    public static MemberClassifier custom(string str)
+    public static ClassMemberClassifier custom(string str)
         => Siren.memberClassifier.custom(str);
 }
 
 public static class memberVisibility
 {
-    public static MemberVisibility @public
+    public static ClassMemberVisibility @public
         => Siren.memberVisibility.@public;
-    public static MemberVisibility @private
+    public static ClassMemberVisibility @private
         => Siren.memberVisibility.@private;
-    public static MemberVisibility @protected
+    public static ClassMemberVisibility @protected
         => Siren.memberVisibility.@protected;
-    public static MemberVisibility packageInternal
+    public static ClassMemberVisibility packageInternal
         => Siren.memberVisibility.packageInternal;
-    public static MemberVisibility custom(string str)
+    public static ClassMemberVisibility custom(string str)
         => Siren.memberVisibility.custom(str);
 }
 
 public static class classDiagram
 {
     public static ClassDiagramElement raw(string txt) => Siren.classDiagram.raw(txt);
-    public static ClassDiagramElement @class(string id, Optional<string> name = default, Optional<string> generic = default, Optional<string[]> members = default) =>
+    public static ClassDiagramElement @class(string id, Optional<string> name = default, Optional<string> generic = default, Optional<IEnumerable<string>> members = default) =>
         Siren.classDiagram.@class(id, name.ToOption(), generic.ToOption(), members.ToOption());
-    public static ClassDiagramElement member(string id, string label, Optional<ClassDiagram.MemberVisibility> memberVisibility = default, Optional<ClassDiagram.MemberClassifier> memberClassifier = default) =>
+    public static ClassDiagramElement member(string id, string label, Optional<ClassMemberVisibility> memberVisibility = default, Optional<ClassMemberClassifier> memberClassifier = default) =>
         Siren.classDiagram.member(id, label, memberVisibility.ToOption(), memberClassifier.ToOption());
-    public static ClassDiagramElement memberAbstract(string id, string label, Optional<ClassDiagram.MemberVisibility> memberVisibility = default) =>
+    public static ClassDiagramElement memberAbstract(string id, string label, Optional<ClassMemberVisibility> memberVisibility = default) =>
         Siren.classDiagram.memberAbstract(id, label, memberVisibility.ToOption());
-    public static ClassDiagramElement memberStatic(string id, string label, Optional<ClassDiagram.MemberVisibility> memberVisibility = default) =>
+    public static ClassDiagramElement memberStatic(string id, string label, Optional<ClassMemberVisibility> memberVisibility = default) =>
         Siren.classDiagram.memberStatic(id, label, memberVisibility.ToOption());
 
     public static ClassDiagramElement relationshipInheritance
         (
             string id1, string id2, 
             Optional<string> label = default, 
-            Optional<ClassDiagram.Cardinality> cardinality1 = default, 
-            Optional<ClassDiagram.Cardinality> cardinality2 = default
+            Optional<ClassCardinality> cardinality1 = default, 
+            Optional<ClassCardinality> cardinality2 = default
         ) =>
         Siren.classDiagram.relationshipInheritance(id1, id2, label.ToOption(), cardinality1.ToOption(), cardinality2.ToOption());
-    public static ClassDiagramElement relationshipComposition(string id1, string id2,Optional<string> label = default,Optional<ClassDiagram.Cardinality> cardinality1 = default,Optional<ClassDiagram.Cardinality> cardinality2 = default) =>
+    public static ClassDiagramElement relationshipComposition(string id1, string id2,Optional<string> label = default,Optional<ClassCardinality> cardinality1 = default,Optional<ClassCardinality> cardinality2 = default) =>
         Siren.classDiagram.relationshipComposition(id1, id2, label.ToOption(), cardinality1.ToOption(), cardinality2.ToOption());
-    public static ClassDiagramElement relationshipAggregation(string id1, string id2, Optional<string> label = default, Optional<ClassDiagram.Cardinality> cardinality1 = default, Optional<ClassDiagram.Cardinality> cardinality2 = default) =>
+    public static ClassDiagramElement relationshipAggregation(string id1, string id2, Optional<string> label = default, Optional<ClassCardinality> cardinality1 = default, Optional<ClassCardinality> cardinality2 = default) =>
         Siren.classDiagram.relationshipAggregation(id1, id2, label.ToOption(), cardinality1.ToOption(), cardinality2.ToOption());
-    public static ClassDiagramElement relationshipAssociation(string id1, string id2, Optional<string> label = default, Optional<ClassDiagram.Cardinality> cardinality1 = default, Optional<ClassDiagram.Cardinality> cardinality2 = default) =>
+    public static ClassDiagramElement relationshipAssociation(string id1, string id2, Optional<string> label = default, Optional<ClassCardinality> cardinality1 = default, Optional<ClassCardinality> cardinality2 = default) =>
         Siren.classDiagram.relationshipAssociation(id1, id2, label.ToOption(), cardinality1.ToOption(), cardinality2.ToOption());
-    public static ClassDiagramElement relationshipSolid(string id1, string id2, Optional<string> label = default, Optional<ClassDiagram.Cardinality> cardinality1 = default, Optional<ClassDiagram.Cardinality> cardinality2 = default) =>
+    public static ClassDiagramElement relationshipSolid(string id1, string id2, Optional<string> label = default, Optional<ClassCardinality> cardinality1 = default, Optional<ClassCardinality> cardinality2 = default) =>
         Siren.classDiagram.relationshipSolid(id1, id2, label.ToOption(), cardinality1.ToOption(), cardinality2.ToOption());
-    public static ClassDiagramElement relationshipDependency(string id1, string id2, Optional<string> label = default, Optional<ClassDiagram.Cardinality> cardinality1 = default, Optional<ClassDiagram.Cardinality> cardinality2 = default) =>
+    public static ClassDiagramElement relationshipDependency(string id1, string id2, Optional<string> label = default, Optional<ClassCardinality> cardinality1 = default, Optional<ClassCardinality> cardinality2 = default) =>
         Siren.classDiagram.relationshipDependency(id1, id2, label.ToOption(), cardinality1.ToOption(), cardinality2.ToOption());
-    public static ClassDiagramElement relationshipRealization(string id1, string id2, Optional<string> label = default, Optional<ClassDiagram.Cardinality> cardinality1 = default, Optional<ClassDiagram.Cardinality> cardinality2 = default) =>
+    public static ClassDiagramElement relationshipRealization(string id1, string id2, Optional<string> label = default, Optional<ClassCardinality> cardinality1 = default, Optional<ClassCardinality> cardinality2 = default) =>
         Siren.classDiagram.relationshipRealization(id1, id2, label.ToOption(), cardinality1.ToOption(), cardinality2.ToOption());
-    public static ClassDiagramElement relationshipDashed(string id1, string id2, Optional<string> label = default, Optional<ClassDiagram.Cardinality> cardinality1 = default, Optional<ClassDiagram.Cardinality> cardinality2 = default) =>
+    public static ClassDiagramElement relationshipDashed(string id1, string id2, Optional<string> label = default, Optional<ClassCardinality> cardinality1 = default, Optional<ClassCardinality> cardinality2 = default) =>
         Siren.classDiagram.relationshipDashed(id1, id2, label.ToOption(), cardinality1.ToOption(), cardinality2.ToOption());
     public static ClassDiagramElement relationshipCustom
         (
             string id1, string id2, 
-            ClassDiagram.ClassRelationshipType classRltsType, 
+            ClassRelationshipType classRltsType, 
             Optional<string> label = default, 
-            Optional<ClassDiagram.ClassRelationshipDirection> direction = default,
+            Optional<ClassRelationshipDirection> direction = default,
             Optional<bool> isDotted = default,
-            Optional<ClassDiagram.Cardinality> cardinality1 = default, 
-            Optional<ClassDiagram.Cardinality> cardinality2 = default ) =>
+            Optional<ClassCardinality> cardinality1 = default, 
+            Optional<ClassCardinality> cardinality2 = default ) =>
         Siren.classDiagram.relationshipCustom(id1, id2, classRltsType, label.ToOption(), direction.ToOption(), isDotted.ToOption(), cardinality1.ToOption(), cardinality2.ToOption());
     public static ClassDiagramElement @namespace(string name, IEnumerable<ClassDiagramElement> children) =>
         Siren.classDiagram.@namespace(name, children);

@@ -1,5 +1,4 @@
 ﻿namespace Siren.Sea;
-using static Siren.Types;
 
 public static class sankey
 {

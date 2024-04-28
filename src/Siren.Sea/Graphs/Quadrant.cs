@@ -1,6 +1,5 @@
 ﻿namespace Siren.Sea;
 
-using static Siren.Types;
 using Util;
 public static class quadrant
 {

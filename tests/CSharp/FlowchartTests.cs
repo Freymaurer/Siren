@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Microsoft.FSharp.Reflection;
 using System.Reflection;
 using Siren.Sea;
-using static Siren.Types;
 
 namespace Siren.Sea.Tests
 {

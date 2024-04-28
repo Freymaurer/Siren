@@ -2,9 +2,6 @@
 
 open Fable.Pyxpecto
 open Siren
-open Types
-
-
 
 let private tests_state = testList "state" [
     testCase "simple" <| fun _ ->

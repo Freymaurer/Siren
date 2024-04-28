@@ -1,7 +1,4 @@
 ﻿namespace Siren.Sea;
-
-using static Siren.Types;
-
 public static class pieChart
 {
     public static PieChartElement raw(string line)

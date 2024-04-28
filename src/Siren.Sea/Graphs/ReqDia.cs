@@ -1,44 +1,43 @@
 ﻿namespace Siren.Sea;
 
 using static Siren.Formatting.RequirementDiagram;
-using static Siren.Types;
 using Util;
 public static class rqRisk
 {
-    public static RiskType low
+    public static RDRiskType low
          => Siren.rqRisk.low;
-    public static RiskType medium
+    public static RDRiskType medium
          => Siren.rqRisk.medium;
-    public static RiskType high
+    public static RDRiskType high
          => Siren.rqRisk.high;
 }
 
 public static class rqMethod
 {
-    public static VerifyMethod analysis
+    public static RDVerifyMethod analysis
          => Siren.rqMethod.analysis;
-    public static VerifyMethod inspection
+    public static RDVerifyMethod inspection
          => Siren.rqMethod.inspection;
-    public static VerifyMethod test
+    public static RDVerifyMethod test
          => Siren.rqMethod.test;
-    public static VerifyMethod demonstration
+    public static RDVerifyMethod demonstration
          => Siren.rqMethod.demonstration;
 }
 public static class reqDia
 {
     public static RequirementDiagramElement raw(string txt)
          => Siren.reqDia.raw(txt);
-    public static RequirementDiagramElement requirement(string name, Optional<string> id = default, Optional<string> text = default, Optional<RiskType> rqRisk = default, Optional<VerifyMethod> rqMethod = default)
+    public static RequirementDiagramElement requirement(string name, Optional<string> id = default, Optional<string> text = default, Optional<RDRiskType> rqRisk = default, Optional<RDVerifyMethod> rqMethod = default)
          => Siren.reqDia.requirement(name, id.ToOption(), text.ToOption(), rqRisk.ToOption(), rqMethod.ToOption());
-    public static RequirementDiagramElement functionalRequirement(string name, Optional<string> id = default, Optional<string> text = default, Optional<RiskType> rqRisk = default, Optional<VerifyMethod> rqMethod = default)
+    public static RequirementDiagramElement functionalRequirement(string name, Optional<string> id = default, Optional<string> text = default, Optional<RDRiskType> rqRisk = default, Optional<RDVerifyMethod> rqMethod = default)
          => Siren.reqDia.functionalRequirement(name, id.ToOption(), text.ToOption(), rqRisk.ToOption(), rqMethod.ToOption());
-    public static RequirementDiagramElement interfaceRequirement(string name, Optional<string> id = default, Optional<string> text = default, Optional<RiskType> rqRisk = default, Optional<VerifyMethod> rqMethod = default)
+    public static RequirementDiagramElement interfaceRequirement(string name, Optional<string> id = default, Optional<string> text = default, Optional<RDRiskType> rqRisk = default, Optional<RDVerifyMethod> rqMethod = default)
          => Siren.reqDia.interfaceRequirement(name, id.ToOption(), text.ToOption(), rqRisk.ToOption(), rqMethod.ToOption());
-    public static RequirementDiagramElement performanceRequirement(string name, Optional<string> id = default, Optional<string> text = default, Optional<RiskType> rqRisk = default, Optional<VerifyMethod> rqMethod = default)
+    public static RequirementDiagramElement performanceRequirement(string name, Optional<string> id = default, Optional<string> text = default, Optional<RDRiskType> rqRisk = default, Optional<RDVerifyMethod> rqMethod = default)
          => Siren.reqDia.performanceRequirement(name, id.ToOption(), text.ToOption(), rqRisk.ToOption(), rqMethod.ToOption());
-    public static RequirementDiagramElement physicalRequirement(string name, Optional<string> id = default, Optional<string> text = default, Optional<RiskType> rqRisk = default, Optional<VerifyMethod> rqMethod = default)
+    public static RequirementDiagramElement physicalRequirement(string name, Optional<string> id = default, Optional<string> text = default, Optional<RDRiskType> rqRisk = default, Optional<RDVerifyMethod> rqMethod = default)
          => Siren.reqDia.physicalRequirement(name, id.ToOption(), text.ToOption(), rqRisk.ToOption(), rqMethod.ToOption());
-    public static RequirementDiagramElement designConstraint(string name, Optional<string> id = default, Optional<string> text = default, Optional<RiskType> rqRisk = default, Optional<VerifyMethod> rqMethod = default)
+    public static RequirementDiagramElement designConstraint(string name, Optional<string> id = default, Optional<string> text = default, Optional<RDRiskType> rqRisk = default, Optional<RDVerifyMethod> rqMethod = default)
          => Siren.reqDia.designConstraint(name, id.ToOption(), text.ToOption(), rqRisk.ToOption(), rqMethod.ToOption());
     public static RequirementDiagramElement element(string name, Optional<string> elementType = default, Optional<string> docref = default)
          => Siren.reqDia.element(name, elementType.ToOption(), docref.ToOption());

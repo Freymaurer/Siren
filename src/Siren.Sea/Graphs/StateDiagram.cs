@@ -1,7 +1,5 @@
 ﻿namespace Siren.Sea;
 
-using static Siren.Types;
-using static Formatting.Generic;
 using Util;
 public static class stateDiagram
 {

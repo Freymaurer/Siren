@@ -1,7 +1,6 @@
 ﻿namespace Siren.Sea;
 
 using System.Collections.Generic;
-using static Siren.Types;
 using static Siren.Sea.Util.TupleExtensions;
 using Util;
 public static class sequence
@@ -40,9 +39,9 @@ public static class sequence
         Siren.sequence.messageDottedOpenArrow(id1, id2, msg, activate.ToOption());
     public static SequenceElement activate(string id) => Siren.sequence.activate(id);
     public static SequenceElement deactivate(string id) => Siren.sequence.deactivate(id);
-    public static SequenceElement note(string id, string text, Optional<Siren.Formatting.Generic.NotePosition> notePosition = default) =>
+    public static SequenceElement note(string id, string text, Optional<NotePosition> notePosition = default) =>
         Siren.sequence.note(id, text, notePosition.ToOption());
-    public static SequenceElement noteSpanning(string id1, string id2, string text, Optional<Siren.Formatting.Generic.NotePosition> notePosition = default) =>
+    public static SequenceElement noteSpanning(string id1, string id2, string text, Optional<NotePosition> notePosition = default) =>
         Siren.sequence.noteSpanning(id1, id2, text, notePosition.ToOption());
     public static SequenceElement loop(string name, SequenceElement[] children) =>
         Siren.sequence.loop(name, children);

@@ -6,13 +6,12 @@ using System.Text;
 using System.Threading.Tasks;
 
 using static Siren.Formatting;
-using static Siren.Types;
 
 public static class notePosition
 {
-    public static Generic.NotePosition over => Siren.notePosition.over;
-    public static Generic.NotePosition rightOf => Siren.notePosition.rightOf;
-    public static Generic.NotePosition leftOf => Siren.notePosition.leftOf;
+    public static NotePosition over => Siren.notePosition.over;
+    public static NotePosition rightOf => Siren.notePosition.rightOf;
+    public static NotePosition leftOf => Siren.notePosition.leftOf;
 }
 
 public static class formatting

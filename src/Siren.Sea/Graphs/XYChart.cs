@@ -1,7 +1,5 @@
 ﻿namespace Siren.Sea;
 
-using static Siren.Types;
-
 public static class xyChart
 {
     public static XYChartElement raw(string line)

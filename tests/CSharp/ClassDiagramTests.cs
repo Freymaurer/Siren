@@ -1,4 +1,7 @@
-﻿namespace Siren.Sea.Tests;
+﻿using Xunit;
+using Siren.Sea;
+
+namespace Siren.Sea.Tests;
 using Xunit;
 using Siren.Sea;
 using System;
@@ -6,7 +9,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static Siren.Types;
 using System.Reflection;
 
 
@@ -41,7 +43,7 @@ public class ClassDiagramTests
                     "+run()",
                 }),
                 classDiagram.@namespace("Mammals", [
-                    classDiagram.@class(zebra)    
+                    classDiagram.@class(zebra)
                 ])
             ]);
         string actual = siren.write(graph);

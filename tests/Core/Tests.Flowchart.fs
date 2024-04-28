@@ -3,8 +3,6 @@
 open Fable.Pyxpecto
 open Siren
 
-open Types
-
 let private writeYml (ele: FlowchartElement) = ele :> IYamlConvertible |> _.ToYamlAst() |> Yaml.root |> Yaml.write
 
 let private tests_nodes = testList "nodes" [

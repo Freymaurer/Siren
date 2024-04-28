@@ -2,7 +2,6 @@
 
 open Fable.Pyxpecto
 open Siren
-open Types
 
 let private tests_click = testList "click" [
     testCase "href" <| fun _ ->

@@ -1,24 +1,35 @@
-﻿module Siren.Types
+﻿namespace Siren
 
-let writeYamlASTBasicWrapper opener closer children =
-    [
-        Yaml.line opener
-        Yaml.level [
-            for child in children do 
-                yield! child :> IYamlConvertible |> _.ToYamlAst()
+module YamlHelpers =
+
+    let writeYamlASTBasicWrapper opener closer children =
+        [
+            Yaml.line opener
+            Yaml.level [
+                for child in children do 
+                    yield! child :> IYamlConvertible |> _.ToYamlAst()
+            ]
+            if closer <> "" then Yaml.line closer
         ]
-        if closer <> "" then Yaml.line closer
-    ]
 
-let writeYamlDiagramRoot opener children =
-    Yaml.root [
-        Yaml.line opener
-        Yaml.level [
-            for child in children do
-                yield! child :> IYamlConvertible |> _.ToYamlAst()
+    let writeYamlDiagramRoot opener children =
+        Yaml.root [
+            Yaml.line opener
+            Yaml.level [
+                for child in children do
+                    yield! child :> IYamlConvertible |> _.ToYamlAst()
+            ]
         ]
-    ]
 
+open YamlHelpers
+
+[<RequireQualifiedAccess>]
+type NotePosition =
+    | Over
+    | RightOf
+    | LeftOf
+
+[<RequireQualifiedAccess>]
 type Direction = 
     | TB
     | TD
@@ -36,6 +47,176 @@ type Direction =
         | LR -> "LR"
         | Custom str -> str
 
+[<RequireQualifiedAccess>]
+type FlowchartNodeTypes =
+    | Default
+    | Round
+    | Stadium
+    | Subroutine
+    | Cylindrical 
+    | Circle 
+    | Asymmetric
+    | Rhombus
+    | Hexagon
+    | Parallelogram
+    | ParallelogramAlt
+    | Trapezoid
+    | TrapezoidAlt
+    | DoubleCircle
+
+[<RequireQualifiedAccess>]
+type FlowchartLinkTypes =
+    | Arrow
+    | Open
+    | Dotted
+    | DottedArrow
+    | Thick
+    | ThickArrow
+    | Invisible
+    | CircleEdge
+    | CrossEdge
+    | ArrowDouble
+    | CircleDouble
+    | CrossDouble
+
+[<RequireQualifiedAccess>]
+type SequenceMessageTypes =
+    | Solid
+    | Dotted
+    | Arrow
+    | DottedArrow
+    | CrossEdge
+    | DottedCrossEdge
+    | OpenArrow
+    | DottedOpenArrow
+
+[<RequireQualifiedAccess>]
+type ClassMemberVisibility =
+    | Public
+    | Private
+    | Protected
+    | PackageInternal
+    | Custom of string
+
+[<RequireQualifiedAccess>]
+type ClassMemberClassifier = 
+    | Abstract
+    | Static
+    | Custom of string
+
+[<RequireQualifiedAccess>]
+type ClassRelationshipDirection =
+    | Left
+    | Right
+    | TwoWay
+
+[<RequireQualifiedAccess>]
+type ClassRelationshipType = 
+    | Inheritance
+    | Composition
+    | Aggregation
+    | Association
+    | Link
+    | Solid
+    | Dashed
+    | Dependency
+    | Realization
+
+type ClassCardinality = 
+    | One
+    | ZeroOrOne
+    | OneOrMore
+    | Many
+    | N
+    | ZeroToN
+    | OneToN
+    | Custom of string
+
+[<RequireQualifiedAccess>]
+type ERCardinalityType = 
+    | OneOrZero
+    | OneOrMany
+    | ZeroOrMany
+    | OnlyOne
+
+[<RequireQualifiedAccess>]
+type ERKeyType = 
+    | PK
+    | FK
+    | UK
+
+[<RequireQualifiedAccess>]
+type ERAttribute = {
+    Type : string
+    Name : string
+    Keys : ERKeyType list
+    Comment: string option
+} 
+
+[<RequireQualifiedAccess>]
+type GanttTags = 
+    | Active
+    | Done
+    | Crit
+    | Milestone
+
+[<RequireQualifiedAccess>]
+type GanttUnit =
+    | Millisecond
+    | Second
+    | Minute
+    | Hour
+    | Day
+    | Week
+    | Month
+
+[<RequireQualifiedAccess>]
+type RequirementType =
+    | Requirement
+    | FunctionalRequirement
+    | InterfaceRequirement
+    | PerformanceRequirement
+    | PhysicalRequirement
+    | DesignConstraint
+
+[<RequireQualifiedAccess>]
+type RDRiskType = 
+    | Low
+    | Medium
+    | High
+
+[<RequireQualifiedAccess>]
+type RDVerifyMethod =
+    | Analysis
+    | Inspection
+    | Test
+    | Demonstration
+
+/// A relationship type can be one of contains, copies, derives, satisfies, verifies, refines, or traces.
+[<RequireQualifiedAccess>]
+type RDRelationship = 
+    | Contains
+    | Copies
+    | Derives
+    | Satisfies
+    | Verifies
+    | Refines
+    | Traces
+
+[<RequireQualifiedAccess>]
+type GitCommitType =
+    | NORMAL
+    | REVERSE
+    | HIGHLIGHT
+
+[<RequireQualifiedAccess>]
+type MindmapShape = 
+    | Square //id[I am a square]
+    | RoundedSquare //id(I am a rounded square)
+    | Circle //id((I am a circle))
+    | Bang //id))I am a bang((
+    | Cloud //id)I am a cloud(
+    | Hexagon //id{{I am a hexagon}}
 
 type FlowchartElement =
     | FlowchartElement of string

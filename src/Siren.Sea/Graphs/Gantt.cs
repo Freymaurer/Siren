@@ -1,7 +1,6 @@
 ﻿namespace Siren.Sea;
 
 using static Siren.Formatting.Gantt;
-using static Siren.Types;
 using Util;
 public static class ganttTime
 {

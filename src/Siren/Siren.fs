@@ -2,7 +2,6 @@
 
 open Fable.Core
 open Util
-open Types
 open Formatting
 
 [<AttachMembers>]
@@ -31,35 +30,35 @@ type flowchart =
     static member raw (txt: string) = FlowchartElement txt
     static member id (txt: string) = FlowchartElement txt
     static member node (id: string, ?name: string) : FlowchartElement = 
-        Flowchart.formatNode id name Flowchart.NodeTypes.Default |> FlowchartElement
+        Flowchart.formatNode id name FlowchartNodeTypes.Default |> FlowchartElement
     static member nodeRound (id: string, ?name: string) : FlowchartElement = 
-        Flowchart.formatNode id name Flowchart.NodeTypes.Round |> FlowchartElement
+        Flowchart.formatNode id name FlowchartNodeTypes.Round |> FlowchartElement
     static member nodeStadium (id: string, ?name: string) : FlowchartElement = 
-        Flowchart.formatNode id name Flowchart.NodeTypes.Stadium |> FlowchartElement
-    static member nodeSubroutine (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name Flowchart.NodeTypes.Subroutine |> FlowchartElement
-    static member nodeCylindrical  (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name Flowchart.NodeTypes.Cylindrical |> FlowchartElement
-    static member nodeCircle (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name Flowchart.NodeTypes.Circle |> FlowchartElement
-    static member nodeAsymmetric (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name Flowchart.NodeTypes.Asymmetric |> FlowchartElement
-    static member nodeRhombus (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name Flowchart.NodeTypes.Rhombus |> FlowchartElement
-    static member nodeHexagon (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name Flowchart.NodeTypes.Hexagon |> FlowchartElement
-    static member nodeParallelogram (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name Flowchart.NodeTypes.Parallelogram |> FlowchartElement
-    static member nodeParallelogramAlt (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name Flowchart.NodeTypes.ParallelogramAlt |> FlowchartElement
-    static member nodeTrapezoid (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name Flowchart.NodeTypes.Trapezoid |> FlowchartElement
-    static member nodeTrapezoidAlt (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name Flowchart.NodeTypes.TrapezoidAlt |> FlowchartElement
-    static member nodeDoubleCircle (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name Flowchart.NodeTypes.DoubleCircle |> FlowchartElement
+        Flowchart.formatNode id name FlowchartNodeTypes.Stadium |> FlowchartElement
+    static member nodeSubroutine (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name FlowchartNodeTypes.Subroutine |> FlowchartElement
+    static member nodeCylindrical  (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name FlowchartNodeTypes.Cylindrical |> FlowchartElement
+    static member nodeCircle (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name FlowchartNodeTypes.Circle |> FlowchartElement
+    static member nodeAsymmetric (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name FlowchartNodeTypes.Asymmetric |> FlowchartElement
+    static member nodeRhombus (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name FlowchartNodeTypes.Rhombus |> FlowchartElement
+    static member nodeHexagon (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name FlowchartNodeTypes.Hexagon |> FlowchartElement
+    static member nodeParallelogram (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name FlowchartNodeTypes.Parallelogram |> FlowchartElement
+    static member nodeParallelogramAlt (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name FlowchartNodeTypes.ParallelogramAlt |> FlowchartElement
+    static member nodeTrapezoid (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name FlowchartNodeTypes.Trapezoid |> FlowchartElement
+    static member nodeTrapezoidAlt (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name FlowchartNodeTypes.TrapezoidAlt |> FlowchartElement
+    static member nodeDoubleCircle (id: string, ?name: string) : FlowchartElement = Flowchart.formatNode id name FlowchartNodeTypes.DoubleCircle |> FlowchartElement
     static member linkArrow (id1: string, id2: string, ?message: string, ?addedLength) = 
-        Flowchart.formatLink id1 id2 Flowchart.LinkTypes.Arrow message addedLength |> FlowchartElement
-    static member linkArrowDouble (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 Flowchart.LinkTypes.ArrowDouble message addedLength |> FlowchartElement
-    static member linkOpen (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 Flowchart.LinkTypes.Open message addedLength |> FlowchartElement
-    static member linkDotted (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 Flowchart.LinkTypes.Dotted message addedLength |> FlowchartElement
-    static member linkDottedArrow (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 Flowchart.LinkTypes.DottedArrow message addedLength |> FlowchartElement
-    static member linkThick (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 Flowchart.LinkTypes.Thick message addedLength |> FlowchartElement
-    static member linkThickArrow (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 Flowchart.LinkTypes.ThickArrow message addedLength |> FlowchartElement
-    static member linkInvisible (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 Flowchart.LinkTypes.Invisible message addedLength |> FlowchartElement
-    static member linkCircleEdge (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 Flowchart.LinkTypes.CircleEdge message addedLength |> FlowchartElement
-    static member linkCircleDouble (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 Flowchart.LinkTypes.CircleDouble message addedLength |> FlowchartElement
-    static member linkCrossEdge (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 Flowchart.LinkTypes.CrossEdge message addedLength |> FlowchartElement
-    static member linkCrossDouble (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 Flowchart.LinkTypes.CrossDouble message addedLength |> FlowchartElement
+        Flowchart.formatLink id1 id2 FlowchartLinkTypes.Arrow message addedLength |> FlowchartElement
+    static member linkArrowDouble (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 FlowchartLinkTypes.ArrowDouble message addedLength |> FlowchartElement
+    static member linkOpen (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 FlowchartLinkTypes.Open message addedLength |> FlowchartElement
+    static member linkDotted (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 FlowchartLinkTypes.Dotted message addedLength |> FlowchartElement
+    static member linkDottedArrow (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 FlowchartLinkTypes.DottedArrow message addedLength |> FlowchartElement
+    static member linkThick (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 FlowchartLinkTypes.Thick message addedLength |> FlowchartElement
+    static member linkThickArrow (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 FlowchartLinkTypes.ThickArrow message addedLength |> FlowchartElement
+    static member linkInvisible (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 FlowchartLinkTypes.Invisible message addedLength |> FlowchartElement
+    static member linkCircleEdge (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 FlowchartLinkTypes.CircleEdge message addedLength |> FlowchartElement
+    static member linkCircleDouble (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 FlowchartLinkTypes.CircleDouble message addedLength |> FlowchartElement
+    static member linkCrossEdge (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 FlowchartLinkTypes.CrossEdge message addedLength |> FlowchartElement
+    static member linkCrossDouble (id1: string, id2: string, ?message: string, ?addedLength) = Flowchart.formatLink id1 id2 FlowchartLinkTypes.CrossDouble message addedLength |> FlowchartElement
     static member direction (direction: Direction) = Generic.formatDirection direction |> FlowchartElement
     static member directionTB = Generic.formatDirection Direction.TB |> FlowchartElement
     static member directionTD = Generic.formatDirection Direction.TD |> FlowchartElement
@@ -78,9 +77,9 @@ type flowchart =
 #endif
 [<AttachMembers>]
 type notePosition =
-    static member over = Generic.NotePosition.Over
-    static member rightOf = Generic.NotePosition.RightOf
-    static member leftOf = Generic.NotePosition.LeftOf
+    static member over = NotePosition.Over
+    static member rightOf = NotePosition.RightOf
+    static member leftOf = NotePosition.LeftOf
 
 [<AttachMembers>]
 type sequence =
@@ -92,19 +91,19 @@ type sequence =
     static member destroy (id: string) = Sequence.formatDestroy id |> SequenceElement
     static member box (name: string, children: #seq<SequenceElement>) = SequenceWrapper (Sequence.formatBox name None, "end", List.ofSeq children)
     static member boxColored (name: string, color: string, children: #seq<SequenceElement>) = SequenceWrapper (Sequence.formatBox name (Some color), "end", List.ofSeq children)
-    static member message(a1, a2, message, ?activate: bool) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.Solid message activate |> SequenceElement 
-    static member messageSolid(a1, a2, message, ?activate: bool) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.Solid message activate |> SequenceElement 
-    static member messageDotted(a1, a2, message, ?activate: bool ) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.Dotted message activate |> SequenceElement 
-    static member messageArrow(a1, a2, message, ?activate: bool) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.Arrow message activate |> SequenceElement 
-    static member messageDottedArrow(a1, a2, message, ?activate: bool) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.DottedArrow message activate |> SequenceElement 
-    static member messageCross(a1, a2, message, ?activate: bool) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.CrossEdge message activate |> SequenceElement 
-    static member messageDottedCross(a1, a2, message, ?activate: bool) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.DottedCrossEdge message activate |> SequenceElement 
-    static member messageOpenArrow(a1, a2, message, ?activate: bool) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.OpenArrow message activate |> SequenceElement 
-    static member messageDottedOpenArrow(a1, a2, message, ?activate: bool) = Sequence.formatMessage a1 a2 Sequence.MessageTypes.DottedOpenArrow message activate |> SequenceElement 
+    static member message(a1, a2, message, ?activate: bool) = Sequence.formatMessage a1 a2 SequenceMessageTypes.Solid message activate |> SequenceElement 
+    static member messageSolid(a1, a2, message, ?activate: bool) = Sequence.formatMessage a1 a2 SequenceMessageTypes.Solid message activate |> SequenceElement 
+    static member messageDotted(a1, a2, message, ?activate: bool ) = Sequence.formatMessage a1 a2 SequenceMessageTypes.Dotted message activate |> SequenceElement 
+    static member messageArrow(a1, a2, message, ?activate: bool) = Sequence.formatMessage a1 a2 SequenceMessageTypes.Arrow message activate |> SequenceElement 
+    static member messageDottedArrow(a1, a2, message, ?activate: bool) = Sequence.formatMessage a1 a2 SequenceMessageTypes.DottedArrow message activate |> SequenceElement 
+    static member messageCross(a1, a2, message, ?activate: bool) = Sequence.formatMessage a1 a2 SequenceMessageTypes.CrossEdge message activate |> SequenceElement 
+    static member messageDottedCross(a1, a2, message, ?activate: bool) = Sequence.formatMessage a1 a2 SequenceMessageTypes.DottedCrossEdge message activate |> SequenceElement 
+    static member messageOpenArrow(a1, a2, message, ?activate: bool) = Sequence.formatMessage a1 a2 SequenceMessageTypes.OpenArrow message activate |> SequenceElement 
+    static member messageDottedOpenArrow(a1, a2, message, ?activate: bool) = Sequence.formatMessage a1 a2 SequenceMessageTypes.DottedOpenArrow message activate |> SequenceElement 
     static member activate(id: string) = sprintf "activate %s" id |> SequenceElement
     static member deactivate(id: string) = sprintf "deactivate %s" id |> SequenceElement
-    static member note(id: string, text: string, ?notePosition: Generic.NotePosition) = Generic.formatNote id notePosition text |> SequenceElement
-    static member noteSpanning(id1: string, id2, text: string, ?notePosition: Generic.NotePosition) = Sequence.formatNoteSpanning id1 id2 notePosition text |> SequenceElement
+    static member note(id: string, text: string, ?notePosition: NotePosition) = Generic.formatNote id notePosition text |> SequenceElement
+    static member noteSpanning(id1: string, id2, text: string, ?notePosition: NotePosition) = Sequence.formatNoteSpanning id1 id2 notePosition text |> SequenceElement
     static member loop(name: string, children: #seq<SequenceElement>) = SequenceWrapper(sprintf "loop %s" name,"end", List.ofSeq children)
     static member alt(name: string, children: #seq<SequenceElement>, elseList: #seq<string*#seq<SequenceElement>>) = 
         let elseItems = elseList |> Seq.length
@@ -159,54 +158,54 @@ type sequence =
 #endif
 [<AttachMembers>]
 type memberVisibility =
-    static member ``public`` = ClassDiagram.MemberVisibility.Public
-    static member ``private`` = ClassDiagram.MemberVisibility.Private
-    static member ``protected`` = ClassDiagram.MemberVisibility.Protected
-    static member packageInternal = ClassDiagram.MemberVisibility.PackageInternal
-    static member custom str = ClassDiagram.MemberVisibility.Custom str
+    static member ``public`` = ClassMemberVisibility.Public
+    static member ``private`` = ClassMemberVisibility.Private
+    static member ``protected`` = ClassMemberVisibility.Protected
+    static member packageInternal = ClassMemberVisibility.PackageInternal
+    static member custom str = ClassMemberVisibility.Custom str
 
 #if FABLE_COMPILER_PYTHON
 [<CompiledName("member_classifier")>]
 #endif
 [<AttachMembers>]
 type memberClassifier =
-    static member ``abstract`` = ClassDiagram.MemberClassifier.Abstract
-    static member ``static`` = ClassDiagram.MemberClassifier.Static
-    static member custom str = ClassDiagram.MemberClassifier.Custom str
+    static member ``abstract`` = ClassMemberClassifier.Abstract
+    static member ``static`` = ClassMemberClassifier.Static
+    static member custom str = ClassMemberClassifier.Custom str
 
 #if FABLE_COMPILER_PYTHON
 [<CompiledName("class_direction")>]
 #endif
 [<AttachMembers>]
 type classDirection =
-    static member twoWay = ClassDiagram.ClassRelationshipDirection.TwoWay
-    static member left = ClassDiagram.ClassRelationshipDirection.Left
-    static member right = ClassDiagram.ClassRelationshipDirection.Right
+    static member twoWay = ClassRelationshipDirection.TwoWay
+    static member left = ClassRelationshipDirection.Left
+    static member right = ClassRelationshipDirection.Right
 
 #if FABLE_COMPILER_PYTHON
 [<CompiledName("class_cardinality")>]
 #endif
 [<AttachMembers>]
 type classCardinality =
-    static member n = ClassDiagram.Cardinality.N
-    static member many = ClassDiagram.Cardinality.Many
-    static member one = ClassDiagram.Cardinality.One
-    static member oneOrMore = ClassDiagram.Cardinality.OneOrMore
-    static member oneToN = ClassDiagram.Cardinality.OneToN
-    static member zeroOrOne = ClassDiagram.Cardinality.ZeroOrOne
-    static member zeroToN = ClassDiagram.Cardinality.ZeroToN
-    static member custom (cardinality: string) = ClassDiagram.Cardinality.Custom cardinality
+    static member n = ClassCardinality.N
+    static member many = ClassCardinality.Many
+    static member one = ClassCardinality.One
+    static member oneOrMore = ClassCardinality.OneOrMore
+    static member oneToN = ClassCardinality.OneToN
+    static member zeroOrOne = ClassCardinality.ZeroOrOne
+    static member zeroToN = ClassCardinality.ZeroToN
+    static member custom (cardinality: string) = ClassCardinality.Custom cardinality
     
 type classRltsType =
-    static member inheritance = ClassDiagram.ClassRelationshipType.Inheritance
-    static member aggregation = ClassDiagram.ClassRelationshipType.Aggregation
-    static member association = ClassDiagram.ClassRelationshipType.Association
-    static member composition = ClassDiagram.ClassRelationshipType.Composition
-    static member dashed = ClassDiagram.ClassRelationshipType.Dashed
-    static member dependency = ClassDiagram.ClassRelationshipType.Dependency
-    static member link = ClassDiagram.ClassRelationshipType.Link
-    static member realization = ClassDiagram.ClassRelationshipType.Realization
-    static member solid = ClassDiagram.ClassRelationshipType.Solid
+    static member inheritance = ClassRelationshipType.Inheritance
+    static member aggregation = ClassRelationshipType.Aggregation
+    static member association = ClassRelationshipType.Association
+    static member composition = ClassRelationshipType.Composition
+    static member dashed = ClassRelationshipType.Dashed
+    static member dependency = ClassRelationshipType.Dependency
+    static member link = ClassRelationshipType.Link
+    static member realization = ClassRelationshipType.Realization
+    static member solid = ClassRelationshipType.Solid
     
 
 #if FABLE_COMPILER_PYTHON
@@ -218,30 +217,30 @@ type classDiagram =
     static member ``class`` (id: string, ?name: string, ?generic: string, ?members: #seq<string>) = 
         if members.IsSome then ClassDiagramWrapper (ClassDiagram.formatClass id name generic + "{","}", (List.ofSeq >> List.map ClassDiagramElement) members.Value) 
         else ClassDiagram.formatClass id name generic |> ClassDiagramElement
-    static member ``member`` (id: string, label:string, ?memberVisibility: ClassDiagram.MemberVisibility, ?memberClassifier: ClassDiagram.MemberClassifier) = 
+    static member ``member`` (id: string, label:string, ?memberVisibility: ClassMemberVisibility, ?memberClassifier: ClassMemberClassifier) = 
         ClassDiagram.formatMember id label memberVisibility memberClassifier |> ClassDiagramElement
-    static member memberAbstract(id: string, label:string, ?memberVisibility: ClassDiagram.MemberVisibility) =
-        ClassDiagram.formatMember id label memberVisibility (Some ClassDiagram.MemberClassifier.Abstract) |> ClassDiagramElement
-    static member memberStatic(id: string, label:string, ?memberVisibility: ClassDiagram.MemberVisibility) =
-        ClassDiagram.formatMember id label memberVisibility (Some ClassDiagram.MemberClassifier.Static) |> ClassDiagramElement
+    static member memberAbstract(id: string, label:string, ?memberVisibility: ClassMemberVisibility) =
+        ClassDiagram.formatMember id label memberVisibility (Some ClassMemberClassifier.Abstract) |> ClassDiagramElement
+    static member memberStatic(id: string, label:string, ?memberVisibility: ClassMemberVisibility) =
+        ClassDiagram.formatMember id label memberVisibility (Some ClassMemberClassifier.Static) |> ClassDiagramElement
     
-    static member relationshipInheritance (id1, id2, ?label: string, ?cardinality1: ClassDiagram.Cardinality, ?cardinality2: ClassDiagram.Cardinality) = 
-        ClassDiagram.formatRelationship id1 id2 ClassDiagram.ClassRelationshipType.Inheritance label cardinality1 cardinality2 |> ClassDiagramElement
-    static member relationshipComposition (id1, id2, ?label: string, ?cardinality1: ClassDiagram.Cardinality, ?cardinality2: ClassDiagram.Cardinality) = 
-        ClassDiagram.formatRelationship id1 id2 ClassDiagram.ClassRelationshipType.Composition label cardinality1 cardinality2 |> ClassDiagramElement
-    static member relationshipAggregation (id1, id2, ?label: string, ?cardinality1: ClassDiagram.Cardinality, ?cardinality2: ClassDiagram.Cardinality) = 
-        ClassDiagram.formatRelationship id1 id2 ClassDiagram.ClassRelationshipType.Aggregation label cardinality1 cardinality2 |> ClassDiagramElement
-    static member relationshipAssociation (id1, id2, ?label: string, ?cardinality1: ClassDiagram.Cardinality, ?cardinality2: ClassDiagram.Cardinality) = 
-        ClassDiagram.formatRelationship id1 id2 ClassDiagram.ClassRelationshipType.Association label cardinality1 cardinality2 |> ClassDiagramElement
-    static member relationshipSolid (id1, id2, ?label: string, ?cardinality1: ClassDiagram.Cardinality, ?cardinality2: ClassDiagram.Cardinality) = 
-        ClassDiagram.formatRelationship id1 id2 ClassDiagram.ClassRelationshipType.Solid label cardinality1 cardinality2 |> ClassDiagramElement
-    static member relationshipDependency (id1, id2, ?label: string, ?cardinality1: ClassDiagram.Cardinality, ?cardinality2: ClassDiagram.Cardinality) = 
-        ClassDiagram.formatRelationship id1 id2 ClassDiagram.ClassRelationshipType.Dependency label cardinality1 cardinality2 |> ClassDiagramElement
-    static member relationshipRealization (id1, id2, ?label: string, ?cardinality1: ClassDiagram.Cardinality, ?cardinality2: ClassDiagram.Cardinality) = 
-        ClassDiagram.formatRelationship id1 id2 ClassDiagram.ClassRelationshipType.Realization label cardinality1 cardinality2 |> ClassDiagramElement
-    static member relationshipDashed (id1, id2, ?label: string, ?cardinality1: ClassDiagram.Cardinality, ?cardinality2: ClassDiagram.Cardinality) = 
-        ClassDiagram.formatRelationship id1 id2 ClassDiagram.ClassRelationshipType.Dashed label cardinality1 cardinality2 |> ClassDiagramElement
-    static member relationshipCustom (id1, id2, rltsType, ?label: string, ?direction, ?isDotted, ?cardinality1: ClassDiagram.Cardinality, ?cardinality2: ClassDiagram.Cardinality) = 
+    static member relationshipInheritance (id1, id2, ?label: string, ?cardinality1: ClassCardinality, ?cardinality2: ClassCardinality) = 
+        ClassDiagram.formatRelationship id1 id2 ClassRelationshipType.Inheritance label cardinality1 cardinality2 |> ClassDiagramElement
+    static member relationshipComposition (id1, id2, ?label: string, ?cardinality1: ClassCardinality, ?cardinality2: ClassCardinality) = 
+        ClassDiagram.formatRelationship id1 id2 ClassRelationshipType.Composition label cardinality1 cardinality2 |> ClassDiagramElement
+    static member relationshipAggregation (id1, id2, ?label: string, ?cardinality1: ClassCardinality, ?cardinality2: ClassCardinality) = 
+        ClassDiagram.formatRelationship id1 id2 ClassRelationshipType.Aggregation label cardinality1 cardinality2 |> ClassDiagramElement
+    static member relationshipAssociation (id1, id2, ?label: string, ?cardinality1: ClassCardinality, ?cardinality2: ClassCardinality) = 
+        ClassDiagram.formatRelationship id1 id2 ClassRelationshipType.Association label cardinality1 cardinality2 |> ClassDiagramElement
+    static member relationshipSolid (id1, id2, ?label: string, ?cardinality1: ClassCardinality, ?cardinality2: ClassCardinality) = 
+        ClassDiagram.formatRelationship id1 id2 ClassRelationshipType.Solid label cardinality1 cardinality2 |> ClassDiagramElement
+    static member relationshipDependency (id1, id2, ?label: string, ?cardinality1: ClassCardinality, ?cardinality2: ClassCardinality) = 
+        ClassDiagram.formatRelationship id1 id2 ClassRelationshipType.Dependency label cardinality1 cardinality2 |> ClassDiagramElement
+    static member relationshipRealization (id1, id2, ?label: string, ?cardinality1: ClassCardinality, ?cardinality2: ClassCardinality) = 
+        ClassDiagram.formatRelationship id1 id2 ClassRelationshipType.Realization label cardinality1 cardinality2 |> ClassDiagramElement
+    static member relationshipDashed (id1, id2, ?label: string, ?cardinality1: ClassCardinality, ?cardinality2: ClassCardinality) = 
+        ClassDiagram.formatRelationship id1 id2 ClassRelationshipType.Dashed label cardinality1 cardinality2 |> ClassDiagramElement
+    static member relationshipCustom (id1, id2, rltsType, ?label: string, ?direction, ?isDotted, ?cardinality1: ClassCardinality, ?cardinality2: ClassCardinality) = 
         ClassDiagram.formatRelationshipCustom id1 id2 rltsType direction isDotted label cardinality1 cardinality2 |> ClassDiagramElement
 
     static member ``namespace`` (name: string, children: #seq<ClassDiagramElement>) =
@@ -271,16 +270,16 @@ type stateDiagram =
     static member stateChoice (id: string) = sprintf "state %s <<choice>>" id |> StateDiagramElement
     static member stateFork (id: string) = sprintf "state %s <<fork>>" id |> StateDiagramElement
     static member stateJoin (id: string) = sprintf "state %s <<join>>" id |> StateDiagramElement
-    static member note (id: string, msg: string, ?notePosition: Generic.NotePosition) = 
-        if notePosition.IsSome && notePosition.Value = Generic.NotePosition.Over then failwith "Error: Cannot use \"over\" for note in State Diagram!"
+    static member note (id: string, msg: string, ?notePosition: NotePosition) = 
+        if notePosition.IsSome && notePosition.Value = NotePosition.Over then failwith "Error: Cannot use \"over\" for note in State Diagram!"
         let lines = msg.Split([|"\r\n"; "\n";|], System.StringSplitOptions.RemoveEmptyEntries)
         StateDiagramWrapper(StateDiagram.formatNoteWrapper id notePosition, "end note", [for line in lines do StateDiagramElement line])
-    static member noteMultiLine (id: string, lines: #seq<string>, ?notePosition: Generic.NotePosition) = 
-        if notePosition.IsSome && notePosition.Value = Generic.NotePosition.Over then failwith "Error: Cannot use \"over\" for note in State Diagram!"
+    static member noteMultiLine (id: string, lines: #seq<string>, ?notePosition: NotePosition) = 
+        if notePosition.IsSome && notePosition.Value = NotePosition.Over then failwith "Error: Cannot use \"over\" for note in State Diagram!"
         //let lines = msg.Split([|"\r\n"; "\n";|], System.StringSplitOptions.RemoveEmptyEntries)
         StateDiagramWrapper(StateDiagram.formatNoteWrapper id notePosition, "end note", [for line in lines do StateDiagramElement line])
-    static member noteLine (id: string, msg: string, ?notePosition: Generic.NotePosition) = 
-        if notePosition.IsSome && notePosition.Value = Generic.NotePosition.Over then failwith "Error: Cannot use \"over\" for note in State Diagram!"
+    static member noteLine (id: string, msg: string, ?notePosition: NotePosition) = 
+        if notePosition.IsSome && notePosition.Value = NotePosition.Over then failwith "Error: Cannot use \"over\" for note in State Diagram!"
         Generic.formatNote id notePosition msg |> StateDiagramElement
     /// Can only be used in stateComposite
     static member concurrency = StateDiagramElement "--" 
@@ -294,9 +293,9 @@ type stateDiagram =
 #endif
 [<AttachMembers>]
 type erKey =
-    static member pk = ERDiagram.ERKeyType.PK
-    static member fk = ERDiagram.ERKeyType.FK
-    static member uk = ERDiagram.ERKeyType.UK
+    static member pk = ERKeyType.PK
+    static member fk = ERKeyType.FK
+    static member uk = ERKeyType.UK
 
 #if FABLE_COMPILER_PYTHON
 [<CompiledName("er_cardinality")>]
@@ -307,22 +306,22 @@ type erCardinality =
     /// }| or |{
     /// </summary>
     /// <param name="oneOrZero"></param>
-    static member oneOrMany = ERDiagram.ERCardinalityType.OneOrMany
+    static member oneOrMany = ERCardinalityType.OneOrMany
     /// <summary>
     /// |o or o|
     /// </summary>
     /// <param name="oneOrZero"></param>
-    static member oneOrZero = ERDiagram.ERCardinalityType.OneOrZero
+    static member oneOrZero = ERCardinalityType.OneOrZero
     /// <summary>
     /// ||
     /// </summary>
     /// <param name="oneOrMany"></param>
-    static member onlyOne = ERDiagram.ERCardinalityType.OnlyOne
+    static member onlyOne = ERCardinalityType.OnlyOne
     /// <summary>
     /// }o or o{
     /// </summary>
     /// <param name="zeroOrMany"></param>
-    static member zeroOrMany = ERDiagram.ERCardinalityType.ZeroOrMany
+    static member zeroOrMany = ERCardinalityType.ZeroOrMany
     
 #if FABLE_COMPILER_PYTHON
 [<CompiledName("er_diagram")>]
@@ -330,14 +329,14 @@ type erCardinality =
 [<AttachMembers>]
 type erDiagram =
     static member raw (line: string) = ERDiagramElement line
-    static member entity (id: string, ?alias: string, ?attr: #seq<ERDiagram.ERAttribute>) = 
+    static member entity (id: string, ?alias: string, ?attr: #seq<ERAttribute>) = 
         if attr.IsSome then 
             let children = [for attr in attr.Value do ERDiagram.formatAttribute attr |> ERDiagramElement] // of attributes
             ERDiagramWrapper (ERDiagram.formatEntityWrapper id alias, "}", children) 
         else ERDiagram.formatEntityNode id alias |> ERDiagramElement
     static member relationship(id1, erCardinality1, id2, erCardinality2, message, ?isOptional: bool) = 
         ERDiagram.formatRelationship id1 erCardinality1 id2 erCardinality2 message isOptional |> ERDiagramElement
-    static member attribute(attrType: string, name: string, ?keys: #seq<ERDiagram.ERKeyType>, ?comment: string) : ERDiagram.ERAttribute = 
+    static member attribute(attrType: string, name: string, ?keys: #seq<ERKeyType>, ?comment: string) : ERAttribute = 
         {Type=attrType; Name=name;Keys=Option.map List.ofSeq keys |> Option.defaultValue []; Comment = comment}
 
 
@@ -364,23 +363,25 @@ type ganttTime =
 #endif
 [<AttachMembers>]
 type ganttTags =
-    static member active = Gantt.GanttTags.Active
-    static member ``done`` = Gantt.GanttTags.Done
-    static member crit = Gantt.GanttTags.Crit
-    static member milestone = Gantt.GanttTags.Milestone
+    static member active = GanttTags.Active
+    static member ``done`` = GanttTags.Done
+    static member crit = GanttTags.Crit
+    static member milestone = GanttTags.Milestone
 
 #if FABLE_COMPILER_PYTHON
 [<CompiledName("gantt_unit")>]
 #endif
 [<AttachMembers>]
 type ganttUnit =
-    static member millisecond = Gantt.GanttUnit.Millisecond
-    static member second = Gantt.GanttUnit.Second
-    static member minute = Gantt.GanttUnit.Minute
-    static member hour = Gantt.GanttUnit.Hour
-    static member day = Gantt.GanttUnit.Day
-    static member week = Gantt.GanttUnit.Week
-    static member month = Gantt.GanttUnit.Month
+    static member millisecond = GanttUnit.Millisecond
+    static member second = GanttUnit.Second
+    static member minute = GanttUnit.Minute
+    static member hour = GanttUnit.Hour
+    static member day = GanttUnit.Day
+    static member week = GanttUnit.Week
+    static member month = GanttUnit.Month
+
+open Formatting.Gantt
 
 [<AttachMembers>]
 type gantt =
@@ -388,23 +389,23 @@ type gantt =
     static member title (name: string) = sprintf "title %s" name |> GanttElement
     static member section (name: string) = sprintf "section %s" name |> GanttElement
 
-    static member task (title: string, id: string, startDate:string, endDate: string, ?tags: #seq<Gantt.GanttTags>) = 
+    static member task (title: string, id: string, startDate:string, endDate: string, ?tags: #seq<GanttTags>) = 
         Gantt.formatTask title (Option.defaultBind List.ofSeq [] tags) (Some id) (Some startDate) (Some endDate) |> GanttElement
-    static member taskStartEnd (title: string, startDate:string, endDate: string, ?tags: #seq<Gantt.GanttTags>) = 
+    static member taskStartEnd (title: string, startDate:string, endDate: string, ?tags: #seq<GanttTags>) = 
         Gantt.formatTask title (Option.defaultBind List.ofSeq [] tags) (None) (Some startDate) (Some endDate) |> GanttElement
-    static member taskEnd (title: string, endDate: string, ?tags: #seq<Gantt.GanttTags>) = 
+    static member taskEnd (title: string, endDate: string, ?tags: #seq<GanttTags>) = 
         Gantt.formatTask title (Option.defaultBind List.ofSeq [] tags) (None) (None) (Some endDate) |> GanttElement
 
-    static member milestone (title: string, id: string, startDate:string, endDate: string, ?tags: #seq<Gantt.GanttTags>) = 
+    static member milestone (title: string, id: string, startDate:string, endDate: string, ?tags: #seq<GanttTags>) = 
         Gantt.formatTask title (ganttTags.milestone::Option.defaultBind List.ofSeq [] tags) (Some id) (Some startDate) (Some endDate) |> GanttElement
-    static member milestoneStartEnd (title: string, startDate:string, endDate: string, ?tags: #seq<Gantt.GanttTags>) = 
+    static member milestoneStartEnd (title: string, startDate:string, endDate: string, ?tags: #seq<GanttTags>) = 
         Gantt.formatTask title (ganttTags.milestone::Option.defaultBind List.ofSeq [] tags) (None) (Some startDate) (Some endDate) |> GanttElement
-    static member milestoneEnd (title: string, endDate: string, ?tags: #seq<Gantt.GanttTags>) = 
+    static member milestoneEnd (title: string, endDate: string, ?tags: #seq<GanttTags>) = 
         Gantt.formatTask title (ganttTags.milestone::Option.defaultBind List.ofSeq [] tags) (None) (None) (Some endDate) |> GanttElement
 
     static member dateFormat (formatString: string) = sprintf "dateFormat %s" formatString |> GanttElement
     static member axisFormat (formatString: string) = sprintf "axisFormat %s" formatString |> GanttElement
-    static member tickInterval (interval: int, unit: Gantt.GanttUnit) = sprintf "tickInterval %i%s" interval (unit.ToFormatString()) |> GanttElement ///^([1-9][0-9]*)(millisecond|second|minute|hour|day|week|month)$/;
+    static member tickInterval (interval: int, unit: GanttUnit) = sprintf "tickInterval %i%s" interval (unit.ToFormatString()) |> GanttElement ///^([1-9][0-9]*)(millisecond|second|minute|hour|day|week|month)$/;
 
     static member weekday (day: string) = sprintf "weekday %s" day |> GanttElement 
     static member excludes (day: string) = sprintf "excludes %s" day |> GanttElement 
@@ -441,19 +442,19 @@ type quadrant =
 #endif
 [<AttachMembers>]
 type rqRisk =
-    static member low = RequirementDiagram.RiskType.Low
-    static member medium = RequirementDiagram.RiskType.Medium
-    static member high = RequirementDiagram.RiskType.High
+    static member low = RDRiskType.Low
+    static member medium = RDRiskType.Medium
+    static member high = RDRiskType.High
 
 #if FABLE_COMPILER_PYTHON
 [<CompiledName("rq_method")>]
 #endif
 [<AttachMembers>]
 type rqMethod =
-    static member analysis = RequirementDiagram.VerifyMethod.Analysis
-    static member inspection = RequirementDiagram.VerifyMethod.Inspection
-    static member test = RequirementDiagram.VerifyMethod.Test
-    static member demonstration = RequirementDiagram.VerifyMethod.Demonstration
+    static member analysis = RDVerifyMethod.Analysis
+    static member inspection = RDVerifyMethod.Inspection
+    static member test = RDVerifyMethod.Test
+    static member demonstration = RDVerifyMethod.Demonstration
 
 #if FABLE_COMPILER_PYTHON
 [<CompiledName("req_dia")>]
@@ -462,28 +463,28 @@ type rqMethod =
 type reqDia =
     static member raw (txt: string) = RequirementDiagramElement txt
 
-    static member requirement (name, ?id: string, ?text: string, ?rqRisk: RequirementDiagram.RiskType, ?rqMethod: RequirementDiagram.VerifyMethod) =
+    static member requirement (name, ?id: string, ?text: string, ?rqRisk: RDRiskType, ?rqMethod: RDVerifyMethod) =
         RequirementDiagram.createRequirement "requirement" name id text rqRisk rqMethod
-    static member functionalRequirement (name, ?id: string, ?text: string, ?rqRisk: RequirementDiagram.RiskType, ?rqMethod: RequirementDiagram.VerifyMethod) =
+    static member functionalRequirement (name, ?id: string, ?text: string, ?rqRisk: RDRiskType, ?rqMethod: RDVerifyMethod) =
         RequirementDiagram.createRequirement "functionalRequirement" name id text rqRisk rqMethod
-    static member interfaceRequirement (name, ?id: string, ?text: string, ?rqRisk: RequirementDiagram.RiskType, ?rqMethod: RequirementDiagram.VerifyMethod) =
+    static member interfaceRequirement (name, ?id: string, ?text: string, ?rqRisk: RDRiskType, ?rqMethod: RDVerifyMethod) =
         RequirementDiagram.createRequirement "interfaceRequirement" name id text rqRisk rqMethod
-    static member performanceRequirement (name, ?id: string, ?text: string, ?rqRisk: RequirementDiagram.RiskType, ?rqMethod: RequirementDiagram.VerifyMethod) =
+    static member performanceRequirement (name, ?id: string, ?text: string, ?rqRisk: RDRiskType, ?rqMethod: RDVerifyMethod) =
         RequirementDiagram.createRequirement "performanceRequirement" name id text rqRisk rqMethod
-    static member physicalRequirement (name, ?id: string, ?text: string, ?rqRisk: RequirementDiagram.RiskType, ?rqMethod: RequirementDiagram.VerifyMethod) = 
+    static member physicalRequirement (name, ?id: string, ?text: string, ?rqRisk: RDRiskType, ?rqMethod: RDVerifyMethod) = 
         RequirementDiagram.createRequirement "physicalRequirement" name id text rqRisk rqMethod
-    static member designConstraint (name, ?id: string, ?text: string, ?rqRisk: RequirementDiagram.RiskType, ?rqMethod: RequirementDiagram.VerifyMethod) =
+    static member designConstraint (name, ?id: string, ?text: string, ?rqRisk: RDRiskType, ?rqMethod: RDVerifyMethod) =
         RequirementDiagram.createRequirement "designConstraint" name id text rqRisk rqMethod
 
     static member element (name, ?elementType, ?docref) = RequirementDiagram.createElement name elementType docref
 
-    static member contains (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RequirementDiagram.Contains |> RequirementDiagramElement
-    static member copies (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RequirementDiagram.Copies |> RequirementDiagramElement
-    static member derives (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RequirementDiagram.Derives |> RequirementDiagramElement
-    static member satisfies (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RequirementDiagram.Satisfies |> RequirementDiagramElement
-    static member verifies (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RequirementDiagram.Verifies |> RequirementDiagramElement
-    static member refines (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RequirementDiagram.Refines |> RequirementDiagramElement
-    static member traces (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RequirementDiagram.Traces |> RequirementDiagramElement
+    static member contains (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RDRelationship.Contains |> RequirementDiagramElement
+    static member copies (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RDRelationship.Copies |> RequirementDiagramElement
+    static member derives (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RDRelationship.Derives |> RequirementDiagramElement
+    static member satisfies (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RDRelationship.Satisfies |> RequirementDiagramElement
+    static member verifies (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RDRelationship.Verifies |> RequirementDiagramElement
+    static member refines (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RDRelationship.Refines |> RequirementDiagramElement
+    static member traces (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RDRelationship.Traces |> RequirementDiagramElement
 
 
 #if FABLE_COMPILER_PYTHON
@@ -491,15 +492,15 @@ type reqDia =
 #endif
 [<AttachMembers>]
 type gitType =
-    static member normal = Git.GitCommitType.NORMAL
-    static member reverse = Git.GitCommitType.REVERSE
-    static member highlight = Git.GitCommitType.HIGHLIGHT
+    static member normal = GitCommitType.NORMAL
+    static member reverse = GitCommitType.REVERSE
+    static member highlight = GitCommitType.HIGHLIGHT
 
 [<AttachMembers>]
 type git =
     static member raw (line:string) = GitGraphElement line
-    static member commit (?id: string, ?gitType: Git.GitCommitType, ?tag: string) = Git.formatCommit id gitType tag |> GitGraphElement
-    static member merge (targetBranchId: string, ?mergeid: string, ?gitType: Git.GitCommitType, ?tag: string) = 
+    static member commit (?id: string, ?gitType: GitCommitType, ?tag: string) = Git.formatCommit id gitType tag |> GitGraphElement
+    static member merge (targetBranchId: string, ?mergeid: string, ?gitType: GitCommitType, ?tag: string) = 
         Git.formatMerge targetBranchId mergeid gitType tag |> GitGraphElement
     static member cherryPick (commitid: string, ?parentId: string) = Git.formatCherryPick commitid parentId |> GitGraphElement
     static member branch (id: string) = GitGraphElement ("branch " + id)
@@ -520,23 +521,23 @@ type mindmap =
     static member raw (line: string) = MindmapElement line
     static member node(name: string, ?children: #seq<MindmapElement>) = Mindmap.handleNodeChildren children name
 
-    static member square(name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode name None Mindmap.Square |> Mindmap.handleNodeChildren children
-    static member squareId(id, name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode id (Some name) Mindmap.Square |> Mindmap.handleNodeChildren children
+    static member square(name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode name None MindmapShape.Square |> Mindmap.handleNodeChildren children
+    static member squareId(id, name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode id (Some name) MindmapShape.Square |> Mindmap.handleNodeChildren children
     
-    static member roundedSquare(name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode name None Mindmap.RoundedSquare |> Mindmap.handleNodeChildren children
-    static member roundedSquareId(id, name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode id (Some name) Mindmap.RoundedSquare |> Mindmap.handleNodeChildren children
+    static member roundedSquare(name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode name None MindmapShape.RoundedSquare |> Mindmap.handleNodeChildren children
+    static member roundedSquareId(id, name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode id (Some name) MindmapShape.RoundedSquare |> Mindmap.handleNodeChildren children
     
-    static member circle(name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode name None Mindmap.Circle |> Mindmap.handleNodeChildren children
-    static member circleId(id, name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode id (Some name) Mindmap.Circle |> Mindmap.handleNodeChildren children
+    static member circle(name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode name None MindmapShape.Circle |> Mindmap.handleNodeChildren children
+    static member circleId(id, name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode id (Some name) MindmapShape.Circle |> Mindmap.handleNodeChildren children
     
-    static member bang(name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode name None Mindmap.Bang |> Mindmap.handleNodeChildren children
-    static member bangId(id, name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode id (Some name) Mindmap.Bang |> Mindmap.handleNodeChildren children
+    static member bang(name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode name None MindmapShape.Bang |> Mindmap.handleNodeChildren children
+    static member bangId(id, name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode id (Some name) MindmapShape.Bang |> Mindmap.handleNodeChildren children
     
-    static member cloud(name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode name None Mindmap.Cloud |> Mindmap.handleNodeChildren children
-    static member cloudId(id, name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode id (Some name) Mindmap.Cloud |> Mindmap.handleNodeChildren children
+    static member cloud(name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode name None MindmapShape.Cloud |> Mindmap.handleNodeChildren children
+    static member cloudId(id, name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode id (Some name) MindmapShape.Cloud |> Mindmap.handleNodeChildren children
     
-    static member hexagon(name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode name None Mindmap.Hexagon |> Mindmap.handleNodeChildren children
-    static member hexagonId(id, name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode id (Some name) Mindmap.Hexagon |> Mindmap.handleNodeChildren children
+    static member hexagon(name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode name None MindmapShape.Hexagon |> Mindmap.handleNodeChildren children
+    static member hexagonId(id, name: string, ?children: #seq<MindmapElement>) = Mindmap.formatNode id (Some name) MindmapShape.Hexagon |> Mindmap.handleNodeChildren children
 
     static member icon(iconClass: string) = sprintf "::icon(%s)" iconClass |> MindmapElement
     static member className(className: string) = sprintf "::: %s" className |> MindmapElement
@@ -585,6 +586,8 @@ type xyChart =
     static member line (data: #seq<float>) = XYChart.formatLine (List.ofSeq data) |> XYChartElement
     static member bar (data: #seq<float>) = XYChart.formatBar (List.ofSeq data) |> XYChartElement
     static member comment (txt) = Generic.formatComment txt |> XYChartElement
+
+open YamlHelpers
 
 [<AttachMembers>]
 type siren =

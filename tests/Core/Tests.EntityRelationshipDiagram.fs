@@ -2,7 +2,6 @@
 
 open Fable.Pyxpecto
 open Siren
-open Types
 
 let private tests_entity = testList "entity" [
     testCase "simple" <| fun _ ->

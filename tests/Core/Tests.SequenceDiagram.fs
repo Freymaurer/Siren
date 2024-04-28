@@ -2,7 +2,6 @@
 
 open Fable.Pyxpecto
 open Siren
-open Types
 
 let private tests_formatter = testList "Formatter" [
     testCase "empty" <| fun _ ->

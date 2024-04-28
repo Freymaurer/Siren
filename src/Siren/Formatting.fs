@@ -1,19 +1,15 @@
 ﻿module Siren.Formatting
 
 open Siren.Util
-open Siren.Types
 
 module Generic =
 
-    type NotePosition =
-    | Over
-    | RightOf
-    | LeftOf
+    type NotePosition with
         member this.ToFormatString() =
             match this with
-            | Over      -> "over"
-            | RightOf   -> "right of"
-            | LeftOf    -> "left of"
+            | NotePosition.Over      -> "over"
+            | NotePosition.RightOf   -> "right of"
+            | NotePosition.LeftOf    -> "left of"
     
     let formatComment (txt: string) = sprintf "%%%% %s" txt
 
@@ -30,37 +26,7 @@ module Generic =
 
 module Flowchart =
 
-    [<RequireQualifiedAccess>]
-    type NodeTypes =
-        | Default
-        | Round
-        | Stadium
-        | Subroutine
-        | Cylindrical 
-        | Circle 
-        | Asymmetric
-        | Rhombus
-        | Hexagon
-        | Parallelogram
-        | ParallelogramAlt
-        | Trapezoid
-        | TrapezoidAlt
-        | DoubleCircle
-
-    [<RequireQualifiedAccess>]
-    type LinkTypes =
-        | Arrow
-        | Open
-        | Dotted
-        | DottedArrow
-        | Thick
-        | ThickArrow
-        | Invisible
-        | CircleEdge
-        | CrossEdge
-        | ArrowDouble
-        | CircleDouble
-        | CrossDouble
+    type FlowchartLinkTypes with
 
         static member appendTextOption (txt: string option) (arrow:string) =
             if txt.IsSome then
@@ -76,52 +42,52 @@ module Flowchart =
 
         member private this.GetAddLengthChar() =
             match this with
-            | Open | Arrow | CircleEdge | CrossEdge | ArrowDouble | CircleDouble | CrossDouble -> "-"
-            | Dotted | DottedArrow -> "."
-            | Thick | ThickArrow -> "="
-            | Invisible -> "~"
+            | FlowchartLinkTypes.Open | FlowchartLinkTypes.Arrow | FlowchartLinkTypes.CircleEdge | FlowchartLinkTypes.CrossEdge | FlowchartLinkTypes.ArrowDouble | FlowchartLinkTypes.CircleDouble | FlowchartLinkTypes.CrossDouble -> "-"
+            | FlowchartLinkTypes.Dotted | FlowchartLinkTypes.DottedArrow -> "."
+            | FlowchartLinkTypes.Thick | FlowchartLinkTypes.ThickArrow -> "="
+            | FlowchartLinkTypes.Invisible -> "~"
 
     let private formatMinimalNamedNode (id:string) (name:string) = $"{id}[{name}]"
 
-    let private nodeTypeToFormatter (nodetype: NodeTypes) =
+    let private nodeTypeToFormatter (nodetype: FlowchartNodeTypes) =
         match nodetype with
-        | NodeTypes.Default -> fun id name -> formatMinimalNamedNode id name
-        | NodeTypes.Round -> fun id name -> $"{id}({name})"
-        | NodeTypes.Stadium -> fun id name -> $"{id}([{name}])"
-        | NodeTypes.Subroutine -> fun id name -> $"{id}[[{name}]]"
-        | NodeTypes.Cylindrical -> fun id name -> $"{id}[({name})]"
-        | NodeTypes.Circle -> fun id name -> $"{id}(({name}))"
-        | NodeTypes.Asymmetric -> fun id name -> $"{id}>{name}]"
-        | NodeTypes.Rhombus -> fun id name -> sprintf "%s{%s}" id name
-        | NodeTypes.Hexagon -> fun id name -> sprintf "%s{{%s}}" id name
-        | NodeTypes.Parallelogram -> fun id name -> sprintf "%s[/%s/]" id name
-        | NodeTypes.ParallelogramAlt -> fun id name -> sprintf "%s[\%s\]" id name
-        | NodeTypes.Trapezoid -> fun id name -> sprintf "%s[/%s\]" id name
-        | NodeTypes.TrapezoidAlt -> fun id name -> sprintf "%s[\%s/]" id name
-        | NodeTypes.DoubleCircle -> fun id name -> sprintf "%s(((%s)))" id name
+        | FlowchartNodeTypes.Default -> fun id name -> formatMinimalNamedNode id name
+        | FlowchartNodeTypes.Round -> fun id name -> $"{id}({name})"
+        | FlowchartNodeTypes.Stadium -> fun id name -> $"{id}([{name}])"
+        | FlowchartNodeTypes.Subroutine -> fun id name -> $"{id}[[{name}]]"
+        | FlowchartNodeTypes.Cylindrical -> fun id name -> $"{id}[({name})]"
+        | FlowchartNodeTypes.Circle -> fun id name -> $"{id}(({name}))"
+        | FlowchartNodeTypes.Asymmetric -> fun id name -> $"{id}>{name}]"
+        | FlowchartNodeTypes.Rhombus -> fun id name -> sprintf "%s{%s}" id name
+        | FlowchartNodeTypes.Hexagon -> fun id name -> sprintf "%s{{%s}}" id name
+        | FlowchartNodeTypes.Parallelogram -> fun id name -> sprintf "%s[/%s/]" id name
+        | FlowchartNodeTypes.ParallelogramAlt -> fun id name -> sprintf "%s[\%s\]" id name
+        | FlowchartNodeTypes.Trapezoid -> fun id name -> sprintf "%s[/%s\]" id name
+        | FlowchartNodeTypes.TrapezoidAlt -> fun id name -> sprintf "%s[\%s/]" id name
+        | FlowchartNodeTypes.DoubleCircle -> fun id name -> sprintf "%s(((%s)))" id name
 
-    let formatNode (id: string) (name: string option) (shape: NodeTypes) =
+    let formatNode (id: string) (name: string option) (shape: FlowchartNodeTypes) =
         let formatter = nodeTypeToFormatter shape
         let name = defaultArg name id
         formatter id name
 
-    let private formatLinkType (link: LinkTypes) (msg: string option) (addedLength: int option) =
+    let private formatLinkType (link: FlowchartLinkTypes) (msg: string option) (addedLength: int option) =
         match link with
-        | LinkTypes.Arrow -> $"-{link.AddedLengthLinker(addedLength)}>" 
-        | LinkTypes.Open -> $"-{link.AddedLengthLinker(addedLength)}-"
-        | LinkTypes.Dotted -> $"-{link.AddedLengthLinker(addedLength)}-"
-        | LinkTypes.DottedArrow -> $"-{link.AddedLengthLinker(addedLength)}->"
-        | LinkTypes.Thick -> $"={link.AddedLengthLinker(addedLength)}="
-        | LinkTypes.ThickArrow -> $"={link.AddedLengthLinker(addedLength)}>"
-        | LinkTypes.Invisible -> $"~{link.AddedLengthLinker(addedLength)}~"
-        | LinkTypes.CircleEdge -> $"-{link.AddedLengthLinker(addedLength)}o"
-        | LinkTypes.CrossEdge -> $"-{link.AddedLengthLinker(addedLength)}x"
-        | LinkTypes.ArrowDouble -> $"<-{link.AddedLengthLinker(addedLength)}>"
-        | LinkTypes.CircleDouble -> $"o-{link.AddedLengthLinker(addedLength)}o"
-        | LinkTypes.CrossDouble -> $"x-{link.AddedLengthLinker(addedLength)}x"
-        |> LinkTypes.appendTextOption msg
+        | FlowchartLinkTypes.Arrow -> $"-{link.AddedLengthLinker(addedLength)}>" 
+        | FlowchartLinkTypes.Open -> $"-{link.AddedLengthLinker(addedLength)}-"
+        | FlowchartLinkTypes.Dotted -> $"-{link.AddedLengthLinker(addedLength)}-"
+        | FlowchartLinkTypes.DottedArrow -> $"-{link.AddedLengthLinker(addedLength)}->"
+        | FlowchartLinkTypes.Thick -> $"={link.AddedLengthLinker(addedLength)}="
+        | FlowchartLinkTypes.ThickArrow -> $"={link.AddedLengthLinker(addedLength)}>"
+        | FlowchartLinkTypes.Invisible -> $"~{link.AddedLengthLinker(addedLength)}~"
+        | FlowchartLinkTypes.CircleEdge -> $"-{link.AddedLengthLinker(addedLength)}o"
+        | FlowchartLinkTypes.CrossEdge -> $"-{link.AddedLengthLinker(addedLength)}x"
+        | FlowchartLinkTypes.ArrowDouble -> $"<-{link.AddedLengthLinker(addedLength)}>"
+        | FlowchartLinkTypes.CircleDouble -> $"o-{link.AddedLengthLinker(addedLength)}o"
+        | FlowchartLinkTypes.CrossDouble -> $"x-{link.AddedLengthLinker(addedLength)}x"
+        |> FlowchartLinkTypes.appendTextOption msg
 
-    let formatLink (n1: string) (n2: string) (link: LinkTypes) (msg: string option) (addedLength: int option) =
+    let formatLink (n1: string) (n2: string) (link: FlowchartLinkTypes) (msg: string option) (addedLength: int option) =
         let link = formatLinkType link msg addedLength
         n1 + link + n2
 
@@ -132,27 +98,18 @@ module Flowchart =
 
 module Sequence =
 
-    [<RequireQualifiedAccess>]
-    type MessageTypes =
-        | Solid
-        | Dotted
-        | Arrow
-        | DottedArrow
-        | CrossEdge
-        | DottedCrossEdge
-        | OpenArrow
-        | DottedOpenArrow
+    open Generic
 
-    let private formatMessageType (msgType: MessageTypes) =
+    let private formatMessageType (msgType: SequenceMessageTypes) =
         match msgType with
-        | MessageTypes.Solid             -> "->"
-        | MessageTypes.Dotted            -> "-->"
-        | MessageTypes.Arrow             -> "->>"
-        | MessageTypes.DottedArrow       -> "-->>"
-        | MessageTypes.CrossEdge         -> "-x"
-        | MessageTypes.DottedCrossEdge   -> "--x"
-        | MessageTypes.OpenArrow         -> "-)"
-        | MessageTypes.DottedOpenArrow   -> "--)"
+        | SequenceMessageTypes.Solid             -> "->"
+        | SequenceMessageTypes.Dotted            -> "-->"
+        | SequenceMessageTypes.Arrow             -> "->>"
+        | SequenceMessageTypes.DottedArrow       -> "-->>"
+        | SequenceMessageTypes.CrossEdge         -> "-x"
+        | SequenceMessageTypes.DottedCrossEdge   -> "--x"
+        | SequenceMessageTypes.OpenArrow         -> "-)"
+        | SequenceMessageTypes.DottedOpenArrow   -> "--)"
 
     let formatMessage a1 a2 msgType msg (activate: bool option) =
         let active = match activate with |None -> "" | Some true -> "+"| Some false -> "-"
@@ -175,60 +132,41 @@ module Sequence =
         let color = color |> Option.formatString (sprintf "%s ")
         sprintf "box %s%s" color name
 
-    let formatNoteSpanning id1 id2 (position: Generic.NotePosition option) (msg: string) =
-        let position = defaultArg position Generic.NotePosition.RightOf |> _.ToFormatString()
+    let formatNoteSpanning id1 id2 (position: NotePosition option) (msg: string) =
+        let position = defaultArg position NotePosition.RightOf |> _.ToFormatString()
         sprintf "note %s %s,%s : %s" position id1 id2 msg
 
 
 module ClassDiagram =
-    type MemberVisibility =
-    | Public
-    | Private
-    | Protected
-    | PackageInternal
-    | Custom of string
+    type ClassMemberVisibility with
         member this.ToFormatString() =
             match this with
-            | Public            -> "+"
-            | Private           -> "-"
-            | Protected         -> "#"
-            | PackageInternal   -> "~"
-            | Custom string     -> string
-    type MemberClassifier = 
-    | Abstract
-    | Static
-    | Custom of string
-        member this.ToFormatString() =
-            match this with
-            | Abstract      -> "*"
-            | Static        -> "$"
-            | Custom string -> string
+            | ClassMemberVisibility.Public            -> "+"
+            | ClassMemberVisibility.Private           -> "-"
+            | ClassMemberVisibility.Protected         -> "#"
+            | ClassMemberVisibility.PackageInternal   -> "~"
+            | ClassMemberVisibility.Custom string     -> string
 
-    type ClassRelationshipDirection =
-    | Left
-    | Right
-    | TwoWay
+    type ClassMemberClassifier with
+        member this.ToFormatString() =
+            match this with
+            | ClassMemberClassifier.Abstract      -> "*"
+            | ClassMemberClassifier.Static        -> "$"
+            | ClassMemberClassifier.Custom string -> string
+
+    type ClassRelationshipDirection with
         member this.ToFormatString(left: string, right: string, center: string) =
             match this with
-            | Left  -> left + center
-            | Right -> center + right
-            | TwoWay -> left + center + right
+            | ClassRelationshipDirection.Left  -> left + center
+            | ClassRelationshipDirection.Right -> center + right
+            | ClassRelationshipDirection.TwoWay -> left + center + right
         member this.ToFormatString(edge: string, center: string) =
             match this with
-            | Left  -> edge + center
-            | Right -> center + edge
-            | TwoWay -> edge + center + edge
+            | ClassRelationshipDirection.Left  -> edge + center
+            | ClassRelationshipDirection.Right -> center + edge
+            | ClassRelationshipDirection.TwoWay -> edge + center + edge
 
-    type ClassRelationshipType = 
-        | Inheritance
-        | Composition
-        | Aggregation
-        | Association
-        | Link
-        | Solid
-        | Dashed
-        | Dependency
-        | Realization
+    type ClassRelationshipType with
 
         member this.ToFormatString(?direction: ClassRelationshipDirection, ?isDotted: bool) =
             let isDotted = defaultArg isDotted false
@@ -237,48 +175,40 @@ module ClassDiagram =
             let center = if isDotted then dotted else solid
             let direct = defaultArg direction ClassRelationshipDirection.Right
             match this with
-            | Inheritance   -> direct.ToFormatString("<|", "|>", center)
-            | Composition   -> direct.ToFormatString("*",center)
-            | Aggregation   -> direct.ToFormatString("o", center)
-            | Association   -> direct.ToFormatString("<",">", center)
-            | Link          -> center
-            | Solid         -> solid
-            | Dashed        -> dotted
-            | Dependency    -> direct.ToFormatString("<",">", dotted)
-            | Realization   -> direct.ToFormatString("<|","|>", dotted)
+            | ClassRelationshipType.Inheritance   -> direct.ToFormatString("<|", "|>", center)
+            | ClassRelationshipType.Composition   -> direct.ToFormatString("*",center)
+            | ClassRelationshipType.Aggregation   -> direct.ToFormatString("o", center)
+            | ClassRelationshipType.Association   -> direct.ToFormatString("<",">", center)
+            | ClassRelationshipType.Link          -> center
+            | ClassRelationshipType.Solid         -> solid
+            | ClassRelationshipType.Dashed        -> dotted
+            | ClassRelationshipType.Dependency    -> direct.ToFormatString("<",">", dotted)
+            | ClassRelationshipType.Realization   -> direct.ToFormatString("<|","|>", dotted)
 
-    type Cardinality = 
-        | One
-        | ZeroOrOne
-        | OneOrMore
-        | Many
-        | N
-        | ZeroToN
-        | OneToN
-        | Custom of string
+    type ClassCardinality with
 
         member this.ToFormatString() =
             match this with
-            | One       -> "1"
-            | ZeroOrOne -> "0..1"
-            | OneOrMore -> "1..*"
-            | Many      -> "*"
-            | N         -> "n"
-            | ZeroToN   -> "0..n"
-            | OneToN    -> "1..n"
-            | Custom s  -> s
+            | ClassCardinality.One       -> "1"
+            | ClassCardinality.ZeroOrOne -> "0..1"
+            | ClassCardinality.OneOrMore -> "1..*"
+            | ClassCardinality.Many      -> "*"
+            | ClassCardinality.N         -> "n"
+            | ClassCardinality.ZeroToN   -> "0..n"
+            | ClassCardinality.OneToN    -> "1..n"
+            | ClassCardinality.Custom s  -> s
 
     let formatClass (id) (name) generic =
         let name = name |> Option.formatString (fun s -> sprintf "[\"%s\"]" s)
         let generic = generic |> Option.formatString (fun s -> sprintf "~%s~" s)
         sprintf "class %s%s%s" id generic name
 
-    let formatMember id label (visibility: MemberVisibility option) (classifier: MemberClassifier option) =
+    let formatMember id label (visibility: ClassMemberVisibility option) (classifier: ClassMemberClassifier option) =
         let visibility = visibility |> Option.map _.ToFormatString() |> Option.formatString (fun x -> x)
         let classifier = classifier |> Option.map _.ToFormatString() |> Option.formatString (fun x -> x)
         sprintf "%s : %s%s%s" id visibility label classifier
 
-    let formatRelationship0 id1 id2 (link: string) (label: string option) (cardinality1: Cardinality option) (cardinality2: Cardinality option) =
+    let formatRelationship0 id1 id2 (link: string) (label: string option) (cardinality1: ClassCardinality option) (cardinality2: ClassCardinality option) =
         //classI -- classJ : Link(Solid)
         //Student "1" --> "1..*" Course
         let car1 = cardinality1 |> Option.map _.ToFormatString() |> Option.formatString (fun s -> sprintf " \"%s\"" s)
@@ -286,11 +216,11 @@ module ClassDiagram =
         let label = label |> Option.formatString (fun l -> sprintf " : %s" l)
         sprintf "%s%s %s %s%s%s" id1 car1 link car2 id2 label
 
-    let formatRelationship id1 id2 (rltsType: ClassRelationshipType) (label: string option) (cardinality1: Cardinality option) (cardinality2: Cardinality option) =
+    let formatRelationship id1 id2 (rltsType: ClassRelationshipType) (label: string option) (cardinality1: ClassCardinality option) (cardinality2: ClassCardinality option) =
         let link = rltsType.ToFormatString()
         formatRelationship0 id1 id2 link label cardinality1 cardinality2
 
-    let formatRelationshipCustom id1 id2 (rltsType: ClassRelationshipType) (direction) (dotted) (label: string option) (cardinality1: Cardinality option) (cardinality2: Cardinality option) =
+    let formatRelationshipCustom id1 id2 (rltsType: ClassRelationshipType) (direction) (dotted) (label: string option) (cardinality1: ClassCardinality option) (cardinality2: ClassCardinality option) =
         let link = rltsType.ToFormatString(?direction=direction, ?isDotted=dotted)
         formatRelationship0 id1 id2 link label cardinality1 cardinality2
 
@@ -305,6 +235,8 @@ module ClassDiagram =
 
 module StateDiagram =
 
+    open Generic
+
     let formatState id (description: string option) = 
         let description = description |> Option.formatString (fun s -> sprintf " : %s" s)
         sprintf "%s%s" id description
@@ -313,38 +245,20 @@ module StateDiagram =
         let description = description |> Option.formatString (fun s -> sprintf " : %s" s)
         sprintf "%s --> %s%s" id1 id2 description
 
-    let formatNoteWrapper (id) (position: Generic.NotePosition option) =
-        let position = defaultArg position Generic.RightOf |> _.ToFormatString()
+    let formatNoteWrapper (id) (position: NotePosition option) =
+        let position = defaultArg position NotePosition.RightOf |> _.ToFormatString()
         sprintf "note %s %s" position id
 
 
 module ERDiagram =
 
-    [<RequireQualifiedAccess>]
-    type ERCardinalityType = 
-        | OneOrZero
-        | OneOrMany
-        | ZeroOrMany
-        | OnlyOne
+    type ERCardinalityType with
         member this.ToFormatString() =
             match this with
-            | OneOrZero -> "one or zero"
-            | OneOrMany -> "one or many"
-            | ZeroOrMany -> "zero or many"
-            | OnlyOne -> "only one"
-
-    [<RequireQualifiedAccess>]
-    type ERKeyType = 
-        | PK
-        | FK
-        | UK
-    [<RequireQualifiedAccess>]
-    type ERAttribute = {
-        Type : string
-        Name : string
-        Keys : ERKeyType list
-        Comment: string option
-    } 
+            | ERCardinalityType.OneOrZero -> "one or zero"
+            | ERCardinalityType.OneOrMany -> "one or many"
+            | ERCardinalityType.ZeroOrMany -> "zero or many"
+            | ERCardinalityType.OnlyOne -> "only one"
 
     let formatEntityNode (id) (alias: string option) =
         let alias = alias |> Option.formatString (fun s -> sprintf "[\"%s\"]" s)
@@ -385,28 +299,15 @@ module UserJourney =
 
 module Gantt =
 
-    [<RequireQualifiedAccess>]
-    type GanttTags = 
-    | Active
-    | Done
-    | Crit
-    | Milestone
+    type GanttTags with
         member this.ToFormatString() =
             match this with
-            | Active    -> "active"
-            | Done      -> "done"
-            | Crit      -> "crit"
-            | Milestone -> "milestone"
+            | GanttTags.Active    -> "active"
+            | GanttTags.Done      -> "done"
+            | GanttTags.Crit      -> "crit"
+            | GanttTags.Milestone -> "milestone"
 
-    [<RequireQualifiedAccess>]
-    type GanttUnit =
-    | Millisecond
-    | Second
-    | Minute
-    | Hour
-    | Day
-    | Week
-    | Month
+    type GanttUnit with
         member this.ToFormatString() =
             string this |> _.ToLower()
 
@@ -450,39 +351,18 @@ module QuadrantChart =
 
 module RequirementDiagram =
 
-    type RequirementType =
-        | Requirement
-        | FunctionalRequirement
-        | InterfaceRequirement
-        | PerformanceRequirement
-        | PhysicalRequirement
-        | DesignConstraint
 
-    type RiskType = 
-        | Low
-        | Medium
-        | High
+    type RDRiskType with
         member this.ToFormatString() = this.ToString().ToLower()
 
-    type VerifyMethod =
-        | Analysis
-        | Inspection
-        | Test
-        | Demonstration
+    type RDVerifyMethod with
         member this.ToFormatString() = this.ToString().ToLower()
 
     /// A relationship type can be one of contains, copies, derives, satisfies, verifies, refines, or traces.
-    type RDRelationship = 
-        | Contains
-        | Copies
-        | Derives
-        | Satisfies
-        | Verifies
-        | Refines
-        | Traces
+    type RDRelationship with
         member this.ToFormatString() = this.ToString().ToLower()
 
-    let createRequirement type0 name id text (risk: RiskType option) (methods: VerifyMethod option) =
+    let createRequirement type0 name id text (risk: RDRiskType option) (methods: RDVerifyMethod option) =
         let children =
             [
                 id |> Option.map (fun i -> sprintf "id: \"%s\"" i)
@@ -510,10 +390,7 @@ module RequirementDiagram =
 
 module Git =
 
-    type GitCommitType =
-    | NORMAL
-    | REVERSE
-    | HIGHLIGHT
+    type GitCommitType with
         member this.ToFormatString() =
             this.ToString().ToUpper()
 
@@ -562,23 +439,15 @@ module Git =
 
 module Mindmap =
 
-    type MindmapShape = 
-        | Square //id[I am a square]
-        | RoundedSquare //id(I am a rounded square)
-        | Circle //id((I am a circle))
-        | Bang //id))I am a bang((
-        | Cloud //id)I am a cloud(
-        | Hexagon //id{{I am a hexagon}}
-
     let formatNode (id: string) (name: string option) t =
         let name = defaultArg name id
         match t with
-        | Square -> sprintf "%s[%s]" id name
-        | RoundedSquare -> sprintf "%s(%s)" id name
-        | Circle -> sprintf "%s((%s))" id name
-        | Bang -> sprintf "%s))%s((" id name
-        | Cloud -> sprintf "%s)%s(" id name
-        | Hexagon -> sprintf "%s{{%s}}" id name
+        | MindmapShape.Square -> sprintf "%s[%s]" id name
+        | MindmapShape.RoundedSquare -> sprintf "%s(%s)" id name
+        | MindmapShape.Circle -> sprintf "%s((%s))" id name
+        | MindmapShape.Bang -> sprintf "%s))%s((" id name
+        | MindmapShape.Cloud -> sprintf "%s)%s(" id name
+        | MindmapShape.Hexagon -> sprintf "%s{{%s}}" id name
 
     let handleNodeChildren (children: #seq<MindmapElement> option) (opener: string)  =
         if children.IsSome && Seq.isEmpty children.Value |> not then
