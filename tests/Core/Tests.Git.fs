@@ -135,5 +135,52 @@ let main = testList "Git" [
     commit id: "C"
 """
         Expect.trimEqual actual expected ""
+    testCase "config" <| fun _ ->
+        let developer, main = "developer", "main"
+        let actual =
+            siren.git [
+                git.commit()
+                git.commit()
+                git.branch developer
+                git.commit()
+                git.commit()
+                git.checkout main
+                git.merge developer
+                git.commit()
+                git.commit()
+            ]
+            |> siren.withTitle "Test"
+            |> siren.withTheme theme.forest
+            |> siren.withGraphConfig(System.Collections.Generic.Dictionary(Map [
+                "parallelCommits", "true"
+                "showCommitLabel", "true"
+            ]))
+            |> siren.withThemeVariables(System.Collections.Generic.Dictionary(Map [
+                "commitLabelColor", "white"
+                "git0", "black"
+            ]))
+            |> siren.write
+        let expected = """---
+title: Test
+config:
+    theme: forest
+    gitGraph:
+        parallelCommits: true
+        showCommitLabel: true
+    themeVariables:
+        commitLabelColor: white
+        git0: black
+---
+gitGraph
+    commit
+    commit
+    branch developer
+    commit
+    commit
+    checkout main
+    merge developer
+    commit
+    commit
+"""
+        Expect.trimEqual actual expected ""
 ]
-

@@ -1,5 +1,7 @@
 ﻿namespace Siren
 
+open Fable.Core
+
 module YamlHelpers =
 
     let writeYamlASTBasicWrapper opener closer children =
@@ -20,6 +22,18 @@ module YamlHelpers =
                     yield! child :> IYamlConvertible |> _.ToYamlAst()
             ]
         ]
+
+//---
+//title: Test
+//config:
+//    theme: forest
+//    gitGraph:
+//        parallelCommits: true
+//        showCommitLabel: true
+//    themeVariables:
+//        commitLabelColor: white
+//        git0: red
+//---
 
 open YamlHelpers
 
@@ -379,8 +393,9 @@ type XYChartElement =
             match this with
             | XYChartElement line -> [Yaml.line line]
 
+[<AttachMembers>]
 [<RequireQualifiedAccess>]
-type SirenElement =
+type SirenGraph =
 | Flowchart of Direction * FlowchartElement list 
 | Sequence of SequenceElement list
 | Class of ClassDiagramElement list
@@ -397,3 +412,172 @@ type SirenElement =
 | Timeline of TimelineElement list
 | Sankey of SankeyElement list
 | XYChart of isHorizontal:bool * XYChartElement list
+with 
+    member this.ToConfigName() =
+        match this with 
+        | SirenGraph.Flowchart _ -> "flowchart"
+        | SirenGraph.Class _ -> "class"
+        | SirenGraph.Sequence _ -> "sequence"
+        | SirenGraph.State _
+        | SirenGraph.StateV2 _ -> "state"
+        | SirenGraph.ERDiagram _ -> "erDiagram"
+        | SirenGraph.Journey _ -> "journey"
+        | SirenGraph.Gantt _ -> "gantt"
+        | SirenGraph.PieChart _ -> "pie"
+        | SirenGraph.Quadrant _ -> "quadrant"
+        | SirenGraph.RequirementDiagram _ -> "requirement"
+        | SirenGraph.GitGraph _ -> "gitGraph"
+        | SirenGraph.Mindmap _ -> "mindmap"
+        | SirenGraph.Timeline _ -> "timeline"
+        | SirenGraph.Sankey _ -> "sankey"
+        | SirenGraph.XYChart _ -> "xyChart"
+
+    member this.ToYamlAst() = 
+        match this with
+        | SirenGraph.Flowchart (direction, children) ->
+            let dia = "flowchart " + direction.ToString()
+            writeYamlDiagramRoot dia children
+        | SirenGraph.Sequence (children) ->
+            let dia = "sequenceDiagram"
+            writeYamlDiagramRoot dia children
+        | SirenGraph.Class children ->
+            let dia = "classDiagram"
+            writeYamlDiagramRoot dia children
+        | SirenGraph.StateV2 children ->
+            let dia = "stateDiagram-v2"
+            writeYamlDiagramRoot dia children
+        | SirenGraph.State children ->
+            let dia = "stateDiagram"
+            writeYamlDiagramRoot dia children
+        | SirenGraph.ERDiagram children ->
+            let dia = "erDiagram"
+            writeYamlDiagramRoot dia children
+        | SirenGraph.Journey children ->
+            let dia = "journey"
+            writeYamlDiagramRoot dia children
+        | SirenGraph.Gantt children ->
+            let dia = "gantt"
+            writeYamlDiagramRoot dia children
+        | SirenGraph.PieChart (showData, title, children) ->
+            let dia = ["pie"; if showData then "showData"; if title.IsSome then sprintf "title %s" title.Value] |> String.concat " "
+            writeYamlDiagramRoot dia children
+        | SirenGraph.Quadrant children ->
+            let dia = "quadrantChart"
+            writeYamlDiagramRoot dia children
+        | SirenGraph.RequirementDiagram children ->
+            let dia = "requirementDiagram"
+            writeYamlDiagramRoot dia children
+        | SirenGraph.GitGraph children ->
+            let dia = "gitGraph"
+            writeYamlDiagramRoot dia children
+        | SirenGraph.Mindmap children ->
+            let dia = "mindmap"
+            writeYamlDiagramRoot dia children
+        | SirenGraph.Timeline children ->
+            let dia = "timeline"
+            writeYamlDiagramRoot dia children
+        | SirenGraph.Sankey children ->
+            let dia = "sankey-beta"
+            Yaml.root [
+                Yaml.line dia
+                for child in children do
+                    yield! child :> IYamlConvertible |> _.ToYamlAst()
+            ]
+        | SirenGraph.XYChart (isHorizontal, children) ->
+            let dia = "xychart-beta"  + if isHorizontal then " horizontal" else ""
+            writeYamlDiagramRoot dia children
+
+open System.Collections.Generic
+
+/// https://mermaid.js.org/config/configuration.html
+[<AttachMembers>]
+type SirenConfig(graph: SirenGraph, ?title, ?theme, ?graphConfig, ?themeVariable) =
+    member val Graph: SirenGraph = graph with get
+    member val Title: string option = title with get, set
+    member val Theme: string option = theme with get, set
+    member val GraphConfig: Dictionary<string, string> option = graphConfig with get, set
+    member val ThemeVariables: Dictionary<string, string> option = themeVariable with get, set
+
+    member this.AddGraphConfig(key: string, value: string) =
+        match this.GraphConfig with
+        | Some config -> config.Add(key, value)
+        | None -> 
+            let config = new Dictionary<string, string>()
+            config.Add(key, value)
+            this.GraphConfig <- Some config
+
+    member this.RemoveGraphConfig(key: string) =
+        match this.GraphConfig with
+        | Some config -> config.Remove(key) |> ignore
+        | None -> ()
+
+    member this.AddThemeVariable(key: string, value: string) = 
+        match this.ThemeVariables with
+        | Some theme -> theme.Add(key, value)
+        | None -> 
+            let theme = new Dictionary<string, string>()
+            theme.Add(key, value)
+            this.ThemeVariables <- Some theme
+
+    member this.RemoveThemeVariable(key: string) =
+        match this.ThemeVariables with
+        | Some theme -> theme.Remove(key) |> ignore
+        | None -> ()
+
+    member this.ToYamlAst() = 
+        let hasInnerConfig = this.GraphConfig.IsSome || this.ThemeVariables.IsSome || this.Theme.IsSome
+        let createInnerConfig () =
+            Yaml.root [
+                Yaml.line "config:"
+                Yaml.level [
+                    if this.Theme.IsSome then Yaml.line $"theme: {this.Theme.Value}"
+                    match this.GraphConfig with
+                    | Some config -> 
+                        this.Graph.ToConfigName()
+                        |> fun b -> b + ":" 
+                        |> Yaml.line
+                        Yaml.level [
+                            for KeyValue(key, value) in config do
+                                yield Yaml.line $"{key}: {value}"
+                        ]
+                    | None -> ()
+                    match this.ThemeVariables with
+                    | Some theme -> 
+                        Yaml.line "themeVariables:"
+                        Yaml.level [
+                            for KeyValue(key, value) in theme do
+                                yield Yaml.line $"{key}: {value}"
+                        ]
+                    | None -> ()
+                ]
+            ]
+        Yaml.root [
+            if this.Title.IsSome || hasInnerConfig then
+                Yaml.line "---"
+                if this.Title.IsSome then 
+                    Yaml.line $"title: {this.Title.Value}"
+                if hasInnerConfig then 
+                    createInnerConfig()
+                Yaml.line "---"
+        ]
+
+    override this.ToString() =
+        [
+            "Title", this.Title.ToString()
+            "Theme", this.Theme.ToString()
+            "GraphConfig", this.GraphConfig |> Option.map (fun x -> x.ToString()) |> _.ToString()
+            "ThemeVariables", this.ThemeVariables |> Option.map (fun x -> x.ToString()) |> _.ToString()
+        ]
+        |> List.map (fun (key, value) -> sprintf "%s: %s" key value)
+        |> String.concat ",\n"
+        |> sprintf "{%s}"
+        
+
+type SirenElement = {
+    Graph: SirenGraph
+    Config: SirenConfig
+} with
+    static member init(graph: SirenGraph) = {
+        Graph = graph
+        Config = SirenConfig(graph) 
+    }

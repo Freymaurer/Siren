@@ -588,77 +588,92 @@ type xyChart =
     static member comment (txt) = Generic.formatComment txt |> XYChartElement
 
 open YamlHelpers
+open System.Collections.Generic
+
+type theme =
+    static member light = "default"
+    static member neutral = "neutral"
+    static member dark = "dark"
+    static member forest = "forest"
+    static member ``base`` = "base"
+    static member custom (theme: string) = theme
 
 [<AttachMembers>]
 type siren =
-    static member flowchart (direction:Direction, children: #seq<FlowchartElement>) = SirenElement.Flowchart (direction, List.ofSeq children)
-    static member sequence (children: #seq<SequenceElement>) = SirenElement.Sequence (List.ofSeq children)
-    static member classDiagram (children: #seq<ClassDiagramElement>) = SirenElement.Class(List.ofSeq children)
-    static member state (children: #seq<StateDiagramElement>) = SirenElement.State(List.ofSeq children)
-    static member stateV2 (children: #seq<StateDiagramElement>) = SirenElement.StateV2(List.ofSeq children)
-    static member erDiagram (children: #seq<ERDiagramElement>) = SirenElement.ERDiagram(List.ofSeq children)
-    static member journey (children: #seq<JourneyElement>) = SirenElement.Journey (List.ofSeq children)
-    static member gantt (children: #seq<GanttElement>) = SirenElement.Gantt(List.ofSeq children)
-    static member pieChart (children: #seq<PieChartElement>, ?showData: bool, ?title: string) = SirenElement.PieChart(defaultArg showData false, title, List.ofSeq children)
-    static member quadrant (children: #seq<QuadrantElement>) = SirenElement.Quadrant (List.ofSeq children)
-    static member requirement (children: #seq<RequirementDiagramElement>) = SirenElement.RequirementDiagram (List.ofSeq children)
-    static member git (children: #seq<GitGraphElement>) = SirenElement.GitGraph (List.ofSeq children)
-    static member mindmap (children: #seq<MindmapElement>) = SirenElement.Mindmap (List.ofSeq children)
-    static member timeline (children: #seq<TimelineElement>) = SirenElement.Timeline (List.ofSeq children)
-    static member sankey (children: #seq<SankeyElement>) = SirenElement.Sankey (List.ofSeq children)
-    static member xyChart (children: #seq<XYChartElement>, ?isHorizontal: bool) = SirenElement.XYChart (defaultArg isHorizontal false, List.ofSeq children)
+    static member flowchart (direction:Direction, children: #seq<FlowchartElement>) = 
+        SirenGraph.Flowchart (direction, List.ofSeq children) |> SirenElement.init
+
+    static member sequence (children: #seq<SequenceElement>) = 
+        SirenGraph.Sequence (List.ofSeq children) |> SirenElement.init
+
+    static member classDiagram (children: #seq<ClassDiagramElement>) = 
+        SirenGraph.Class(List.ofSeq children) |> SirenElement.init
+    static member state (children: #seq<StateDiagramElement>) = 
+        SirenGraph.State(List.ofSeq children) |> SirenElement.init
+    
+    static member stateV2 (children: #seq<StateDiagramElement>) = 
+        SirenGraph.StateV2(List.ofSeq children) |> SirenElement.init
+
+    static member erDiagram (children: #seq<ERDiagramElement>) = 
+        SirenGraph.ERDiagram(List.ofSeq children) |> SirenElement.init
+
+    static member journey (children: #seq<JourneyElement>) = 
+        SirenGraph.Journey (List.ofSeq children) |> SirenElement.init
+
+    static member gantt (children: #seq<GanttElement>) = 
+        SirenGraph.Gantt(List.ofSeq children) |> SirenElement.init
+
+    static member pieChart (children: #seq<PieChartElement>, ?showData: bool, ?title: string) = 
+        SirenGraph.PieChart(defaultArg showData false, title, List.ofSeq children) |> SirenElement.init
+
+    static member quadrant (children: #seq<QuadrantElement>) = 
+        SirenGraph.Quadrant (List.ofSeq children) |> SirenElement.init
+        
+    static member requirement (children: #seq<RequirementDiagramElement>) = 
+        SirenGraph.RequirementDiagram (List.ofSeq children) |> SirenElement.init
+        
+    static member git (children: #seq<GitGraphElement>) = 
+        SirenGraph.GitGraph (List.ofSeq children) |> SirenElement.init
+        
+    static member mindmap (children: #seq<MindmapElement>) = 
+        SirenGraph.Mindmap (List.ofSeq children) |> SirenElement.init
+        
+    static member timeline (children: #seq<TimelineElement>) = 
+        SirenGraph.Timeline (List.ofSeq children) |> SirenElement.init
+        
+    static member sankey (children: #seq<SankeyElement>) = 
+        SirenGraph.Sankey (List.ofSeq children) |> SirenElement.init
+        
+    static member xyChart (children: #seq<XYChartElement>, ?isHorizontal: bool) = 
+        SirenGraph.XYChart (defaultArg isHorizontal false, List.ofSeq children) |> SirenElement.init
+        
+    static member withTitle (title: string) (diagram: SirenElement) =
+        diagram.Config.Title <- Some title
+        diagram
+
+    static member withTheme (theme: string) (diagram: SirenElement) =
+        diagram.Config.Theme <- Some theme
+        diagram
+
+    static member withGraphConfig (config: Dictionary<string, string>) (diagram: SirenElement) =
+        diagram.Config.GraphConfig <- Some config
+        diagram
+
+    static member withThemeVariables (themeVariables: Dictionary<string, string>) (diagram: SirenElement) =
+        diagram.Config.ThemeVariables <- Some themeVariables
+        diagram
+
+    static member addThemeVariable (key: string, value: string) (diagram: SirenElement) =
+        diagram.Config.AddThemeVariable(key, value)
+        diagram
+
+    static member addGraphConfigVariable (key: string, value: string) (diagram: SirenElement) =
+        diagram.Config.AddGraphConfig(key, value)
+        diagram
+
     static member write(diagram: SirenElement) =
-        match diagram with
-        | SirenElement.Flowchart (direction, children) ->
-            let dia = "flowchart " + direction.ToString()
-            writeYamlDiagramRoot dia children
-        | SirenElement.Sequence (children) ->
-            let dia = "sequenceDiagram"
-            writeYamlDiagramRoot dia children
-        | SirenElement.Class children ->
-            let dia = "classDiagram"
-            writeYamlDiagramRoot dia children
-        | SirenElement.StateV2 children ->
-            let dia = "stateDiagram-v2"
-            writeYamlDiagramRoot dia children
-        | SirenElement.State children ->
-            let dia = "stateDiagram"
-            writeYamlDiagramRoot dia children
-        | SirenElement.ERDiagram children ->
-            let dia = "erDiagram"
-            writeYamlDiagramRoot dia children
-        | SirenElement.Journey children ->
-            let dia = "journey"
-            writeYamlDiagramRoot dia children
-        | SirenElement.Gantt children ->
-            let dia = "gantt"
-            writeYamlDiagramRoot dia children
-        | SirenElement.PieChart (showData, title, children) ->
-            let dia = ["pie"; if showData then "showData"; if title.IsSome then sprintf "title %s" title.Value] |> String.concat " "
-            writeYamlDiagramRoot dia children
-        | SirenElement.Quadrant children ->
-            let dia = "quadrantChart"
-            writeYamlDiagramRoot dia children
-        | SirenElement.RequirementDiagram children ->
-            let dia = "requirementDiagram"
-            writeYamlDiagramRoot dia children
-        | SirenElement.GitGraph children ->
-            let dia = "gitGraph"
-            writeYamlDiagramRoot dia children
-        | SirenElement.Mindmap children ->
-            let dia = "mindmap"
-            writeYamlDiagramRoot dia children
-        | SirenElement.Timeline children ->
-            let dia = "timeline"
-            writeYamlDiagramRoot dia children
-        | SirenElement.Sankey children ->
-            let dia = "sankey-beta"
-            Yaml.root [
-                Yaml.line dia
-                for child in children do
-                    yield! child :> IYamlConvertible |> _.ToYamlAst()
-            ]
-        | SirenElement.XYChart (isHorizontal, children) ->
-            let dia = "xychart-beta"  + if isHorizontal then " horizontal" else ""
-            writeYamlDiagramRoot dia children
+        Yaml.root [
+            diagram.Config.ToYamlAst()
+            diagram.Graph.ToYamlAst()
+        ]
         |> Yaml.write
