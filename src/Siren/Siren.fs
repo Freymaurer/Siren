@@ -405,7 +405,9 @@ type gantt =
 
     static member dateFormat (formatString: string) = sprintf "dateFormat %s" formatString |> GanttElement
     static member axisFormat (formatString: string) = sprintf "axisFormat %s" formatString |> GanttElement
-    static member tickInterval (interval: int, unit: GanttUnit) = sprintf "tickInterval %i%s" interval (unit.ToFormatString()) |> GanttElement ///^([1-9][0-9]*)(millisecond|second|minute|hour|day|week|month)$/;
+    static member tickInterval (interval: int, unit: GanttUnit) = 
+        sprintf "tickInterval %i%s" interval (unit.ToFormatString()) 
+        |> GanttElement ///^([1-9][0-9]*)(millisecond|second|minute|hour|day|week|month)$/;
 
     static member weekday (day: string) = sprintf "weekday %s" day |> GanttElement 
     static member excludes (day: string) = sprintf "excludes %s" day |> GanttElement 

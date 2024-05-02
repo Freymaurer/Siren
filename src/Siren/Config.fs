@@ -40,3 +40,53 @@ type flowchartConfig =
 type sequenceConfig =
     static member custom (key, value) = key, value
     static member arrowMarkerAbsolute (b: bool) = "arrowMarkerAbsolute", string b
+
+[<AttachMembers>]
+type ganttConfig =
+    static member custom (key, value) = key, value
+    /// Default: 25
+    static member titleTopMargin(px:int) = "titleTopMargin", string px
+    /// Default: 20
+    static member barHeight(px:int) = "barHeight", string px
+    /// Default: 4
+    static member barGap(px:int) = "barGap", string px
+    /// Default: 50
+    static member topPadding(px:int) = "topPadding", string px
+    /// Default: 75
+    static member leftPadding(px:int) = "leftPadding", string px
+    /// Default: 75
+    static member rightPadding(px:int) = "rightPadding", string px
+    /// Default: 35
+    static member gridLineStartPadding(px:int) = "gridLineStartPadding", string px
+    /// Default: 11
+    static member fontSize(px:int) = "fontSize", string px
+    /// Default: 11
+    static member sectionFontSize(px:int) = "sectionFontSize", string px
+    /// Default: 4
+    static member numberSectionStyles(n:int) = "numberSectionStyles", string n
+    /// Default: "%Y-%m-%d"
+    static member axisFormat(format:string) = "axisFormat", format
+    /// Must match: /^([1-9][0-9]*)(millisecond|second|minute|hour|day|week|month)$/
+    static member tickInterval(format:string) = "tickInterval", format
+    static member tickIntervalMillisecond(ms:int) = "tickInterval", sprintf "%imillisecond" ms
+    static member tickIntervalSecond(s:int) = "tickInterval", sprintf "%isecond" s
+    static member tickIntervalMinute(min:int) = "tickInterval", sprintf "%iminute" min
+    static member tickIntervalHour(hour:int) = "tickInterval", sprintf "%ihour" hour
+    static member tickIntervalDay(day:int) = "tickInterval", sprintf "%iday" day
+    static member tickIntervalWeek(week:int) = "tickInterval", sprintf "%iweek" week
+    static member tickIntervalMonth(month:int) = "tickInterval", sprintf "%imonth" month
+    static member topAxis(b:bool) = "topAxis", string b
+    static member displayMode(mode: string) = "displayMode", sprintf "\"%s\"" mode
+    static member displayModeDefault = "displayMode", sprintf "\"\""
+    static member displayModeCompact = "displayMode", sprintf "\"compact\""
+    /// Default: "sunday"
+    static member weekday(day: string) = "weekday", sprintf "%A" day
+    static member weekdayMonday = "weekday", sprintf "%A" "monday"
+    static member weekdayTuesday = "weekday", sprintf "%A" "tuesday"
+    static member weekdayWednesday = "weekday", sprintf "%A" "wednesday"
+    static member weekdayThursday = "weekday", sprintf "%A" "thursday"
+    static member weekdayFriday = "weekday", sprintf "%A" "friday"
+    static member weekdaySaturday = "weekday", sprintf "%A" "saturday"
+    static member weekdaySunday = "weekday", sprintf "%A" "sunday"
+
+    
