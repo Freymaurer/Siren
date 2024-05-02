@@ -10,6 +10,7 @@
     <Compile Include="Yaml.fs" />
     <Compile Include="Types.fs" />
     <Compile Include="Formatting.fs" />
+    <Compile Include="Config.fs" />
     <Compile Include="Siren.fs" />
   </ItemGroup>
 
