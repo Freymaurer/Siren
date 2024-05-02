@@ -234,6 +234,50 @@ type erConfig =
     /// Default: 12
     static member fontSize (value: int) = "fontSize", string value
 
+[<AttachMembers>]
+type quadrantChart  =
+    static member custom (key, value) = key, value
+    /// Default: 500
+    static member chartWidth (value: int) = "chartWidth", string value
+    /// Default: 500
+    static member chartHeight (value: int) = "chartHeight", string value
+    /// Default: 20
+    static member titleFontSize (value: int) = "titleFontSize", string value
+    /// Default: 10
+    static member titlePadding (value: int) = "titlePadding", string value
+    /// Default: 5
+    static member quadrantPadding (value: int) = "quadrantPadding", string value
+    /// Default: 5
+    static member xAxisLabelPadding (value: int) = "xAxisLabelPadding", string value
+    /// Default: 5
+    static member yAxisLabelPadding (value: int) = "yAxisLabelPadding", string value
+    /// Default: 16
+    static member xAxisLabelFontSize (value: int) = "xAxisLabelFontSize", string value
+    /// Default: 16
+    static member yAxisLabelFontSize (value: int) = "yAxisLabelFontSize", string value
+    /// Default: 16
+    static member quadrantLabelFontSize (value: int) = "quadrantLabelFontSize", string value
+    /// Default: 5
+    static member quadrantTextTopPadding (value: int) = "quadrantTextTopPadding", string value
+    /// Default: 5
+    static member pointTextPadding (value: int) = "pointTextPadding", string value
+    /// Default: 12
+    static member pointLabelFontSize (value: int) = "pointLabelFontSize", string value
+    /// Default: 5
+    static member pointRadius (value: int) = "pointRadius", string value
+    /// Default: "top" 
+    // Did not work
+    //static member xAxisPosition (value: string)     = "xAxisPosition", value
+    //static member xAxisPositionTop                  = "xAxisPosition", "top"
+    //static member xAxisPositionBottom               = "xAxisPosition", "bottom"
+    /// Default: "left" 
+    static member yAxisPosition (value: string)     = "xAxisPosition", value
+    static member yAxisPositionLeft                 = "xAxisPosition", "left"
+    static member yAxisPositionRight                = "xAxisPosition", "right"
+    /// Default: 1
+    static member quadrantInternalBorderStrokeWidth (value: int) = "quadrantInternalBorderStrokeWidth", string value
+    /// Default: 2
+    static member quadrantExternalBorderStrokeWidth (value: int) = "quadrantExternalBorderStrokeWidth", string value
 
 [<AttachMembers>]
 type pieConfig =
