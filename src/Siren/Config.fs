@@ -192,3 +192,39 @@ type timelineConfig =
     static member custom (key, value) = key, value
     static member disableMulticolor (value: bool) = "disableMulticolor", string value
     static member padding (value: int) = "disableMulticolor", string value
+
+type classConfig =
+    static member custom (key, value) = key, value
+    /// Default: "dagre-wrapper"
+    static member defaultRenderer (renderer: string) = "defaultRenderer", renderer
+    static member defaultRendererElk = "defaultRenderer", "elk"
+    static member defaultRendererDagreD3 = "defaultRenderer", "dagre-d3"
+    static member defaultRendererDagreWrapper = "defaultRenderer", "dagre-wrapper"
+
+type stateConfig =
+    static member custom (key, value) = key, value
+    /// Default: 25
+    static member titleTopMargin (value: int) = "titleTopMargin", string value
+
+type erConfig =
+    static member custom (key, value) = key, value
+    /// Default: 25
+    static member titleTopMargin (value: int) = "titleTopMargin", string value
+    /// Default: 20
+    static member diagramPadding (value: int) = "diagramPadding", string value
+    /// Default: "TB"
+    static member layoutDirection (value: string) = "layoutDirection", value
+    static member layoutDirectionTB = "layoutDirection", "TB"
+    static member layoutDirectionBT = "layoutDirection", "BT"
+    static member layoutDirectionLR = "layoutDirection", "LR"
+    static member layoutDirectionRL = "layoutDirection", "RL"
+    /// Default: 100
+    static member minEntityWidth (value: int) = "minEntityWidth", string value
+    /// Default: 75
+    static member minEntityHeight (value: int) = "minEntityHeight", string value
+    /// Default: 15
+    static member entityPadding (value: int) = "entityPadding", string value
+    /// Default: "gray"
+    static member stroke (value: string) = "stroke", value
+    /// Default: 12
+    static member fontSize (value: int) = "fontSize", string value
