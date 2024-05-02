@@ -155,6 +155,7 @@ type ganttConfig =
     static member weekdaySaturday = "weekday", sprintf "%A" "saturday"
     static member weekdaySunday = "weekday", sprintf "%A" "sunday"
 
+[<AttachMembers>]
 type journeyConfig =
     static member custom (key, value) = key, value
     /// Default: 50
@@ -188,11 +189,13 @@ type journeyConfig =
     //static member bottomMarginAdj (value: int) = "bottomMarginAdj", string value
     //static member rightAngles (value: bool) = "rightAngles", string value
 
+[<AttachMembers>]
 type timelineConfig =
     static member custom (key, value) = key, value
     static member disableMulticolor (value: bool) = "disableMulticolor", string value
     static member padding (value: int) = "disableMulticolor", string value
 
+[<AttachMembers>]
 type classConfig =
     static member custom (key, value) = key, value
     /// Default: "dagre-wrapper"
@@ -201,11 +204,13 @@ type classConfig =
     static member defaultRendererDagreD3 = "defaultRenderer", "dagre-d3"
     static member defaultRendererDagreWrapper = "defaultRenderer", "dagre-wrapper"
 
+[<AttachMembers>]
 type stateConfig =
     static member custom (key, value) = key, value
     /// Default: 25
     static member titleTopMargin (value: int) = "titleTopMargin", string value
 
+[<AttachMembers>]
 type erConfig =
     static member custom (key, value) = key, value
     /// Default: 25
