@@ -121,3 +121,8 @@ type journeyConfig =
     ///// Default: 1
     //static member bottomMarginAdj (value: int) = "bottomMarginAdj", string value
     //static member rightAngles (value: bool) = "rightAngles", string value
+
+type timelineConfig =
+    static member custom (key, value) = key, value
+    static member disableMulticolor (value: bool) = "disableMulticolor", string value
+    static member padding (value: int) = "disableMulticolor", string value
