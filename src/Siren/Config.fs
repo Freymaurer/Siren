@@ -233,3 +233,70 @@ type erConfig =
     static member stroke (value: string) = "stroke", value
     /// Default: 12
     static member fontSize (value: int) = "fontSize", string value
+
+
+[<AttachMembers>]
+type pieConfig =
+    static member custom (key, value) = key, value
+    /// Default: 0.75
+    static member textPosition (value: float) = "textPosition", string value
+
+module private XYChartHelpers =
+    let inline optionStringBind (key:string) (value:'A option) =
+        match value with
+        | Some value -> Some (key, string value)
+        | None -> None
+
+    let mkAxisConfig (parameters: (string*string) list) =
+        parameters
+        |> List.map (fun (key, value) -> sprintf "\"%s\": %A" key value)
+        |> String.concat ", "
+        |> fun s -> "{" + s + "}"
+
+[<AttachMembers>]
+type xyChartConfig =
+    static member custom (key, value) = key, value
+    /// Default: 700
+    static member width (value: int) = "width", string value
+    /// Default: 500
+    static member height (value: int) = "height", string value
+    /// Default: 22
+    static member titlePadding (value: int) = "titlePadding", string value
+    /// Default: 20
+    static member titleFontSize (value: int) = "titleFontSize", string value
+    /// Default: true
+    static member showTitle (value: int) = "showTitle", string value
+    static member internal _axis(name: string,
+        ?showLabel: bool, ?labelFontSize: int, ?labelPadding: int, ?showTitle: bool, ?titleFontSize: int,
+        ?titlePadding: int, ?showTick: bool, ?tickLength: int, ?tickWidth: int, ?showAxisLine: bool, ?axisLineWidth: int) =
+            name, [
+                XYChartHelpers.optionStringBind "showLabel" showLabel
+                XYChartHelpers.optionStringBind "labelFontSize" labelFontSize
+                XYChartHelpers.optionStringBind "labelPadding" labelPadding
+                XYChartHelpers.optionStringBind "showTitle" showTitle
+                XYChartHelpers.optionStringBind "titleFontSize" titleFontSize
+                XYChartHelpers.optionStringBind "titlePadding" titlePadding
+                XYChartHelpers.optionStringBind "showTick" showTick
+                XYChartHelpers.optionStringBind "tickLength" tickLength
+                XYChartHelpers.optionStringBind "tickWidth" tickWidth
+                XYChartHelpers.optionStringBind "showAxisLine" showAxisLine
+                XYChartHelpers.optionStringBind "axisLineWidth" axisLineWidth
+            ]
+            |> List.choose id
+            |> XYChartHelpers.mkAxisConfig
+    static member xAxis(?showLabel: bool, ?labelFontSize: int, ?labelPadding: int, ?showTitle: bool, ?titleFontSize: int,
+        ?titlePadding: int, ?showTick: bool, ?tickLength: int, ?tickWidth: int, ?showAxisLine: bool, ?axisLineWidth: int) = 
+        xyChartConfig._axis(
+            "xAxis", ?showLabel=showLabel, ?labelFontSize=labelFontSize, ?labelPadding=labelPadding, ?showTitle=showTitle, 
+            ?titleFontSize=titleFontSize, ?titlePadding=titlePadding, ?showTick=showTick, ?tickLength=tickLength, 
+            ?tickWidth=tickWidth, ?showAxisLine=showAxisLine, ?axisLineWidth=axisLineWidth)
+    static member yAxis(?showLabel: bool, ?labelFontSize: int, ?labelPadding: int, ?showTitle: bool, ?titleFontSize: int,
+        ?titlePadding: int, ?showTick: bool, ?tickLength: int, ?tickWidth: int, ?showAxisLine: bool, ?axisLineWidth: int) = 
+        xyChartConfig._axis(
+            "yAxis", ?showLabel=showLabel, ?labelFontSize=labelFontSize, ?labelPadding=labelPadding, ?showTitle=showTitle, 
+            ?titleFontSize=titleFontSize, ?titlePadding=titlePadding, ?showTick=showTick, ?tickLength=tickLength, 
+            ?tickWidth=tickWidth, ?showAxisLine=showAxisLine, ?axisLineWidth=axisLineWidth)
+    /// Default: "vertical"
+    static member chartOrientation (value: int) = "chartOrientation", string value
+    static member chartOrientationVertical = "chartOrientation", "vertical"
+    static member chartOrientationHorizontal= "chartOrientation", "horizontal"
