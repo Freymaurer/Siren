@@ -344,3 +344,17 @@ type xyChartConfig =
     static member chartOrientation (value: int) = "chartOrientation", string value
     static member chartOrientationVertical = "chartOrientation", "vertical"
     static member chartOrientationHorizontal= "chartOrientation", "horizontal"
+
+
+[<AttachMembers>]
+type requirementDiagram  =
+    static member custom (key, value) = key, value
+    /// Default: 200
+    static member rect_min_width (value: int) = "rect_min_width", string value
+    /// Default: 200
+    static member rect_min_height (value: int) = "rect_min_height", string value
+    /// Defaukt: 10
+    static member rect_padding (value: int) = "rect_padding", string value
+    /// Default: 20
+    static member line_height (value: int) = "line_height", string value
+    
