@@ -89,4 +89,35 @@ type ganttConfig =
     static member weekdaySaturday = "weekday", sprintf "%A" "saturday"
     static member weekdaySunday = "weekday", sprintf "%A" "sunday"
 
-    
+type journeyConfig =
+    static member custom (key, value) = key, value
+    /// Default: 50
+    static member diagramMarginX (value: int) = "diagramMarginX", string value
+    /// Default: 10
+    static member diagramMarginY (value: int) = "diagramMarginY", string value
+    /// Default: 150
+    static member leftMargin (value: int) = "leftMargin", string value
+    /// Default: 150
+    static member width (value: int) = "width", string value
+    /// Default: 50
+    static member height (value: int) = "height", string value
+    // ---
+    // The following part is shown in official docs but does not really make 
+    // sense and does not work in live editor.
+    // ---
+    ///// Default: 10
+    //static member boxMargin (value: int) = "boxMargin", string value
+    ///// Default: 5
+    //static member boxTextMargin (value: int) = "boxTextMargin", string value
+    ///// Default: 10
+    //static member noteMargin (value: int) = "noteMargin", string value
+    ///// Default: 35
+    //static member messageMargin (value: int) = "messageMargin", string value
+    ///// Default: "center"
+    //static member messageAlign (value: string) = "messageAlign", string value
+    //static member messageAlignLeft = "messageAlign", "\"left\""
+    //static member messageAlignCenter = "messageAlign", "\"center\""
+    //static member messageAlignRight = "messageAlign", "\"right\""
+    ///// Default: 1
+    //static member bottomMarginAdj (value: int) = "bottomMarginAdj", string value
+    //static member rightAngles (value: bool) = "rightAngles", string value
