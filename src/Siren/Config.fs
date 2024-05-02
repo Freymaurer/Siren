@@ -107,3 +107,88 @@ type sequenceConfig =
     //TO DO: noteFont. JavaScript function that returns a FontConfig. By default, these return the appropriate *FontSize, *FontFamily, *FontWeight values. For example, the font calculator called boundaryFont might be defined as:
     //TO DO: actorFont. JavaScript function that returns a FontConfig. By default, these return the appropriate *FontSize, *FontFamily, *FontWeight values. For example, the font calculator called boundaryFont might be defined as:
 
+[<AttachMembers>]
+type ganttConfig =
+    static member custom (key, value) = key, value
+    /// Default: 25
+    static member titleTopMargin(px:int) = "titleTopMargin", string px
+    /// Default: 20
+    static member barHeight(px:int) = "barHeight", string px
+    /// Default: 4
+    static member barGap(px:int) = "barGap", string px
+    /// Default: 50
+    static member topPadding(px:int) = "topPadding", string px
+    /// Default: 75
+    static member leftPadding(px:int) = "leftPadding", string px
+    /// Default: 75
+    static member rightPadding(px:int) = "rightPadding", string px
+    /// Default: 35
+    static member gridLineStartPadding(px:int) = "gridLineStartPadding", string px
+    /// Default: 11
+    static member fontSize(px:int) = "fontSize", string px
+    /// Default: 11
+    static member sectionFontSize(px:int) = "sectionFontSize", string px
+    /// Default: 4
+    static member numberSectionStyles(n:int) = "numberSectionStyles", string n
+    /// Default: "%Y-%m-%d"
+    static member axisFormat(format:string) = "axisFormat", format
+    /// Must match: /^([1-9][0-9]*)(millisecond|second|minute|hour|day|week|month)$/
+    static member tickInterval(format:string) = "tickInterval", format
+    static member tickIntervalMillisecond(ms:int) = "tickInterval", sprintf "%imillisecond" ms
+    static member tickIntervalSecond(s:int) = "tickInterval", sprintf "%isecond" s
+    static member tickIntervalMinute(min:int) = "tickInterval", sprintf "%iminute" min
+    static member tickIntervalHour(hour:int) = "tickInterval", sprintf "%ihour" hour
+    static member tickIntervalDay(day:int) = "tickInterval", sprintf "%iday" day
+    static member tickIntervalWeek(week:int) = "tickInterval", sprintf "%iweek" week
+    static member tickIntervalMonth(month:int) = "tickInterval", sprintf "%imonth" month
+    static member topAxis(b:bool) = "topAxis", string b
+    static member displayMode(mode: string) = "displayMode", sprintf "\"%s\"" mode
+    static member displayModeDefault = "displayMode", sprintf "\"\""
+    static member displayModeCompact = "displayMode", sprintf "\"compact\""
+    /// Default: "sunday"
+    static member weekday(day: string) = "weekday", sprintf "%A" day
+    static member weekdayMonday = "weekday", sprintf "%A" "monday"
+    static member weekdayTuesday = "weekday", sprintf "%A" "tuesday"
+    static member weekdayWednesday = "weekday", sprintf "%A" "wednesday"
+    static member weekdayThursday = "weekday", sprintf "%A" "thursday"
+    static member weekdayFriday = "weekday", sprintf "%A" "friday"
+    static member weekdaySaturday = "weekday", sprintf "%A" "saturday"
+    static member weekdaySunday = "weekday", sprintf "%A" "sunday"
+
+type journeyConfig =
+    static member custom (key, value) = key, value
+    /// Default: 50
+    static member diagramMarginX (value: int) = "diagramMarginX", string value
+    /// Default: 10
+    static member diagramMarginY (value: int) = "diagramMarginY", string value
+    /// Default: 150
+    static member leftMargin (value: int) = "leftMargin", string value
+    /// Default: 150
+    static member width (value: int) = "width", string value
+    /// Default: 50
+    static member height (value: int) = "height", string value
+    // ---
+    // The following part is shown in official docs but does not really make 
+    // sense and does not work in live editor.
+    // ---
+    ///// Default: 10
+    //static member boxMargin (value: int) = "boxMargin", string value
+    ///// Default: 5
+    //static member boxTextMargin (value: int) = "boxTextMargin", string value
+    ///// Default: 10
+    //static member noteMargin (value: int) = "noteMargin", string value
+    ///// Default: 35
+    //static member messageMargin (value: int) = "messageMargin", string value
+    ///// Default: "center"
+    //static member messageAlign (value: string) = "messageAlign", string value
+    //static member messageAlignLeft = "messageAlign", "\"left\""
+    //static member messageAlignCenter = "messageAlign", "\"center\""
+    //static member messageAlignRight = "messageAlign", "\"right\""
+    ///// Default: 1
+    //static member bottomMarginAdj (value: int) = "bottomMarginAdj", string value
+    //static member rightAngles (value: bool) = "rightAngles", string value
+
+type timelineConfig =
+    static member custom (key, value) = key, value
+    static member disableMulticolor (value: bool) = "disableMulticolor", string value
+    static member padding (value: int) = "disableMulticolor", string value
