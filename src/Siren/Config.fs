@@ -344,3 +344,28 @@ type xyChartConfig =
     static member chartOrientation (value: int) = "chartOrientation", string value
     static member chartOrientationVertical = "chartOrientation", "vertical"
     static member chartOrientationHorizontal= "chartOrientation", "horizontal"
+
+type mindmapConfig =
+    static member custom (key, value) = key, value
+    /// Default: 10
+    static member padding (value: int) = "padding", string value
+    /// Default: 200
+    static member maxNodeWidth (value: int) = "maxNodeWidth", string value
+
+type gitGraphConfig =
+    static member custom (key, value) = key, value
+    /// Default: 25
+    static member titleTopMargin (value: int) = "titleTopMargin", string value
+    /// Default: 8
+    static member diagramPadding (value: int) = "diagramPadding", string value
+    /// Default: main
+    static member mainBranchName (value: string) = "mainBranchName", value
+    static member mainBranchOrder (value: string) = "mainBranchOrder", value
+    /// Default: true
+    static member showCommitLabel (value: bool) = "showCommitLabel", value
+    /// Default: true
+    static member showBranches (value: bool) = "showBranches", value
+    /// Default: true
+    static member rotateCommitLabel (value: bool) = "rotateCommitLabel", value
+    /// Default: false
+    static member parallelCommits  (value: bool) = "parallelCommits ", string value
