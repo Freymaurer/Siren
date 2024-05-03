@@ -96,6 +96,24 @@ module Flowchart =
         let opener = sprintf "subgraph %s%s" id nameStr 
         opener
 
+    let formatLinkStyles (ids0: int list) (styles0: (string*string) list) =
+        let styles = styles0 |> List.map (fun (key, v) -> sprintf "%s: %s" key v) |> String.concat ","
+        let ids = ids0 |> List.map string |> String.concat ","
+        sprintf "linkStyle %s %s;" ids styles
+
+    let formatNodeStyles (ids0: string list) (styles0: (string*string) list) =
+        let styles = styles0 |> List.map (fun (key, v) -> sprintf "%s: %s" key v) |> String.concat ","
+        let ids = ids0 |> String.concat ","
+        sprintf "style %s %s;" ids styles
+
+    let formatClassDef (className: string) (styles0: (string*string) list) =
+        let styles = styles0 |> List.map (fun (key, v) -> sprintf "%s: %s" key v) |> String.concat ","
+        sprintf "classDef %s %s;" className styles
+
+    let formatClass (nodeIds0: string list) (className: string) =
+        let ids = nodeIds0 |> String.concat ","
+        sprintf "classDef %s %s;" ids className
+
 module Sequence =
 
     open Generic
@@ -232,6 +250,14 @@ module ClassDiagram =
         else
             sprintf "note \"%s\"" txt
 
+    let formatClassStyles (id: string) (styles0: (string*string) list) =
+        let styles = styles0 |> List.map (fun (key, v) -> sprintf "%s: %s" key v) |> String.concat ","
+        sprintf "style %s %s" id styles
+
+    let formatCssClass (ids0: string list) (className: string) =
+        let ids = ids0 |> String.concat ","
+        sprintf "style \"%s\" %s;" ids className
+
 
 module StateDiagram =
 
@@ -248,6 +274,12 @@ module StateDiagram =
     let formatNoteWrapper (id) (position: NotePosition option) =
         let position = defaultArg position NotePosition.RightOf |> _.ToFormatString()
         sprintf "note %s %s" position id
+
+    let formatClassDef (className: string) (styles0: (string*string) list) =
+        Flowchart.formatClassDef className styles0
+
+    let formatClass (nodeIds0: string list) (className: string) =
+        Flowchart.formatClass nodeIds0 className
 
 
 module ERDiagram =

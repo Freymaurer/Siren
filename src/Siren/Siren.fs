@@ -69,6 +69,12 @@ type flowchart =
     static member subgraph (id: string, children: #seq<FlowchartElement>) = FlowchartSubgraph (Flowchart.formatSubgraph id None ,"end",List.ofSeq children)
     static member clickHref(id: string, url: string, ?tooltip: string) = Generic.formatClickHref id url tooltip |> FlowchartElement
     static member comment(txt:string) = Generic.formatComment txt |> FlowchartElement
+    static member stylesLink (linkOrderId: int, styles: #seq<string*string>) = Flowchart.formatLinkStyles [linkOrderId] (List.ofSeq styles) |> FlowchartElement
+    static member stylesLinks (linkOrderIds: #seq<int>, styles: #seq<string*string>) = Flowchart.formatLinkStyles (List.ofSeq linkOrderIds) (List.ofSeq styles) |> FlowchartElement
+    static member stylesNode (nodeId: string, styles:#seq<string*string>) = Flowchart.formatNodeStyles [nodeId] (List.ofSeq styles) |> FlowchartElement
+    static member classDef(className: string, styles: #seq<string*string>) = Flowchart.formatClassDef className (List.ofSeq styles) |> FlowchartElement
+    static member ``class``(nodeIds: #seq<string>, className: string) = Flowchart.formatClass (List.ofSeq nodeIds) className |> FlowchartElement
+    
     //static member clickCallback() = failwith "TODO"
 
 
@@ -255,6 +261,8 @@ type classDiagram =
     static member note(txt:string, ?id: string) = ClassDiagram.formatNote txt id |> ClassDiagramElement
     static member link(id: string, url: string, ?tooltip: string) = Generic.formatClickHref id url tooltip |> ClassDiagramElement
     //static member callback(id: string, func: unit -> unit, ?tooltip: string) = failwith "TODO"
+    static member style(id: string, styles: #seq<string*string>) = ClassDiagram.formatClassStyles id (List.ofSeq styles) |> ClassDiagramElement
+    static member cssClass(ids: #seq<string>, className: string) = ClassDiagram.formatCssClass (List.ofSeq ids) className |> ClassDiagramElement
 
 #if FABLE_COMPILER_PYTHON
 [<CompiledName("state_diagram")>]
@@ -285,6 +293,8 @@ type stateDiagram =
     static member concurrency = StateDiagramElement "--" 
     static member direction (direction: Direction) = Generic.formatDirection direction |> StateDiagramElement
     static member comment (txt: string) = Generic.formatComment txt |> StateDiagramElement
+    static member classDef(className: string, styles: #seq<string*string>) = StateDiagram.formatClassDef className (List.ofSeq styles) |> StateDiagramElement
+    static member ``class``(nodeIds: #seq<string>, className: string) = StateDiagram.formatClass (List.ofSeq nodeIds) className |> StateDiagramElement
 
 
 
