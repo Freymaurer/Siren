@@ -57,3 +57,47 @@ type gitTheme =
     static member gitInv5 (color: string) = "gitInv5", color
     static member gitInv6 (color: string) = "gitInv6", color
     static member gitInv7 (color: string) = "gitInv7", color
+
+
+// cScale0 to cScale11
+// cScaleLabel0 to cScaleLabel11
+[<AttachMembers>]
+type timelineTheme =
+    static member cScale0 (color: string) = "cScale0", color
+    static member cScale1 (color: string) = "cScale1", color
+    static member cScale2 (color: string) = "cScale2", color
+    static member cScale3 (color: string) = "cScale3", color
+    static member cScale4 (color: string) = "cScale4", color
+    static member cScale5 (color: string) = "cScale5", color
+    static member cScale6 (color: string) = "cScale6", color
+    static member cScale7 (color: string) = "cScale7", color
+    static member cScale8 (color: string) = "cScale8", color
+    static member cScale9 (color: string) = "cScale9", color
+    static member cScale10 (color: string) = "cScale10", color
+    static member cScale11 (color: string) = "cScale11", color
+    static member cScaleLabel0 (color: string) = "cScaleLabel0", color
+    static member cScaleLabel1 (color: string) = "cScaleLabel1", color
+    static member cScaleLabel2 (color: string) = "cScaleLabel2", color
+    static member cScaleLabel3 (color: string) = "cScaleLabel3", color
+    static member cScaleLabel4 (color: string) = "cScaleLabel4", color
+    static member cScaleLabel5 (color: string) = "cScaleLabel5", color
+    static member cScaleLabel6 (color: string) = "cScaleLabel6", color
+    static member cScaleLabel7 (color: string) = "cScaleLabel7", color
+    static member cScaleLabel8 (color: string) = "cScaleLabel8", color
+    static member cScaleLabel9 (color: string) = "cScaleLabel9", color
+    static member cScaleLabel10 (color: string) = "cScaleLabel10", color
+    static member cScaleLabel11 (color: string) = "cScaleLabel11", color
+
+type xyChartTheme =
+    static member backgroundColor (color: string) = "backgroundColor", color
+    static member titleColor (color: string) = "titleColor", color
+    static member xAxisLabelColor (color: string) = "xAxisLabelColor", color
+    static member xAxisTitleColor (color: string) = "xAxisTitleColor", color
+    static member xAxisTickColor (color: string) = "xAxisTickColor", color
+    static member xAxisLineColor (color: string) = "xAxisLineColor", color
+    static member yAxisLabelColor (color: string) = "yAxisLabelColor", color
+    static member yAxisTitleColor (color: string) = "yAxisTitleColor", color
+    static member yAxisTickColor (color: string) = "yAxisTickColor", color
+    static member yAxisLineColor (color: string) = "yAxisLineColor", color
+    static member plotColorPalette (colors: #seq<string>) = "plotColorPalette", colors |> String.concat ","
+    

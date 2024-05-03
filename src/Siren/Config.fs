@@ -285,6 +285,16 @@ type pieConfig =
     /// Default: 0.75
     static member textPosition (value: float) = "textPosition", string value
 
+[<AttachMembers>]
+type sankeyConfig =
+    static member custom (key, value) = key, value
+    static member width (value: int) = "width", string value
+    static member height (value: int) = "width", string value
+    static member linkColor (value: string) = "linkColor", string value
+    static member linkColorSource = "linkColor", "source" 
+    static member linkColorTarget = "linkColor", "target"
+    static member linkColorGradient = "linkColor", "gradient"
+
 module private XYChartHelpers =
     let inline optionStringBind (key:string) (value:'A option) =
         match value with
