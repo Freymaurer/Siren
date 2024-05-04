@@ -24,6 +24,17 @@ module Generic =
         let position = defaultArg position NotePosition.RightOf |> _.ToFormatString()
         sprintf "note %s %s : %s" position id msg
 
+    [<Literal>]
+    let ProtectedWhitespace = "&nbsp;"
+
+    let formatClassDef (className: string) (styles0: (string*string) list) =
+        let styles = styles0 |> List.map (fun (key, v) -> sprintf "%s:%s" key v) |> String.concat ","
+        sprintf "classDef %s %s;" className styles
+
+    let formatClass (nodeIds0: string list) (className: string) =
+        let ids = nodeIds0 |> String.concat ","
+        sprintf "class %s %s;" ids className
+
 module Flowchart =
 
     type FlowchartLinkTypes with
@@ -97,22 +108,16 @@ module Flowchart =
         opener
 
     let formatLinkStyles (ids0: int list) (styles0: (string*string) list) =
-        let styles = styles0 |> List.map (fun (key, v) -> sprintf "%s: %s" key v) |> String.concat ","
+        let styles = styles0 |> List.map (fun (key, v) -> sprintf "%s:%s" key v) |> String.concat ","
         let ids = ids0 |> List.map string |> String.concat ","
         sprintf "linkStyle %s %s;" ids styles
 
     let formatNodeStyles (ids0: string list) (styles0: (string*string) list) =
-        let styles = styles0 |> List.map (fun (key, v) -> sprintf "%s: %s" key v) |> String.concat ","
+        let styles = styles0 |> List.map (fun (key, v) -> sprintf "%s:%s" key v) |> String.concat ","
         let ids = ids0 |> String.concat ","
         sprintf "style %s %s;" ids styles
 
-    let formatClassDef (className: string) (styles0: (string*string) list) =
-        let styles = styles0 |> List.map (fun (key, v) -> sprintf "%s: %s" key v) |> String.concat ","
-        sprintf "classDef %s %s;" className styles
 
-    let formatClass (nodeIds0: string list) (className: string) =
-        let ids = nodeIds0 |> String.concat ","
-        sprintf "classDef %s %s;" ids className
 
 module Sequence =
 
@@ -274,12 +279,6 @@ module StateDiagram =
     let formatNoteWrapper (id) (position: NotePosition option) =
         let position = defaultArg position NotePosition.RightOf |> _.ToFormatString()
         sprintf "note %s %s" position id
-
-    let formatClassDef (className: string) (styles0: (string*string) list) =
-        Flowchart.formatClassDef className styles0
-
-    let formatClass (nodeIds0: string list) (className: string) =
-        Flowchart.formatClass nodeIds0 className
 
 
 module ERDiagram =
@@ -549,3 +548,63 @@ module XYChart =
         
     let formatLine (data: float list) = sprintf "line %s" (data |> List.map string |> formatData)
     let formatBar (data: float list) = sprintf "bar %s" (data |> List.map string |> formatData)
+
+module Block =
+
+    type BlockBlockType with
+        member this.ToFormatString(id: string, label: string) =
+            match this with
+            | BlockBlockType.Square -> sprintf "%s[\"%s\"]" id label
+            | BlockBlockType.RoundedEdge -> sprintf "%s(\"%s\")" id label
+            | BlockBlockType.Stadium -> sprintf "%s([\"%s\"])" id label
+            | BlockBlockType.Subroutine -> sprintf "%s[[\"%s\"]]" id label
+            | BlockBlockType.Cylindrical -> sprintf "%s[(\"%s\")]" id label
+            | BlockBlockType.Circle -> sprintf "%s((\"%s\"))" id label
+            | BlockBlockType.Asymmetric -> sprintf "%s>\"%s\"]" id label
+            | BlockBlockType.Rhombus -> sprintf "%s{\"%s\"}" id label
+            | BlockBlockType.Hexagon -> sprintf "%s{{\"%s\"}}" id label
+            | BlockBlockType.Parallelogram -> sprintf "%s[/\"%s\"/]" id label
+            | BlockBlockType.ParallelogramAlt -> sprintf "%s[\\\"%s\"\\]" id label
+            | BlockBlockType.Trapezoid -> sprintf "%s[/\"%s\"\]" id label
+            | BlockBlockType.TrapezoidAlt -> sprintf "%s[\\\"%s\"/]" id label
+            | BlockBlockType.DoubleCircle -> sprintf "%s(((\"%s\")))" id label
+
+    type BlockArrowDirection with
+        member this.ToFormatString() =
+            match this with
+            | BlockArrowDirection.Custom s -> s
+            | anyElse -> anyElse.ToString().ToLower()
+
+    let formatBlockType (id: string) (label:string option) (width: int option) (blockType: BlockBlockType) =
+        let label = defaultArg label id
+        let baseStr = blockType.ToFormatString(id, label)
+        let width = width |> Option.map (fun w -> sprintf ":%i" w)
+        baseStr + (width |> Option.defaultValue "")
+
+    let formatBlockArrow (id: string) (label: string option) (direction: BlockArrowDirection) =
+        let label = defaultArg label id
+        let directionStr = direction.ToFormatString()
+        sprintf "%s<[\"%s\"]>(%s)" id label directionStr
+
+    let formatEmptyBlockArrow (id: string) (width: int option) (direction: BlockArrowDirection) =
+        let width = defaultArg width 3
+        let labelStr = String.init width (fun _ -> Generic.ProtectedWhitespace)
+        let directionStr = direction.ToFormatString()
+        sprintf "%s<[\"%s\"]>(%s)" id labelStr directionStr
+
+    let formatSpace (width: int option) =
+        if width.IsSome then sprintf "space:%i" width.Value else "space"
+
+    let formatLink id1 id2 (label: string option) =
+        if label.IsSome then
+            sprintf "%s-- \"%s\" -->%s" id1 label.Value id2
+        else
+            sprintf "%s-->%s" id1 id2
+
+    let formatStyle (id: string) (styles: (string*string) list) =
+        let styles = styles |> List.map (fun (key, v) -> sprintf "%s:%s" key v) |> String.concat ","
+        sprintf "style %s %s;" id styles
+
+    let formatClass (nodeIds0: string list) (className: string) =
+        Generic.formatClass nodeIds0 className
+        |> fun x -> x.TrimEnd(';')

@@ -23,6 +23,7 @@
     <Compile Include="Tests.Timeline.fs" />
     <Compile Include="Tests.Sankey.fs" />
     <Compile Include="Tests.XYChart.fs" />
+    <Compile Include="Tests.Block.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
 

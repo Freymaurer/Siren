@@ -20,6 +20,7 @@ let all = testList "Main" [
     Tests.Timeline.main
     Tests.Sankey.main
     Tests.XYChart.main
+    Tests.Block.main
 ]
 
 [<EntryPoint>]

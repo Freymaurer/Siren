@@ -10,6 +10,7 @@ type formatting =
     static member unicode (txt: string) = string '"' + txt + string '"'
     static member markdown (txt: string) = "\"`" + txt + "`\""
     static member comment (txt: string) = Generic.formatComment txt
+    static member protectedWhitespace = "&nbsp;"
 
 [<AttachMembers>]
 type direction =
@@ -72,8 +73,8 @@ type flowchart =
     static member stylesLink (linkOrderId: int, styles: #seq<string*string>) = Flowchart.formatLinkStyles [linkOrderId] (List.ofSeq styles) |> FlowchartElement
     static member stylesLinks (linkOrderIds: #seq<int>, styles: #seq<string*string>) = Flowchart.formatLinkStyles (List.ofSeq linkOrderIds) (List.ofSeq styles) |> FlowchartElement
     static member stylesNode (nodeId: string, styles:#seq<string*string>) = Flowchart.formatNodeStyles [nodeId] (List.ofSeq styles) |> FlowchartElement
-    static member classDef(className: string, styles: #seq<string*string>) = Flowchart.formatClassDef className (List.ofSeq styles) |> FlowchartElement
-    static member ``class``(nodeIds: #seq<string>, className: string) = Flowchart.formatClass (List.ofSeq nodeIds) className |> FlowchartElement
+    static member classDef(className: string, styles: #seq<string*string>) = Generic.formatClassDef className (List.ofSeq styles) |> FlowchartElement
+    static member ``class``(nodeIds: #seq<string>, className: string) = Generic.formatClass (List.ofSeq nodeIds) className |> FlowchartElement
     
     //static member clickCallback() = failwith "TODO"
 
@@ -293,8 +294,8 @@ type stateDiagram =
     static member concurrency = StateDiagramElement "--" 
     static member direction (direction: Direction) = Generic.formatDirection direction |> StateDiagramElement
     static member comment (txt: string) = Generic.formatComment txt |> StateDiagramElement
-    static member classDef(className: string, styles: #seq<string*string>) = StateDiagram.formatClassDef className (List.ofSeq styles) |> StateDiagramElement
-    static member ``class``(nodeIds: #seq<string>, className: string) = StateDiagram.formatClass (List.ofSeq nodeIds) className |> StateDiagramElement
+    static member classDef(className: string, styles: #seq<string*string>) = Generic.formatClassDef className (List.ofSeq styles) |> StateDiagramElement
+    static member ``class``(nodeIds: #seq<string>, className: string) = Generic.formatClass (List.ofSeq nodeIds) className |> StateDiagramElement
 
 
 
@@ -602,6 +603,78 @@ type xyChart =
 open YamlHelpers
 open System.Collections.Generic
 
+
+[<AttachMembers>]
+type block =
+    static member columns (count: int) = sprintf "columns %i" count |> BlockElement
+    static member simple (id: string) = BlockElement id
+    static member simples (ids: #seq<string>) = ids |> String.concat " " |> BlockElement
+    static member cBlock (children: #seq<BlockElement>) = BlockWrapper ("block","end", List.ofSeq children)
+    static member cIdBlock (id: string, children: #seq<BlockElement>) = BlockWrapper (sprintf "block:%s" id,"end", List.ofSeq children)
+    static member cIdWidthBlock (id: string, width: int, children: #seq<BlockElement>) = BlockWrapper (sprintf "block:%s:%i" id width,"end", List.ofSeq children)
+    
+    static member line (children: #seq<BlockElement>) = BlockLine (List.ofSeq children)
+
+    static member block (id: string, ?label:string, ?width: int) = 
+        Block.formatBlockType id label width BlockBlockType.Square |> BlockElement
+    static member blockRounded(id, ?label:string, ?width: int) = 
+        Block.formatBlockType id label width BlockBlockType.RoundedEdge |> BlockElement
+    static member blockStatidum(id, ?label:string, ?width: int) = 
+        Block.formatBlockType id label width BlockBlockType.Stadium |> BlockElement
+    static member blockSubroutine(id, ?label:string, ?width: int) = 
+        Block.formatBlockType id label width BlockBlockType.Subroutine |> BlockElement
+    static member blockCylindrical(id, ?label:string, ?width: int) =
+        Block.formatBlockType id label width BlockBlockType.Cylindrical |> BlockElement
+    static member blockCircle(id, ?label:string, ?width: int) = 
+        Block.formatBlockType id label width BlockBlockType.Circle |> BlockElement
+    static member blockAsymmetric(id, ?label:string, ?width: int) =
+        Block.formatBlockType id label width BlockBlockType.Asymmetric |> BlockElement
+    static member blockRhombus(id, ?label:string, ?width: int) = 
+        Block.formatBlockType id label width BlockBlockType.Rhombus |> BlockElement
+    static member blockHexagon(id, ?label:string, ?width: int) = 
+        Block.formatBlockType id label width BlockBlockType.Hexagon |> BlockElement
+    static member blockParallelogram(id, ?label:string, ?width: int) = 
+        Block.formatBlockType id label width BlockBlockType.Parallelogram |> BlockElement
+    static member blockParallelogramAlt(id, ?label:string, ?width: int) = 
+        Block.formatBlockType id label width BlockBlockType.ParallelogramAlt |> BlockElement
+    static member blockTrapezoid(id, ?label:string, ?width: int) = 
+        Block.formatBlockType id label width BlockBlockType.Trapezoid |> BlockElement
+    static member blockTrapezoidAlt(id, ?label:string, ?width: int) = 
+        Block.formatBlockType id label width BlockBlockType.TrapezoidAlt |> BlockElement
+    static member blockDoubleCircle(id, ?label:string, ?width: int) = 
+        Block.formatBlockType id label width BlockBlockType.DoubleCircle |> BlockElement
+
+    static member arrowRightLabeled(id: string, ?label: string) = Block.formatBlockArrow id label BlockArrowDirection.Right |> BlockElement
+    static member arrowRight(id: string, ?width: int) = Block.formatEmptyBlockArrow id width BlockArrowDirection.Right |> BlockElement
+
+    static member arrowLeftLabeled(id: string, ?label: string) = Block.formatBlockArrow id label BlockArrowDirection.Left |> BlockElement
+    static member arrowLeft(id: string, ?width: int) = Block.formatEmptyBlockArrow id width BlockArrowDirection.Left |> BlockElement
+
+    static member arrowUpLabeled(id: string, ?label: string) = Block.formatBlockArrow id label BlockArrowDirection.Up |> BlockElement
+    static member arrowUp(id: string, ?width: int) = Block.formatEmptyBlockArrow id width BlockArrowDirection.Up |> BlockElement
+
+    static member arrowDownLabeled(id: string, ?label: string) = Block.formatBlockArrow id label BlockArrowDirection.Down |> BlockElement
+    static member arrowDown(id: string, ?width: int) = Block.formatEmptyBlockArrow id width BlockArrowDirection.Down |> BlockElement
+
+    static member arrowXLabeled(id: string, ?label: string) = Block.formatBlockArrow id label BlockArrowDirection.X |> BlockElement
+    static member arrowX(id: string, ?width: int) = Block.formatEmptyBlockArrow id width BlockArrowDirection.X |> BlockElement
+
+    static member arrowYLabeled(id: string, ?label: string) = Block.formatBlockArrow id label BlockArrowDirection.Y |> BlockElement
+    static member arrowY(id: string, ?width: int) = Block.formatEmptyBlockArrow id width BlockArrowDirection.Y |> BlockElement
+
+    static member arrowCustomLabeled(id: string, direction: string, ?label: string) = Block.formatBlockArrow id label (BlockArrowDirection.Custom direction) |> BlockElement
+    static member arrowCustom(id: string, direction: string, ?width: int) = Block.formatEmptyBlockArrow id width (BlockArrowDirection.Custom direction) |> BlockElement
+
+    static member space = Block.formatSpace None |> BlockElement
+    static member spacew(?width: int) = Block.formatSpace width |> BlockElement
+
+    static member link(id1: string, id2: string, ?label: string) = Block.formatLink id1 id2 label |> BlockElement
+
+    static member style (id, styles: #seq<string*string>) = Block.formatStyle id (List.ofSeq styles) |> BlockElement
+    static member classDef(className: string, styles: #seq<string*string>) = Generic.formatClassDef className (List.ofSeq styles) |> BlockElement
+    static member ``class``(nodeIds: #seq<string>, className: string) = Block.formatClass (List.ofSeq nodeIds) className |> BlockElement
+    static member comment(txt: string) = Generic.formatComment txt |> BlockElement
+
 type theme =
     static member light = "default"
     static member neutral = "neutral"
@@ -658,6 +731,9 @@ type siren =
         
     static member xyChart (children: #seq<XYChartElement>, ?isHorizontal: bool) = 
         SirenGraph.XYChart (defaultArg isHorizontal false, List.ofSeq children) |> SirenElement.init
+
+    static member block (children: #seq<BlockElement>) =
+        SirenGraph.Block (List.ofSeq children) |> SirenElement.init
         
     static member withTitle (title: string) (diagram: SirenElement) =
         diagram.Config.Title <- Some title

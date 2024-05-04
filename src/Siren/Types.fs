@@ -232,6 +232,33 @@ type MindmapShape =
     | Cloud //id)I am a cloud(
     | Hexagon //id{{I am a hexagon}}
 
+[<RequireQualifiedAccess>]
+type BlockBlockType =
+    | Square
+    | RoundedEdge
+    | Stadium
+    | Subroutine 
+    | Cylindrical 
+    | Circle  
+    | Asymmetric  
+    | Rhombus  
+    | Hexagon
+    | Parallelogram
+    | ParallelogramAlt
+    | Trapezoid
+    | TrapezoidAlt
+    | DoubleCircle
+
+[<RequireQualifiedAccess>]
+type BlockArrowDirection = 
+    | Right
+    | Left
+    | Up
+    | Down
+    | X
+    | Y
+    | Custom of string
+
 type FlowchartElement =
     | FlowchartElement of string
     | FlowchartSubgraph of opener:string * closer: string * FlowchartElement list
@@ -372,6 +399,29 @@ type TimelineElement =
             | TimelineWrapper (opener, closer, children) ->
                 writeYamlASTBasicWrapper opener closer children
 
+
+type BlockElement =
+    | BlockElement of string
+    | BlockWrapper of opener:string * closer:string * BlockElement list
+    | BlockLine of BlockElement list
+    interface IYamlConvertible with
+            
+        member this.ToYamlAst() = 
+            match this with
+            | BlockElement line -> [Yaml.line line]
+            | BlockWrapper (opener, closer, children) ->
+                writeYamlASTBasicWrapper opener closer children
+            | BlockLine children ->
+                children
+                |> List.fold (fun acc child -> 
+                    match child with
+                    | BlockElement line -> acc + " " + line
+                    | _ -> acc
+                ) ""
+                |> _.Trim()
+                |> Yaml.line
+                |> List.singleton
+
 type SankeyElement =
     | SankeyElement of string
     | SankeyElementList of SankeyElement list
@@ -412,6 +462,7 @@ type SirenGraph =
 | Timeline of TimelineElement list
 | Sankey of SankeyElement list
 | XYChart of isHorizontal:bool * XYChartElement list
+| Block of BlockElement list
 with 
     member this.ToConfigName() =
         match this with 
@@ -431,6 +482,7 @@ with
         | SirenGraph.Timeline _ -> "timeline"
         | SirenGraph.Sankey _ -> "sankey"
         | SirenGraph.XYChart _ -> "xyChart"
+        | SirenGraph.Block _ -> "block"
 
     member this.ToYamlAst() = 
         match this with
@@ -485,6 +537,9 @@ with
             ]
         | SirenGraph.XYChart (isHorizontal, children) ->
             let dia = "xychart-beta"  + if isHorizontal then " horizontal" else ""
+            writeYamlDiagramRoot dia children
+        | SirenGraph.Block children ->
+            let dia = "block-beta"
             writeYamlDiagramRoot dia children
 
 open System.Collections.Generic

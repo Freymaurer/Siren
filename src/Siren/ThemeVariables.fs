@@ -59,8 +59,6 @@ type gitTheme =
     static member gitInv7 (color: string) = "gitInv7", color
 
 
-// cScale0 to cScale11
-// cScaleLabel0 to cScaleLabel11
 [<AttachMembers>]
 type timelineTheme =
     static member cScale0 (color: string) = "cScale0", color
