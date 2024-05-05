@@ -33,4 +33,8 @@ public static class stateDiagram
          => Siren.stateDiagram.direction(direction);
     public static StateDiagramElement comment(string txt)
          => Siren.stateDiagram.comment(txt);
+    public static StateDiagramElement classDef(string className, IEnumerable<(string, string)> styles)
+         => Siren.stateDiagram.classDef(className, styles.Select(t => t.ToTuple()));
+    public static StateDiagramElement @class(IEnumerable<string> nodeIds, string className)
+        => Siren.stateDiagram.@class(nodeIds, className);
 }

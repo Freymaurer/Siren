@@ -136,4 +136,8 @@ public static class classDiagram
     public static ClassDiagramElement clickHref(string id, string url, Optional<string> tooltip = default) => Siren.classDiagram.clickHref(id, url, tooltip.ToOption());
     public static ClassDiagramElement note(string txt, Optional<string> id = default) => Siren.classDiagram.note(txt, id.ToOption());
     public static ClassDiagramElement link(string id, string url, Optional<string> tooltip = default) => Siren.classDiagram.link(id, url, tooltip.ToOption());
+    public static ClassDiagramElement style(string id, (string, string)[] styles) =>
+        Siren.classDiagram.style(id, styles.Select(t => t.ToTuple()));
+    public static ClassDiagramElement cssClass(string[] ids, string className) =>
+        Siren.classDiagram.cssClass(ids, className);
 }

@@ -19,6 +19,7 @@ public static class formatting
     public static string unicode(string txt) => Siren.formatting.unicode(txt);
     public static string markdown(string txt) => Siren.formatting.markdown(txt);
     public static string comment(string txt) => Siren.formatting.comment(txt);
+    public static string protectedWhitespace => Siren.formatting.protectedWhitespace;
 }
 
 public static class direction

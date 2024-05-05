@@ -77,4 +77,14 @@ public static class flowchart
         Siren.flowchart.clickHref(id, url, tooltip.ToOption());
     public static FlowchartElement comment(string txt) =>
         Siren.flowchart.comment(txt);
+    public static FlowchartElement stylesLink(int linkOrderId, (string, string)[] styles) =>
+        Siren.flowchart.stylesLink(linkOrderId, styles.Select(t => t.ToTuple()));
+    public static FlowchartElement stylesLinks(int[] linkOrderIds, (string, string)[] styles) =>
+        Siren.flowchart.stylesLinks(linkOrderIds, styles.Select(t => t.ToTuple()));
+    public static FlowchartElement stylesNode(string nodeId, (string, string)[] styles) =>
+        Siren.flowchart.stylesNode(nodeId, styles.Select(t => t.ToTuple()));
+    public static FlowchartElement classDef(string className, (string, string)[] styles) =>
+        Siren.flowchart.classDef(className, styles.Select(t => t.ToTuple()));
+    public static FlowchartElement @class(string[] nodeIds, string className) =>
+        Siren.flowchart.@class(nodeIds, className);
 };
