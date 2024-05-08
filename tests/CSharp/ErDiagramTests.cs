@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Siren.Sea.Tests
 {
-    public class EntityRelationshipDiagramTests
+    public class ErDiagramTests
     {
         [Fact]
         public void docs()

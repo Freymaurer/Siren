@@ -13,6 +13,8 @@ let transformParameterTypeName (paramTypeName: string)=
     | "Int32" -> "int"
     | "Double" -> "double"
     | "FSharpOption`1" -> FSharpOptionDefault // this is not always true but a good approximation
+    | "Tuple`2" -> "(string,string)"
+    | "Boolean" -> "bool"
     | _ -> paramTypeName
 
 type ParameterInfo = {
@@ -66,7 +68,7 @@ let generateCSharpCode<'A>() =
                 |> String.concat(", ")
                 |> fun s -> "(" + s + ")"
         
-        let methodSignature = $"public static {returnType} {methodName}{csharpParameters}"
+        let methodSignature = $"public static {transformParameterTypeName returnType} {methodName}{csharpParameters}"
         let methodBody = 
             if methodName.StartsWith("get_") then
                 let withoutGet = methodName.Substring(4)
@@ -79,7 +81,7 @@ let generateCSharpCode<'A>() =
     csharpCode
 
 let test() = 
-    generateCSharpCode<Siren.siren>()
+    generateCSharpCode<Siren.requirementDiagram>()
     |> printfn "%A"
     //for memberInfo in staticMembersInfo do
     //    let name, parameters, returnType = memberInfo

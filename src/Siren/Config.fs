@@ -38,7 +38,7 @@ type flowchartConfig =
 
 [<AttachMembers>]
 type sequenceConfig =
-    static member custom (key, value) = key, value
+    static member custom (key: string, value: string) = key, value
     static member arrowMarkerAbsolute (b: bool) = "arrowMarkerAbsolute", string b
     static member hideUnusedParticipants (b: bool) = "hideUnusedParticipants", string b
     /// Default: 10
@@ -109,7 +109,7 @@ type sequenceConfig =
 
 [<AttachMembers>]
 type ganttConfig =
-    static member custom (key, value) = key, value
+    static member custom (key: string, value: string) = key, value
     /// Default: 25
     static member titleTopMargin(px:int) = "titleTopMargin", string px
     /// Default: 20
@@ -157,7 +157,7 @@ type ganttConfig =
 
 [<AttachMembers>]
 type journeyConfig =
-    static member custom (key, value) = key, value
+    static member custom (key: string, value: string) = key, value
     /// Default: 50
     static member diagramMarginX (value: int) = "diagramMarginX", string value
     /// Default: 10
@@ -191,13 +191,13 @@ type journeyConfig =
 
 [<AttachMembers>]
 type timelineConfig =
-    static member custom (key, value) = key, value
+    static member custom (key: string, value: string) = key, value
     static member disableMulticolor (value: bool) = "disableMulticolor", string value
     static member padding (value: int) = "disableMulticolor", string value
 
 [<AttachMembers>]
 type classConfig =
-    static member custom (key, value) = key, value
+    static member custom (key: string, value: string) = key, value
     /// Default: "dagre-wrapper"
     static member defaultRenderer (renderer: string) = "defaultRenderer", renderer
     static member defaultRendererElk = "defaultRenderer", "elk"
@@ -206,13 +206,13 @@ type classConfig =
 
 [<AttachMembers>]
 type stateConfig =
-    static member custom (key, value) = key, value
+    static member custom (key: string, value: string) = key, value
     /// Default: 25
     static member titleTopMargin (value: int) = "titleTopMargin", string value
 
 [<AttachMembers>]
 type erConfig =
-    static member custom (key, value) = key, value
+    static member custom (key: string, value: string) = key, value
     /// Default: 25
     static member titleTopMargin (value: int) = "titleTopMargin", string value
     /// Default: 20
@@ -235,8 +235,8 @@ type erConfig =
     static member fontSize (value: int) = "fontSize", string value
 
 [<AttachMembers>]
-type quadrantChart  =
-    static member custom (key, value) = key, value
+type quadrantChartConfig  =
+    static member custom (key: string, value: string) = key, value
     /// Default: 500
     static member chartWidth (value: int) = "chartWidth", string value
     /// Default: 500
@@ -281,13 +281,13 @@ type quadrantChart  =
 
 [<AttachMembers>]
 type pieConfig =
-    static member custom (key, value) = key, value
+    static member custom (key: string, value: string) = key, value
     /// Default: 0.75
     static member textPosition (value: float) = "textPosition", string value
 
 [<AttachMembers>]
 type sankeyConfig =
-    static member custom (key, value) = key, value
+    static member custom (key: string, value: string) = key, value
     static member width (value: int) = "width", string value
     static member height (value: int) = "width", string value
     static member linkColor (value: string) = "linkColor", string value
@@ -309,7 +309,7 @@ module private XYChartHelpers =
 
 [<AttachMembers>]
 type xyChartConfig =
-    static member custom (key, value) = key, value
+    static member custom (key: string, value: string) = key, value
     /// Default: 700
     static member width (value: int) = "width", string value
     /// Default: 500
@@ -356,14 +356,14 @@ type xyChartConfig =
     static member chartOrientationHorizontal= "chartOrientation", "horizontal"
 
 type mindmapConfig =
-    static member custom (key, value) = key, value
+    static member custom (key: string, value: string) = key, value
     /// Default: 10
     static member padding (value: int) = "padding", string value
     /// Default: 200
     static member maxNodeWidth (value: int) = "maxNodeWidth", string value
 
 type gitGraphConfig =
-    static member custom (key, value) = key, value
+    static member custom (key: string, value: string) = key, value
     /// Default: 25
     static member titleTopMargin (value: int) = "titleTopMargin", string value
     /// Default: 8
@@ -372,18 +372,18 @@ type gitGraphConfig =
     static member mainBranchName (value: string) = "mainBranchName", value
     static member mainBranchOrder (value: string) = "mainBranchOrder", value
     /// Default: true
-    static member showCommitLabel (value: bool) = "showCommitLabel", value
+    static member showCommitLabel (value: bool) = "showCommitLabel", string value
     /// Default: true
-    static member showBranches (value: bool) = "showBranches", value
+    static member showBranches (value: bool) = "showBranches", string value
     /// Default: true
-    static member rotateCommitLabel (value: bool) = "rotateCommitLabel", value
+    static member rotateCommitLabel (value: bool) = "rotateCommitLabel", string value
     /// Default: false
-    static member parallelCommits  (value: bool) = "parallelCommits ", string value
+    static member parallelCommits (value: bool) = "parallelCommits ", string value
 
 
 [<AttachMembers>]
-type requirementDiagram  =
-    static member custom (key, value) = key, value
+type requirementConfig  =
+    static member custom (key: string, value: string) = key, value
     /// Default: 200
     static member rect_min_width (value: int) = "rect_min_width", string value
     /// Default: 200

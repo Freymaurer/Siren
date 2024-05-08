@@ -3,7 +3,7 @@
 open Fable.Core
 
 [<AttachMembers>]
-type qudarantTheme =
+type quadrantTheme =
     static member quadrant1Fill (color: string) = "quadrant1Fill", color
     static member quadrant2Fill (color: string) = "quadrant2Fill", color
     static member quadrant3Fill (color: string) = "quadrant3Fill", color
@@ -86,6 +86,7 @@ type timelineTheme =
     static member cScaleLabel10 (color: string) = "cScaleLabel10", color
     static member cScaleLabel11 (color: string) = "cScaleLabel11", color
 
+[<AttachMembers>]
 type xyChartTheme =
     static member backgroundColor (color: string) = "backgroundColor", color
     static member titleColor (color: string) = "titleColor", color

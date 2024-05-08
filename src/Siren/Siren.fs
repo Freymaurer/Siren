@@ -473,7 +473,7 @@ type rqMethod =
 [<CompiledName("req_dia")>]
 #endif
 [<AttachMembers>]
-type reqDia =
+type requirement =
     static member raw (txt: string) = RequirementDiagramElement txt
 
     static member requirement (name, ?id: string, ?text: string, ?rqRisk: RDRiskType, ?rqMethod: RDVerifyMethod) =
