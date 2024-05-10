@@ -636,3 +636,33 @@ type SirenElement = {
         Graph = graph
         Config = SirenConfig(graph) 
     }
+    member this.withTitle (title: string) =
+        this.Config.Title <- Some title
+        this
+
+    member this.withTheme (theme: string) =
+        this.Config.Theme <- Some theme
+        this
+
+    member this.withGraphConfig (config: Dictionary<string, string>) =
+        this.Config.GraphConfig <- Some config
+        this
+
+    member this.withThemeVariables (themeVariables: Dictionary<string, string>) =
+        this.Config.ThemeVariables <- Some themeVariables
+        this
+
+    member this.addThemeVariable (key: string, value: string) =
+        this.Config.AddThemeVariable(key, value)
+        this
+
+    member this.addGraphConfigVariable (key: string, value: string) =
+        this.Config.AddGraphConfig(key, value)
+        this
+
+    member this.write() =
+        Yaml.root [
+            this.Config.ToYamlAst()
+            this.Graph.ToYamlAst()
+        ]
+        |> Yaml.write

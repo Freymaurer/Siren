@@ -37,29 +37,29 @@ public static class flowchart
     public static FlowchartElement nodeDoubleCircle(string id, Optional<string> name = default) =>
         Siren.flowchart.nodeDoubleCircle(id, name.ToOption());
 
-    public static FlowchartElement linkArrow(string id1, string id2, Optional<string> message, Optional<int> addedLength) =>
+    public static FlowchartElement linkArrow(string id1, string id2, Optional<string> message = default, Optional<int> addedLength = default) =>
         Siren.flowchart.linkArrow(id1, id2, message.ToOption(), addedLength.ToOption());
-    public static FlowchartElement linkArrowDouble(string id1, string id2, Optional<string> message, Optional<int> addedLength) =>
+    public static FlowchartElement linkArrowDouble(string id1, string id2, Optional<string> message = default, Optional<int> addedLength = default) =>
         Siren.flowchart.linkArrowDouble(id1, id2, message.ToOption(), addedLength.ToOption());
-    public static FlowchartElement linkOpen(string id1, string id2, Optional<string> message, Optional<int> addedLength) =>
+    public static FlowchartElement linkOpen(string id1, string id2, Optional<string> message = default, Optional<int> addedLength = default) =>
         Siren.flowchart.linkOpen(id1, id2, message.ToOption(), addedLength.ToOption());
-    public static FlowchartElement linkDotted(string id1, string id2, Optional<string> message, Optional<int> addedLength) =>
+    public static FlowchartElement linkDotted(string id1, string id2, Optional<string> message = default, Optional<int> addedLength = default) =>
         Siren.flowchart.linkDotted(id1, id2, message.ToOption(), addedLength.ToOption());
-    public static FlowchartElement linkDottedArrow(string id1, string id2, Optional<string> message, Optional<int> addedLength) =>
+    public static FlowchartElement linkDottedArrow(string id1, string id2, Optional<string> message = default, Optional<int> addedLength = default) =>
         Siren.flowchart.linkDottedArrow(id1, id2, message.ToOption(), addedLength.ToOption());
-    public static FlowchartElement linkThick(string id1, string id2, Optional<string> message, Optional<int> addedLength) =>
+    public static FlowchartElement linkThick(string id1, string id2, Optional<string> message = default, Optional<int> addedLength = default) =>
         Siren.flowchart.linkThick(id1, id2, message.ToOption(), addedLength.ToOption());
-    public static FlowchartElement linkThickArrow(string id1, string id2, Optional<string> message, Optional<int> addedLength) =>
+    public static FlowchartElement linkThickArrow(string id1, string id2, Optional<string> message = default, Optional<int> addedLength = default) =>
         Siren.flowchart.linkThickArrow(id1, id2, message.ToOption(), addedLength.ToOption());
-    public static FlowchartElement linkInvisible(string id1, string id2, Optional<string> message, Optional<int> addedLength) =>
+    public static FlowchartElement linkInvisible(string id1, string id2, Optional<string> message = default, Optional<int> addedLength = default) =>
         Siren.flowchart.linkInvisible(id1, id2, message.ToOption(), addedLength.ToOption());
-    public static FlowchartElement linkCircleEdge(string id1, string id2, Optional<string> message, Optional<int> addedLength) =>
+    public static FlowchartElement linkCircleEdge(string id1, string id2, Optional<string> message = default, Optional<int> addedLength = default) =>
         Siren.flowchart.linkCircleEdge(id1, id2, message.ToOption(), addedLength.ToOption());
-    public static FlowchartElement linkCircleDouble(string id1, string id2, Optional<string> message, Optional<int> addedLength) =>
+    public static FlowchartElement linkCircleDouble(string id1, string id2, Optional<string> message = default, Optional<int> addedLength = default) =>
         Siren.flowchart.linkCircleDouble(id1, id2, message.ToOption(), addedLength.ToOption());
-    public static FlowchartElement linkCrossEdge(string id1, string id2, Optional<string> message, Optional<int> addedLength) =>
+    public static FlowchartElement linkCrossEdge(string id1, string id2, Optional<string> message = default, Optional<int> addedLength = default) =>
         Siren.flowchart.linkCrossEdge(id1, id2, message.ToOption(), addedLength.ToOption());
-    public static FlowchartElement linkCrossDouble(string id1, string id2, Optional<string> message, Optional<int> addedLength) =>
+    public static FlowchartElement linkCrossDouble(string id1, string id2, Optional<string> message = default, Optional<int> addedLength = default) =>
         Siren.flowchart.linkCrossDouble(id1, id2, message.ToOption(), addedLength.ToOption());
 
     public static FlowchartElement direction(Direction direction) => Siren.flowchart.direction(direction);

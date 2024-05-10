@@ -7,30 +7,30 @@ let main = testList "RequirementDiagram" [
     testCase "docs" <| fun _ ->
         let actual =
             siren.requirement [
-                reqDia.requirement("test_req", "1", "the test text.", rqRisk.high, rqMethod.test)
+                requirement.requirement("test_req", "1", "the test text.", rqRisk.high, rqMethod.test)
 
-                reqDia.functionalRequirement("test_req2", "1.1", "the second test text.", rqRisk.low, rqMethod.inspection)
+                requirement.functionalRequirement("test_req2", "1.1", "the second test text.", rqRisk.low, rqMethod.inspection)
 
-                reqDia.performanceRequirement ("test_req3", "1.2", "the third test text.", rqRisk.medium, rqMethod.demonstration)
+                requirement.performanceRequirement ("test_req3", "1.2", "the third test text.", rqRisk.medium, rqMethod.demonstration)
 
-                reqDia.interfaceRequirement ("test_req4", "1.2.1", "the fourth test text.", rqRisk.medium, rqMethod.analysis)
+                requirement.interfaceRequirement ("test_req4", "1.2.1", "the fourth test text.", rqRisk.medium, rqMethod.analysis)
 
-                reqDia.physicalRequirement ("test_req5", "1.2.2", "the fifth test text.", rqRisk.medium, rqMethod.analysis)
+                requirement.physicalRequirement ("test_req5", "1.2.2", "the fifth test text.", rqRisk.medium, rqMethod.analysis)
 
-                reqDia.designConstraint ("test_req6", "1.2.3", "the sixth test text.", rqRisk.medium, rqMethod.analysis)
+                requirement.designConstraint ("test_req6", "1.2.3", "the sixth test text.", rqRisk.medium, rqMethod.analysis)
 
-                reqDia.element("test_entity", "simulation")
-                reqDia.element("test_entity2", "word doc", "reqs/test_entity")
-                reqDia.element("test_entity3", "test suite", "github.com/all_the_tests")
+                requirement.element("test_entity", "simulation")
+                requirement.element("test_entity2", "word doc", "reqs/test_entity")
+                requirement.element("test_entity3", "test suite", "github.com/all_the_tests")
 
-                reqDia.satisfies ("test_entity", "test_req2")
-                reqDia.traces ("test_req", "test_req2")
-                reqDia.contains ("test_req", "test_req3")
-                reqDia.contains ("test_req3", "test_req4")
-                reqDia.derives ("test_req4", "test_req5")
-                reqDia.refines ("test_req5", "test_req6")
-                reqDia.verifies ("test_entity3", "test_req5")
-                reqDia.copies ("test_entity2", "test_req")
+                requirement.satisfies ("test_entity", "test_req2")
+                requirement.traces ("test_req", "test_req2")
+                requirement.contains ("test_req", "test_req3")
+                requirement.contains ("test_req3", "test_req4")
+                requirement.derives ("test_req4", "test_req5")
+                requirement.refines ("test_req5", "test_req6")
+                requirement.verifies ("test_entity3", "test_req5")
+                requirement.copies ("test_entity2", "test_req")
             ]
             |> siren.write
         let expected = """requirementDiagram
