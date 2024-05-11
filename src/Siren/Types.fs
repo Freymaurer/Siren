@@ -627,7 +627,7 @@ type SirenConfig(graph: SirenGraph, ?title, ?theme, ?graphConfig, ?themeVariable
         |> String.concat ",\n"
         |> sprintf "{%s}"
         
-
+[<AttachMembers>]
 type SirenElement = {
     Graph: SirenGraph
     Config: SirenConfig

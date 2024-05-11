@@ -1,4 +1,4 @@
-import {siren, flowchart, direction, formatting } from "./siren/Siren.js"
+import {siren, flowchart, direction, formatting } from "./siren/index.js"
 import * as assert from "assert"
 
 describe('ensure testing', function () {

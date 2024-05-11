@@ -9,7 +9,6 @@ let private outDir = "js"
 let private entryPoint = System.IO.Path.Combine([|outDir; "main.js"|])
 
 let handleNative (args: string list) =
-    let isWatch = args |> List.contains "--watch"
     let isFast = args |> List.contains "--fast"
 
     let mochaComand =
@@ -19,37 +18,25 @@ let handleNative (args: string list) =
         |> CmdLine.appendRaw ProjectInfo.TestPaths.JSNativeDirectory
         |> CmdLine.toString
 
-    let fableArgs =
-        CmdLine.concat
-            [
-                CmdLine.empty
-                |> CmdLine.appendRaw "fable"
-                |> CmdLine.appendRaw ProjectInfo.Projects.Siren
-                |> CmdLine.appendPrefix "--outDir" (ProjectInfo.TestPaths.JSNativeDirectory + "/siren")
-                |> CmdLine.appendRaw "--noCache"
-
-                if isWatch then
-                   CmdLine.empty
-                   |> CmdLine.appendRaw "--watch"
-                   |> CmdLine.appendRaw "--runWatch"
-                   |> CmdLine.appendRaw "npx"
-                   |> CmdLine.appendRaw mochaComand
-                else
-                   CmdLine.empty
-                   |> CmdLine.appendRaw "--run"
-                   |> CmdLine.appendRaw "npx"
-                   |> CmdLine.appendRaw mochaComand
-            ]
-        |> CmdLine.toString
     if isFast then
         Command.Run(
-          "npx",
-          mochaComand
+            "npx",
+            mochaComand
         )
     else
+        let dirPath = ProjectInfo.TestPaths.JSNativeDirectory + "/siren"
+        let fableTranspile =
+            CmdLine.empty
+            |> CmdLine.appendRaw "fable"
+            |> CmdLine.appendRaw ProjectInfo.Projects.Siren
+            |> CmdLine.appendPrefix "--outDir" dirPath
+            |> CmdLine.appendRaw "--noCache"
+            |> CmdLine.toString
+        Command.Run("dotnet", fableTranspile)
+        Index.JS.generate dirPath
         Command.Run(
-            "dotnet",
-            fableArgs
+            "npx",
+            mochaComand
         )
 
 let handle (args: string list) =

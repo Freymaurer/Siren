@@ -203,6 +203,7 @@ type classCardinality =
     static member zeroToN = ClassCardinality.ZeroToN
     static member custom (cardinality: string) = ClassCardinality.Custom cardinality
     
+[<AttachMembers>]
 type classRltsType =
     static member inheritance = ClassRelationshipType.Inheritance
     static member aggregation = ClassRelationshipType.Aggregation
@@ -675,6 +676,7 @@ type block =
     static member ``class``(nodeIds: #seq<string>, className: string) = Block.formatClass (List.ofSeq nodeIds) className |> BlockElement
     static member comment(txt: string) = Generic.formatComment txt |> BlockElement
 
+[<AttachMembers>]
 type theme =
     static member light = "default"
     static member neutral = "neutral"

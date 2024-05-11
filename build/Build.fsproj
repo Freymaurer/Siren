@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="IndexFiles\Indexjs.fs" />
     <Compile Include="CodeGen.fs" />
     <Compile Include="Util.fs" />
     <Compile Include="ProjectInfo.fs" />

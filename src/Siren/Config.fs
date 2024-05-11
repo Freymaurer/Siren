@@ -59,7 +59,7 @@ type sequenceConfig =
     static member boxTextMargin (px: int) = "boxTextMargin", string px
     /// Default: 10
     static member noteMargin (px: int) = "noteMargin", string px
-    /// Default: 35
+    // Default: 35
     // static member messageMargin (px: int) = "messageMargin", string px //Did not work
     /// Default: center
     static member messageAlign (name: string)   = "messageAlign", name
@@ -75,13 +75,13 @@ type sequenceConfig =
     static member showSequenceNumbers (b: bool) = "showSequenceNumbers", string b
     /// Default: "14"
     static member actorFontSize (s: string) = "actorFontSize", s //TODO: Multiple types
-    /// Default: "\"Open Sans\", sans-serif"
+    // Default: "\"Open Sans\", sans-serif"
     //static member actorFontFamily (s:string) = "actorFontFamily", s //Did not work
     /// Default: "400"
     static member actorFontWeight (s:string) = "actorFontWeight", s //TODO: Multiple types
     /// Default: "14"
     static member noteFontSize (s:string) = "noteFontSize", s //TODO: Multiple types
-    /// Default: "\"trebuchet ms\", verdana, arial, sans-serif"
+    // Default: "\"trebuchet ms\", verdana, arial, sans-serif"
     //static member noteFontFamily (s:string) = "noteFontFamily", s //Did not work
     /// Default: "400"
     static member noteFontWeight (s:string) = "noteFontWeight", s //TODO: Multiple types
@@ -92,14 +92,14 @@ type sequenceConfig =
     static member noteAlignRight        = "noteAlign", "right"
     /// Default: "16"
     static member messageFontSize (s:string) = "messageFontSize", s //TODO: Multiple types
-    /// Default: "\"trebuchet ms\", verdana, arial, sans-serif"
+    // Default: "\"trebuchet ms\", verdana, arial, sans-serif"
     // static member messageFontFamily (s:string) = "messageFontFamily", s //TODO: Multiple types
     /// Default: "400"
     static member messageFontWeight (s:string) = "messageFontWeight", s //TODO: Multiple types
     static member wrap (b: bool) = "wrap", string b
     /// Default: 10
     static member wrapPadding (px: int) = "wrapPadding", string px
-    /// Default: 50
+    // Default: 50
     //static member labelBoxWidth (px: int) = "labelBoxWidth", string px //Did not work
     /// Default: 20
     //static member labelBoxHeight (px: int) = "labelBoxHeight", string px //Did not work
@@ -265,7 +265,7 @@ type quadrantChartConfig  =
     static member pointLabelFontSize (value: int) = "pointLabelFontSize", string value
     /// Default: 5
     static member pointRadius (value: int) = "pointRadius", string value
-    /// Default: "top" 
+    // Default: "top" 
     // Did not work
     //static member xAxisPosition (value: string)     = "xAxisPosition", value
     //static member xAxisPositionTop                  = "xAxisPosition", "top"
@@ -355,6 +355,7 @@ type xyChartConfig =
     static member chartOrientationVertical = "chartOrientation", "vertical"
     static member chartOrientationHorizontal= "chartOrientation", "horizontal"
 
+[<AttachMembers>]
 type mindmapConfig =
     static member custom (key: string, value: string) = key, value
     /// Default: 10
@@ -362,6 +363,7 @@ type mindmapConfig =
     /// Default: 200
     static member maxNodeWidth (value: int) = "maxNodeWidth", string value
 
+[<AttachMembers>]
 type gitGraphConfig =
     static member custom (key: string, value: string) = key, value
     /// Default: 25
