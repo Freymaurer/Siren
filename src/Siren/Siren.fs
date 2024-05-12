@@ -78,10 +78,6 @@ type flowchart =
     
     //static member clickCallback() = failwith "TODO"
 
-
-#if FABLE_COMPILER_PYTHON
-[<CompiledName("note_position")>]
-#endif
 [<AttachMembers>]
 type notePosition =
     static member over = NotePosition.Over
@@ -159,10 +155,6 @@ type sequence =
         let json = "{" + json0 + "}"
         sprintf "links %s: %s" id json |> SequenceElement
 
-
-#if FABLE_COMPILER_PYTHON
-[<CompiledName("member_visibility")>]
-#endif
 [<AttachMembers>]
 type memberVisibility =
     static member ``public`` = ClassMemberVisibility.Public
@@ -171,27 +163,18 @@ type memberVisibility =
     static member packageInternal = ClassMemberVisibility.PackageInternal
     static member custom str = ClassMemberVisibility.Custom str
 
-#if FABLE_COMPILER_PYTHON
-[<CompiledName("member_classifier")>]
-#endif
 [<AttachMembers>]
 type memberClassifier =
     static member ``abstract`` = ClassMemberClassifier.Abstract
     static member ``static`` = ClassMemberClassifier.Static
     static member custom str = ClassMemberClassifier.Custom str
 
-#if FABLE_COMPILER_PYTHON
-[<CompiledName("class_direction")>]
-#endif
 [<AttachMembers>]
 type classDirection =
     static member twoWay = ClassRelationshipDirection.TwoWay
     static member left = ClassRelationshipDirection.Left
     static member right = ClassRelationshipDirection.Right
 
-#if FABLE_COMPILER_PYTHON
-[<CompiledName("class_cardinality")>]
-#endif
 [<AttachMembers>]
 type classCardinality =
     static member n = ClassCardinality.N
@@ -215,10 +198,6 @@ type classRltsType =
     static member realization = ClassRelationshipType.Realization
     static member solid = ClassRelationshipType.Solid
     
-
-#if FABLE_COMPILER_PYTHON
-[<CompiledName("class_diagram")>]
-#endif
 [<AttachMembers>]
 type classDiagram =
     static member raw (txt: string) = ClassDiagramElement txt
@@ -266,9 +245,6 @@ type classDiagram =
     static member style(id: string, styles: #seq<string*string>) = ClassDiagram.formatClassStyles id (List.ofSeq styles) |> ClassDiagramElement
     static member cssClass(ids: #seq<string>, className: string) = ClassDiagram.formatCssClass (List.ofSeq ids) className |> ClassDiagramElement
 
-#if FABLE_COMPILER_PYTHON
-[<CompiledName("state_diagram")>]
-#endif
 [<AttachMembers>]
 type stateDiagram =
     static member state (id: string, ?description: string) = StateDiagram.formatState id description |> StateDiagramElement 
@@ -298,20 +274,12 @@ type stateDiagram =
     static member classDef(className: string, styles: #seq<string*string>) = Generic.formatClassDef className (List.ofSeq styles) |> StateDiagramElement
     static member ``class``(nodeIds: #seq<string>, className: string) = Generic.formatClass (List.ofSeq nodeIds) className |> StateDiagramElement
 
-
-
-#if FABLE_COMPILER_PYTHON
-[<CompiledName("er_key")>]
-#endif
 [<AttachMembers>]
 type erKey =
     static member pk = ERKeyType.PK
     static member fk = ERKeyType.FK
     static member uk = ERKeyType.UK
 
-#if FABLE_COMPILER_PYTHON
-[<CompiledName("er_cardinality")>]
-#endif
 [<AttachMembers>]
 type erCardinality =
     /// <summary>
@@ -335,9 +303,6 @@ type erCardinality =
     /// <param name="zeroOrMany"></param>
     static member zeroOrMany = ERCardinalityType.ZeroOrMany
     
-#if FABLE_COMPILER_PYTHON
-[<CompiledName("er_diagram")>]
-#endif
 [<AttachMembers>]
 type erDiagram =
     static member raw (line: string) = ERDiagramElement line
@@ -360,9 +325,6 @@ type journey =
     static member task (name: string, score: int, ?actors: #seq<string>) = UserJourney.formatTask name score actors |> JourneyElement
 
 
-#if FABLE_COMPILER_PYTHON
-[<CompiledName("gantt_time")>]
-#endif
 [<AttachMembers>]
 type ganttTime =
     static member length (timespan: string) : string = timespan
@@ -370,9 +332,6 @@ type ganttTime =
     static member after (id) : string = sprintf "after %s" id
     static member until (id) : string = sprintf "until %s" id
 
-#if FABLE_COMPILER_PYTHON
-[<CompiledName("gantt_tags")>]
-#endif
 [<AttachMembers>]
 type ganttTags =
     static member active = GanttTags.Active
@@ -380,9 +339,6 @@ type ganttTags =
     static member crit = GanttTags.Crit
     static member milestone = GanttTags.Milestone
 
-#if FABLE_COMPILER_PYTHON
-[<CompiledName("gantt_unit")>]
-#endif
 [<AttachMembers>]
 type ganttUnit =
     static member millisecond = GanttUnit.Millisecond
@@ -425,10 +381,6 @@ type gantt =
     static member excludes (day: string) = sprintf "excludes %s" day |> GanttElement 
     static member comment (txt: string) = Generic.formatComment txt |> GanttElement
 
-
-#if FABLE_COMPILER_PYTHON
-[<CompiledName("pie_chart")>]
-#endif
 [<AttachMembers>]
 type pieChart =
     static member raw (line: string) = PieChartElement line
@@ -450,19 +402,12 @@ type quadrant =
     static member point (name: string, xAxis: float, yAxis: float) = QuadrantChart.formatPoint name xAxis yAxis |> QuadrantElement
     static member comment (txt: string) = Generic.formatComment txt |> QuadrantElement
 
-
-#if FABLE_COMPILER_PYTHON
-[<CompiledName("rq_risk")>]
-#endif
 [<AttachMembers>]
 type rqRisk =
     static member low = RDRiskType.Low
     static member medium = RDRiskType.Medium
     static member high = RDRiskType.High
 
-#if FABLE_COMPILER_PYTHON
-[<CompiledName("rq_method")>]
-#endif
 [<AttachMembers>]
 type rqMethod =
     static member analysis = RDVerifyMethod.Analysis
@@ -470,9 +415,6 @@ type rqMethod =
     static member test = RDVerifyMethod.Test
     static member demonstration = RDVerifyMethod.Demonstration
 
-#if FABLE_COMPILER_PYTHON
-[<CompiledName("req_dia")>]
-#endif
 [<AttachMembers>]
 type requirement =
     static member raw (txt: string) = RequirementDiagramElement txt
@@ -500,10 +442,6 @@ type requirement =
     static member refines (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RDRelationship.Refines |> RequirementDiagramElement
     static member traces (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RDRelationship.Traces |> RequirementDiagramElement
 
-
-#if FABLE_COMPILER_PYTHON
-[<CompiledName("git_type")>]
-#endif
 [<AttachMembers>]
 type gitType =
     static member normal = GitCommitType.NORMAL
@@ -580,9 +518,6 @@ type sankey =
         Sankey.createLinks source (List.ofSeq targets)
 
 
-#if FABLE_COMPILER_PYTHON
-[<CompiledName("xy_chart")>]
-#endif
 [<AttachMembers>]
 type xyChart =
     static member raw(line: string) = XYChartElement line

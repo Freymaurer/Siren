@@ -1,4 +1,4 @@
-import siren.siren as siren
+import siren.index as siren
 
 
 class TestSyntax:

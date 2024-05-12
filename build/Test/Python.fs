@@ -10,47 +10,39 @@ let private entryPoint = System.IO.Path.Combine([|outDir; "main.py"|])
 let python = @".venv\Scripts\python.exe"
 
 let handleNative (args: string list) =
-    let isWatch = args |> List.contains "--watch"
     let isFast = args |> List.contains "--fast"
+
     let pytestCommand =
         CmdLine.empty
         |> CmdLine.appendRaw "-m pytest"
         |> CmdLine.appendRaw ProjectInfo.TestPaths.PyNativeDirectory
         |> CmdLine.toString
 
-    let fableArgs =
-        CmdLine.concat
-            [
-                CmdLine.empty
-                |> CmdLine.appendRaw "fable"
-                |> CmdLine.appendRaw ProjectInfo.Projects.Siren
-                |> CmdLine.appendPrefix "--outDir" (ProjectInfo.TestPaths.PyNativeDirectory + "/siren")
-                |> CmdLine.appendPrefix "--lang" "python"
-                |> CmdLine.appendRaw "--noCache"
-
-                if isWatch then
-                   CmdLine.empty
-                   |> CmdLine.appendRaw "--watch"
-                   |> CmdLine.appendRaw "--runWatch"
-                   |> CmdLine.appendRaw python
-                   |> CmdLine.appendRaw pytestCommand
-                else
-                   CmdLine.empty
-                   |> CmdLine.appendRaw "--run"
-                   |> CmdLine.appendRaw python
-                   |> CmdLine.appendRaw pytestCommand
-            ]
-        |> CmdLine.toString
     if isFast then
         Command.Run(
           python,
           pytestCommand
         )
     else
+        let dirPath = ProjectInfo.TestPaths.PyNativeDirectory + "/siren"
+        let fableTranspile =
+            CmdLine.empty
+            |> CmdLine.appendRaw "fable"
+            |> CmdLine.appendRaw ProjectInfo.Projects.Siren
+            |> CmdLine.appendPrefix "--outDir" dirPath
+            |> CmdLine.appendPrefix "--lang" "python"
+            |> CmdLine.appendRaw "--noCache"
+            |> CmdLine.toString
         Command.Run(
             "dotnet",
-            fableArgs
+            fableTranspile
         )
+        Index.PY.generate dirPath
+        Command.Run(
+          python,
+          pytestCommand
+        )
+
 
 let handle (args: string list) =
     let isWatch = args |> List.contains "--watch"

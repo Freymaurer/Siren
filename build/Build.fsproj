@@ -6,7 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="IndexFiles\WhiteList.fs" />
+    <Compile Include="IndexFiles\Util.fs" />
     <Compile Include="IndexFiles\Indexjs.fs" />
+    <Compile Include="IndexFiles\Indexpy.fs" />
     <Compile Include="CodeGen.fs" />
     <Compile Include="Util.fs" />
     <Compile Include="ProjectInfo.fs" />

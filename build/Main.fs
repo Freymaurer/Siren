@@ -49,6 +49,13 @@ let main argv =
         printfn "STARTING CODEGEN..."
         CodeGen.test() 
         printfn "ENDING CODEGEN..."
+    | "index" :: args ->
+        match args with
+        | "js" :: _ -> 
+            Index.JS.generate @"C:\Users\Kevin\source\repos\Siren\tests\JavaScript\siren"
+        | "py" :: _ -> 
+            Index.PY.generate @"C:\Users\Kevin\source\repos\Siren\tests\Python\siren"
+        | _ -> printHelp ()
     | _ -> printHelp ()
 
     0
