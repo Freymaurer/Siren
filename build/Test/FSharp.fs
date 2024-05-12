@@ -1,4 +1,4 @@
-﻿module Build.Test.NET
+﻿module Build.Test.FSharp
 
 open SimpleExec
 open BlackFox.CommandLine

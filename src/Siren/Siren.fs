@@ -245,6 +245,9 @@ type classDiagram =
     static member style(id: string, styles: #seq<string*string>) = ClassDiagram.formatClassStyles id (List.ofSeq styles) |> ClassDiagramElement
     static member cssClass(ids: #seq<string>, className: string) = ClassDiagram.formatCssClass (List.ofSeq ids) className |> ClassDiagramElement
 
+#if FABLE_COMPILER_PYTHON
+[<CompiledName("state_diagram")>]
+#endif
 [<AttachMembers>]
 type stateDiagram =
     static member state (id: string, ?description: string) = StateDiagram.formatState id description |> StateDiagramElement 
@@ -332,6 +335,9 @@ type ganttTime =
     static member after (id) : string = sprintf "after %s" id
     static member until (id) : string = sprintf "until %s" id
 
+#if FABLE_COMPILER_PYTHON
+[<CompiledName("gantt_tags")>]
+#endif
 [<AttachMembers>]
 type ganttTags =
     static member active = GanttTags.Active

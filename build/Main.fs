@@ -28,14 +28,16 @@ let main argv =
     match argv with
     | "test" :: args ->
         match args with
-        | "dotnet" :: args -> Test.NET.handle args
+        | "f#" :: args -> Test.FSharp.handle args
+        | "c#" :: args -> Test.CSharp.handle args
         | "js" :: "native" :: args -> 
             Test.JavaScript.handleNative args
         | "js" :: args -> Test.JavaScript.handle args
         | "py" :: "native" :: args -> Test.Python.handleNative args
         | "py" :: args -> Test.Python.handle args
         | [] | "all" :: _ -> 
-            Test.NET.handle []
+            Test.FSharp.handle []
+            Test.CSharp.handle args
             Test.JavaScript.handle []
             Test.Python.handle []
             Test.Python.handleNative args

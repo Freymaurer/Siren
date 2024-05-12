@@ -13,9 +13,10 @@
     <Compile Include="CodeGen.fs" />
     <Compile Include="Util.fs" />
     <Compile Include="ProjectInfo.fs" />
+    <Compile Include="Test\CSharp.fs" />
     <Compile Include="Test\Python.fs" />
     <Compile Include="Test\JavaScript.fs" />
-    <Compile Include="Test\NET.fs" />
+    <Compile Include="Test\FSharp.fs" />
     <Compile Include="Examples\Util.fs" />
     <Compile Include="Examples\ClassDiagram.fs" />
     <Compile Include="Examples\Flowchart.fs" />

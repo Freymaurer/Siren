@@ -12,6 +12,7 @@ module TestPaths =
 
     let [<Literal>] BaseDirectory = "./tests"
     let [<Literal>] CoreDirectory = BaseDirectory + "/Core"
+    let [<Literal>] CSharpDirectory = BaseDirectory + "/CSharp"
     let [<Literal>] JSNativeDirectory = BaseDirectory + "/JavaScript"
     let [<Literal>] PyNativeDirectory = BaseDirectory + "/Python"
 
@@ -23,3 +24,4 @@ module Projects =
 
     let Siren = "./src/Siren/Siren.fsproj"
     let TestsSiren = System.IO.Path.Combine(TestPaths.CoreDirectory, "Siren.Tests.fsproj")
+    let TestsSirenSea = System.IO.Path.Combine(TestPaths.CSharpDirectory, "Siren.Sea.Tests.csproj")

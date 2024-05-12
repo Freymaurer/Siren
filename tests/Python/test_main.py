@@ -1,6 +1,5 @@
 import siren.index as siren
 
-
 class TestSyntax:
       
     def test_moon_rocket_example(self):
