@@ -190,7 +190,6 @@ end
         Expect.trimEqual actual expected ""
 ]
 
-
 let private tests_formatter = testList "formatter" [
     testCase "empty" <| fun _ ->
         let actual =
@@ -230,6 +229,156 @@ let private tests_formatter = testList "formatter" [
         Expect.trimEqual actual expected ""
 ]
 
+let private tests_docs = testList "docs" [
+    testCase "With title" <| fun _ ->
+        let actual =
+            siren.flowchart(direction.lr, [
+                flowchart.node("id1", "This is the text in the box")
+            ])
+            |> siren.withTitle("Node with text")
+            |> siren.write
+        let expected = """---
+title: Node with text
+---
+flowchart LR
+    id1[This is the text in the box]"""
+        Expect.trimEqual actual expected ""
+    testCase "Different Length" <| fun _ -> 
+        let a, b, c, d, e = "A", "B", "C", "D", "E"
+        let actual =
+            siren.flowchart(direction.td, [
+                flowchart.node(a, "Start")
+                flowchart.nodeRhombus(b, "Is it?")
+                flowchart.node(c, "OK")
+                flowchart.node(d, "Rethink")
+                flowchart.node(e, "End")
+                flowchart.linkArrow(a, b)
+                flowchart.linkArrow(b, c, "Yes")
+                flowchart.linkArrow(c, d)
+                flowchart.linkArrow(d, b)
+                flowchart.linkArrow(b, e, "No", 3)
+            ]).write()
+        let expected = """flowchart TD
+    A[Start]
+    B{Is it?}
+    C[OK]
+    D[Rethink]
+    E[End]
+    A-->B
+    B-->|Yes|C
+    C-->D
+    D-->B
+    B---->|No|E"""
+        Expect.trimEqual actual expected ""
+    testCase "Subgraphs" <| fun _ ->
+        let c1, c2, b1, b2, a1, a2 = "c1", "c2", "b1", "b2", "a1", "a2"
+        let actual = 
+            siren.flowchart(direction.tb, [
+                flowchart.linkArrow(c1, a2)
+                flowchart.subgraph("one", [
+                    flowchart.linkArrow(a1,a2)
+                ])
+                flowchart.subgraph("two", [
+                    flowchart.linkArrow(b1,b2)
+                ])
+                flowchart.subgraph("three", [
+                    flowchart.linkArrow(c1,c2)
+                ])
+            ]).write()
+        let expected = """flowchart TB
+    c1-->a2
+    subgraph one
+        a1-->a2
+    end
+    subgraph two
+        b1-->b2
+    end
+    subgraph three
+        c1-->c2
+    end
+"""
+        Expect.trimEqual actual expected ""
+    testCase "SubgraphDirection" <| fun _ ->
+        let outside, top1, bot1, top2, bot2 = ("outside", "top1", "bottom1", "top2", "bottom2");
+        let actual = 
+            siren.flowchart(direction.lr, [
+                flowchart.subgraph("subgraph1", [
+                    flowchart.directionTB
+                    flowchart.node(top1)
+                    flowchart.node(bot1)
+                    flowchart.linkArrow(top1, bot1)
+                ])
+                flowchart.subgraph("subgraph2", [
+                    flowchart.directionTB
+                    flowchart.node(top2)
+                    flowchart.node(bot2)
+                    flowchart.linkArrow(top2, bot2)
+                ])
+                flowchart.linkArrow(outside, "subgraph1")
+                flowchart.linkArrow(outside, top2, addedLength = 2)
+            ]).write()
+        let expected = """flowchart LR
+    subgraph subgraph1
+        direction TB
+        top1[top1]
+        bottom1[bottom1]
+        top1-->bottom1
+    end
+    subgraph subgraph2
+        direction TB
+        top2[top2]
+        bottom2[bottom2]
+        top2-->bottom2
+    end
+    outside-->subgraph1
+    outside--->top2
+"""
+        Expect.trimEqual actual expected ""
+    testCase "MarkdownString" <| fun _ ->
+        let actual = 
+            siren.flowchart(direction.lr, [
+                flowchart.subgraph("One", [
+                    flowchart.nodeRound("a", formatting.markdown(@"The **cat**
+in the hat")
+                    )
+                    flowchart.nodeRhombus("b", formatting.markdown(@"The **dog** in the hog"))
+                    flowchart.linkArrow("a","b", formatting.markdown("Bold **edge label**"))
+                ])
+            ]).write()
+        let expected = """flowchart LR
+    subgraph One
+        a("`The **cat**
+in the hat`")
+        b{"`The **dog** in the hog`"}
+        a-->|"`Bold **edge label**`"|b
+    end"""
+        Expect.trimEqual actual expected ""
+    testCase "MoonRocket" <| fun _ ->
+        let actual =
+            siren.flowchart(direction.bt, [
+                flowchart.subgraph("space", [
+                    flowchart.directionBT
+                    flowchart.linkDottedArrow("earth", "moon", formatting.unicode("🚀"), 6)
+                    flowchart.nodeRound("moon")
+                    flowchart.subgraph("atmosphere",[
+                        flowchart.nodeCircle("earth")
+                    ])
+                ])
+            ])
+            |> siren.write
+        let expected = """flowchart BT
+    subgraph space
+        direction BT
+        earth-......->|"🚀"|moon
+        moon(moon)
+        subgraph atmosphere
+            earth((earth))
+        end
+    end
+"""
+        Expect.trimEqual actual expected ""
+]
+
 let main = testList "Flowchart" [
     tests_nodes
     tests_raw
@@ -237,5 +386,6 @@ let main = testList "Flowchart" [
     tests_link
     tests_subgraph
     tests_formatter
+    tests_docs
 ]
 

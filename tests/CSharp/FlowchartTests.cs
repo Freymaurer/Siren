@@ -97,6 +97,70 @@ flowchart LR
             Assert.Equal(expected, actual);
         }
         [Fact]
+        public void SubgraphDirectionTest()
+        {
+            (string outside, string top1, string bot1, string top2, string bot2) = ("outside", "top1", "bottom1", "top2", "bottom2");
+            SirenElement graph = siren.flowchart(direction.lr, [
+                flowchart.subgraph("subgraph1", [
+                    flowchart.directionTB,
+                    flowchart.node(top1),
+                    flowchart.node(bot1),
+                    flowchart.linkArrow(top1, bot1)
+                ]),
+                flowchart.subgraph("subgraph2", [
+                    flowchart.directionTB,
+                    flowchart.node(top2),
+                    flowchart.node(bot2),
+                    flowchart.linkArrow(top2, bot2)
+                ]),
+                flowchart.linkArrow(outside, "subgraph1"),
+                flowchart.linkArrow(outside, top2, addedLength: 2),
+            ]);
+            string actual =
+                graph.write();
+            Console.WriteLine(actual);
+            string expected = @"flowchart LR
+    subgraph subgraph1
+        direction TB
+        top1[top1]
+        bottom1[bottom1]
+        top1-->bottom1
+    end
+    subgraph subgraph2
+        direction TB
+        top2[top2]
+        bottom2[bottom2]
+        top2-->bottom2
+    end
+    outside-->subgraph1
+    outside--->top2
+";
+            Assert.Equal(expected, actual);
+        }
+        [Fact]
+        public void MarkdownStringsTest()
+        {
+            SirenElement graph = siren.flowchart(direction.lr, [
+                flowchart.subgraph("One", [
+                    flowchart.nodeRound("a", formatting.markdown(@"The **cat**
+in the hat")
+                    ),
+                    flowchart.nodeRhombus("b", formatting.markdown(@"The **dog** in the hog")),
+                    flowchart.linkArrow("a","b", formatting.markdown("Bold **edge label**"))
+                ]),
+            ]);
+            string actual = siren.write(graph);
+            string expected = @"flowchart LR
+    subgraph One
+        a(""`The **cat**
+in the hat`"")
+        b{""`The **dog** in the hog`""}
+        a-->|""`Bold **edge label**`""|b
+    end
+";
+            Assert.Equal(expected, actual);
+        }
+        [Fact]
         public void MoonRocket()
         {
             SirenElement graph = siren.flowchart(direction.bt, [
