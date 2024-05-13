@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="C:\Users\Kevin\.nuget\packages\fable.core\4.3.0\contentFiles\any\netstandard2.0\CHANGELOG.md" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Include="Util.fs" />
     <Compile Include="Yaml.fs" />
     <Compile Include="SirenTypes.fs" />
