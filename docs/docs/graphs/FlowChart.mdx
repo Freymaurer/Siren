@@ -21,13 +21,9 @@ siren.flowchart(direction.lr, [
 <TabItem value="csharp" label="C#">
 
 ```csharp
-SirenElement graph = siren.flowchart(direction.lr, [
+string graph = siren.flowchart(direction.lr, [
     flowchart.node("id1", "This is the text in the box")
-]);
-string actual = 
-    graph
-        .withTitle("Node with text")
-        .write();
+]).withTitle("Node with text").write();
 ```
 
 </TabItem>

@@ -226,10 +226,37 @@ module ClassDiagram =
         let generic = generic |> Option.formatString (fun s -> sprintf "~%s~" s)
         sprintf "class %s%s%s" id generic name
 
-    let formatMember id label (visibility: ClassMemberVisibility option) (classifier: ClassMemberClassifier option) =
+    let formatClassMember name (visibility: ClassMemberVisibility option) (classifier: ClassMemberClassifier option) =
         let visibility = visibility |> Option.map _.ToFormatString() |> Option.formatString (fun x -> x)
         let classifier = classifier |> Option.map _.ToFormatString() |> Option.formatString (fun x -> x)
-        sprintf "%s : %s%s%s" id visibility label classifier
+        visibility + name + classifier
+
+    let formatGeneric (generic: string) =
+        generic.Replace("<","~").Replace(">","~")
+
+    let formatClassAttr name (generic: string option) (visibility: ClassMemberVisibility option) (classifier: ClassMemberClassifier option) =
+        // Update generic <> to ~
+        let generic = generic |> Option.formatString formatGeneric
+        let visibility = visibility |> Option.map _.ToFormatString() |> Option.formatString (fun x -> x)
+        let classifier = classifier |> Option.map _.ToFormatString() |> Option.formatString (fun x -> x)
+        sprintf "%s%s %s%s" visibility generic name classifier
+        |> _.Trim()
+
+    let formatClassFunction name (args: string option) (returnType: string option) (visibility: ClassMemberVisibility option) (classifier: ClassMemberClassifier option) =
+        let visibility = visibility |> Option.map _.ToFormatString() |> Option.formatString (fun x -> x)
+        let classifier = classifier |> Option.map _.ToFormatString() |> Option.formatString (fun x -> x)
+        let args = defaultArg args "" |> formatGeneric
+        let returnType = returnType |> Option.formatString (fun x -> x |> formatGeneric |> sprintf " %s")
+        sprintf "%s%s(%s)%s%s" visibility name args returnType classifier
+
+    let formatMember id label (visibility: ClassMemberVisibility option) (classifier: ClassMemberClassifier option) =
+        sprintf "%s : %s" id (formatClassMember label visibility classifier)
+
+    let formatAttr id name (generic: string option) (visibility: ClassMemberVisibility option) (classifier: ClassMemberClassifier option) =
+        sprintf "%s : %s" id (formatClassAttr name generic visibility classifier)
+
+    let formatFunction id name (args: string option) (returnType: string option) (visibility: ClassMemberVisibility option) (classifier: ClassMemberClassifier option) =
+        sprintf "%s : %s" id (formatClassFunction name args returnType visibility classifier)
 
     let formatRelationship0 id1 id2 (link: string) (label: string option) (cardinality1: ClassCardinality option) (cardinality2: ClassCardinality option) =
         //classI -- classJ : Link(Solid)
@@ -247,7 +274,10 @@ module ClassDiagram =
         let link = rltsType.ToFormatString(?direction=direction, ?isDotted=dotted)
         formatRelationship0 id1 id2 link label cardinality1 cardinality2
 
-    let formatAnnotation id (annotation: string) = sprintf "<<%s>> %s" annotation id
+    let formatAnnotation (id0: string option) (annotation: string) = 
+        match id0 with 
+        | Some id -> sprintf "<<%s>> %s" annotation id 
+        | None -> sprintf "<<%s>>" annotation
 
     let formatNote txt (id: string option) =
         if id.IsSome then

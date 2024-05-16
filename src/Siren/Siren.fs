@@ -156,18 +156,28 @@ type sequence =
         sprintf "links %s: %s" id json |> SequenceElement
 
 [<AttachMembers>]
-type memberVisibility =
-    static member ``public`` = ClassMemberVisibility.Public
-    static member ``private`` = ClassMemberVisibility.Private
-    static member ``protected`` = ClassMemberVisibility.Protected
+type classMemberVisibility =
+
+    [<CompiledName("``public``")>]
+    static member Public = ClassMemberVisibility.Public
+    [<CompiledName("``private``")>]
+    static member Private = ClassMemberVisibility.Private
+    [<CompiledName("``protected``")>]
+    static member Protected = ClassMemberVisibility.Protected
     static member packageInternal = ClassMemberVisibility.PackageInternal
     static member custom str = ClassMemberVisibility.Custom str
 
+type cmv = classMemberVisibility
+
 [<AttachMembers>]
-type memberClassifier =
-    static member ``abstract`` = ClassMemberClassifier.Abstract
-    static member ``static`` = ClassMemberClassifier.Static
+type classMemberClassifier =
+    [<CompiledName("``abstract``")>]
+    static member Abstract = ClassMemberClassifier.Abstract
+    [<CompiledName("``static``")>]
+    static member Static = ClassMemberClassifier.Static
     static member custom str = ClassMemberClassifier.Custom str
+
+type cmc = classMemberClassifier
 
 [<AttachMembers>]
 type classDirection =
@@ -201,16 +211,24 @@ type classRltsType =
 [<AttachMembers>]
 type classDiagram =
     static member raw (txt: string) = ClassDiagramElement txt
-    static member ``class`` (id: string, ?name: string, ?generic: string, ?members: #seq<string>) = 
-        if members.IsSome then ClassDiagramWrapper (ClassDiagram.formatClass id name generic + "{","}", (List.ofSeq >> List.map ClassDiagramElement) members.Value) 
+    static member ``class`` (id: string, ?name: string, ?generic: string, ?members: #seq<ClassDiagramElement>) = 
+        if members.IsSome then ClassDiagramWrapper (ClassDiagram.formatClass id name generic + "{","}", List.ofSeq members.Value) 
         else ClassDiagram.formatClass id name generic |> ClassDiagramElement
-    static member ``member`` (id: string, label:string, ?memberVisibility: ClassMemberVisibility, ?memberClassifier: ClassMemberClassifier) = 
-        ClassDiagram.formatMember id label memberVisibility memberClassifier |> ClassDiagramElement
-    static member memberAbstract(id: string, label:string, ?memberVisibility: ClassMemberVisibility) =
-        ClassDiagram.formatMember id label memberVisibility (Some ClassMemberClassifier.Abstract) |> ClassDiagramElement
-    static member memberStatic(id: string, label:string, ?memberVisibility: ClassMemberVisibility) =
-        ClassDiagram.formatMember id label memberVisibility (Some ClassMemberClassifier.Static) |> ClassDiagramElement
-    
+
+    static member classMember(name: string, ?classMemberVisibility: ClassMemberVisibility, ?classMemberClassifier: ClassMemberClassifier) =
+        ClassDiagram.formatClassMember name classMemberVisibility classMemberClassifier |> ClassDiagramElement
+    static member classAttr (name: string, ?generic: string, ?classMemberVisibility: ClassMemberVisibility, ?classMemberClassifier: ClassMemberClassifier) =
+        ClassDiagram.formatClassAttr name generic classMemberVisibility classMemberClassifier |> ClassDiagramElement
+    static member classFunction(name: string, ?param: string, ?returnType: string, ?classMemberVisibility: ClassMemberVisibility, ?classMemberClassifier: ClassMemberClassifier) =
+        ClassDiagram.formatClassFunction name param returnType classMemberVisibility classMemberClassifier |> ClassDiagramElement
+
+    static member idMember (id: string, name: string, ?classMemberVisibility: ClassMemberVisibility, ?classMemberClassifier: ClassMemberClassifier) = 
+       ClassDiagram.formatMember id name classMemberVisibility classMemberClassifier |> ClassDiagramElement
+    static member idAttr (id: string, name: string, ?generic: string, ?classMemberVisibility: ClassMemberVisibility, ?classMemberClassifier: ClassMemberClassifier) = 
+        ClassDiagram.formatAttr id name generic classMemberVisibility classMemberClassifier |> ClassDiagramElement
+    static member idFunction (id: string, name: string, ?param: string, ?returnType: string, ?classMemberVisibility: ClassMemberVisibility, ?classMemberClassifier: ClassMemberClassifier) = 
+        ClassDiagram.formatFunction id name param returnType classMemberVisibility classMemberClassifier |> ClassDiagramElement
+
     static member relationshipInheritance (id1, id2, ?label: string, ?cardinality1: ClassCardinality, ?cardinality2: ClassCardinality) = 
         ClassDiagram.formatRelationship id1 id2 ClassRelationshipType.Inheritance label cardinality1 cardinality2 |> ClassDiagramElement
     static member relationshipComposition (id1, id2, ?label: string, ?cardinality1: ClassCardinality, ?cardinality2: ClassCardinality) = 
@@ -233,10 +251,20 @@ type classDiagram =
     static member ``namespace`` (name: string, children: #seq<ClassDiagramElement>) =
         if Seq.isEmpty children then ClassDiagramNone 
         else ClassDiagramWrapper (sprintf "namespace %s {" name,"}", List.ofSeq children)
-    static member annotation (id: string, annotation: string) : ClassDiagramElement = classDiagram.annotationString (id, annotation) |> ClassDiagramElement
-    static member annotationString (id: string, annotation: string) : string = ClassDiagram.formatAnnotation id annotation
+    [<CompiledName("``interface``")>]
+    static member Interface (?id: string) : ClassDiagramElement = ClassDiagram.formatAnnotation id "Interface" |> ClassDiagramElement 
+    [<CompiledName("``abstract``")>]
+    static member Abstract (?id: string) : ClassDiagramElement = ClassDiagram.formatAnnotation id "Abstract" |> ClassDiagramElement
+    static member service (?id: string) : ClassDiagramElement = ClassDiagram.formatAnnotation id "Service" |> ClassDiagramElement
+    static member enumeration (?id: string) : ClassDiagramElement = ClassDiagram.formatAnnotation id "Enumeration" |> ClassDiagramElement
+    static member annotation (name: string, ?id: string) : ClassDiagramElement = ClassDiagram.formatAnnotation id name |> ClassDiagramElement
     static member comment (txt:string) = Generic.formatComment txt |> ClassDiagramElement
     static member direction (direction: Direction) = Generic.formatDirection direction |> ClassDiagramElement
+    static member directionTB = Generic.formatDirection Direction.TB |> ClassDiagramElement
+    static member directionTD = Generic.formatDirection Direction.TD |> ClassDiagramElement
+    static member directionBT = Generic.formatDirection Direction.BT |> ClassDiagramElement
+    static member directionRL = Generic.formatDirection Direction.RL |> ClassDiagramElement
+    static member directionLR = Generic.formatDirection Direction.LR |> ClassDiagramElement
     static member clickHref(id,url,?tooltip) = Generic.formatClickHref id url tooltip |> ClassDiagramElement
     //static member clickCallback() = failwith "TODO"
     static member note(txt:string, ?id: string) = ClassDiagram.formatNote txt id |> ClassDiagramElement
@@ -244,6 +272,7 @@ type classDiagram =
     //static member callback(id: string, func: unit -> unit, ?tooltip: string) = failwith "TODO"
     static member style(id: string, styles: #seq<string*string>) = ClassDiagram.formatClassStyles id (List.ofSeq styles) |> ClassDiagramElement
     static member cssClass(ids: #seq<string>, className: string) = ClassDiagram.formatCssClass (List.ofSeq ids) className |> ClassDiagramElement
+
 
 #if FABLE_COMPILER_PYTHON
 [<CompiledName("state_diagram")>]

@@ -93,9 +93,9 @@ let private tests_member = testList "member" [
             let ba = "BankAccount"
             siren.classDiagram [
                 classDiagram.``class`` ba
-                classDiagram.``member``(ba,"String owner")
-                classDiagram.``member``(ba,"+BigDecimal balance")
-                classDiagram.``member``(ba,"deposit(amount)", memberVisibility.``public``)
+                classDiagram.idAttr(ba,"owner", "String")
+                classDiagram.idAttr(ba,"balance", "BigDecimal", classMemberVisibility.Public)
+                classDiagram.idFunction(ba,"deposit", "amount", classMemberVisibility = classMemberVisibility.Public)
             ]
             |> siren.write
         let expected = """classDiagram
@@ -110,8 +110,8 @@ let private tests_member = testList "member" [
             let ba = "BankAccount"
             siren.classDiagram [
                 classDiagram.``class`` ba
-                classDiagram.memberAbstract(ba,"String owner")
-                classDiagram.memberStatic(ba,"float owner")
+                classDiagram.idAttr(ba,"owner", "String", classMemberClassifier = classMemberClassifier.Abstract)
+                classDiagram.idAttr(ba,"owner", "float", classMemberClassifier = classMemberClassifier.Static)
             ]
             |> siren.write
         let expected = """classDiagram
@@ -125,8 +125,8 @@ let private tests_member = testList "member" [
             let ba = "BankAccount"
             siren.classDiagram [
                 classDiagram.``class`` ba
-                classDiagram.``member``(ba,"String owner",memberVisibility.packageInternal, memberClassifier.``abstract``)
-                classDiagram.``member``(ba,"float owner", memberVisibility.``public`` , memberClassifier.``static`` )
+                classDiagram.idAttr(ba,"owner","String", classMemberVisibility.packageInternal, classMemberClassifier.Abstract)
+                classDiagram.idAttr(ba,"owner", "float", classMemberVisibility.Public , classMemberClassifier.Static)
             ]
             |> siren.write
         let expected = """classDiagram
@@ -162,22 +162,22 @@ let private tests_class = testList "class" [
         let actual = 
             siren.classDiagram [
                 classDiagram.``class``("Animal", "Such a cool thing","Animal")
-                classDiagram.memberStatic("Animal", "sex", memberVisibility.``public``)
+                classDiagram.idAttr("Animal", "sex", "String", cmv.Public, cmc.Static)
             ]
             |> siren.write
         let expected = """classDiagram
     class Animal~Animal~["Such a cool thing"]
-    Animal : +sex$
+    Animal : +String sex$
 """
         Expect.trimEqual actual expected ""
     testCase "members" <| fun _ ->
         let actual = 
             siren.classDiagram [
                 classDiagram.``class``("BankAccount", "Treasure chest",members=[
-                    "+String owner"
-                    "+BigDecimal balance"
-                    "+deposit(amount) bool"
-                    "+withdrawal(amount) int"
+                    classDiagram.classAttr("owner","String", classMemberVisibility.Public)
+                    classDiagram.classAttr("balance","BigDecimal", classMemberVisibility.Public)
+                    classDiagram.classFunction("deposit", "amount", "bool", classMemberVisibility.Public)
+                    classDiagram.classFunction("withdrawal", "amount", "int", classMemberVisibility.Public)
                 ])
             ]
             |> siren.write
@@ -192,7 +192,7 @@ let private tests_class = testList "class" [
         Expect.trimEqual actual expected ""
 ]
 
-let private tests_complex = testList "complex" [
+let private tests_docs = testList "docs" [
     testCase "animals" <| fun _ ->
         let actual =
             let duck,animal,zebra,fish = "Duck","Animal","Zebra", "Fish"
@@ -202,22 +202,22 @@ let private tests_complex = testList "complex" [
                 classDiagram.note(@"can fly\ncan swim\ncan dive\ncan help in debugging", duck)
                 classDiagram.relationshipInheritance(fish, animal)
                 classDiagram.relationshipInheritance(zebra, animal)
-                classDiagram.``member``(animal,"+int age")
-                classDiagram.``member``(animal,"+String gender")
-                classDiagram.``member``(animal,"+isMammal()")
-                classDiagram.``member``(animal,"+mate()")
+                classDiagram.idAttr(animal,"age", "int", classMemberVisibility.Public)
+                classDiagram.idAttr(animal, "gender", "String", classMemberVisibility.Public)
+                classDiagram.idFunction(animal, "isMammal", classMemberVisibility = classMemberVisibility.Public)
+                classDiagram.idFunction(animal, "mate", classMemberVisibility = classMemberVisibility.Public)
                 classDiagram.``class``(duck,members=[
-                    "+String beakColor"
-                    "+swim()"
-                    "+quack()"
+                    classDiagram.classAttr("beakColor","String", classMemberVisibility.Public)
+                    classDiagram.classFunction("swim", classMemberVisibility = classMemberVisibility.Public)
+                    classDiagram.classFunction("quack", classMemberVisibility = classMemberVisibility.Public)
                 ])
                 classDiagram.``class``(fish,members=[
-                    "-int sizeInFeet"
-                    "-canEat()"
+                    classDiagram.classAttr("sizeInFeet","int", classMemberVisibility.Private)
+                    classDiagram.classFunction("canEat", classMemberVisibility = classMemberVisibility.Private)
                 ])
                 classDiagram.``class``(zebra,members=[
-                    "+bool is_wild"
-                    "+run()"
+                    classDiagram.classAttr("is_wild","bool", classMemberVisibility.Public)
+                    classDiagram.classFunction("run", classMemberVisibility = classMemberVisibility.Public)
                 ])
                 classDiagram.``namespace``("Mammals", [
                     classDiagram.``class``(zebra)
@@ -251,6 +251,129 @@ let private tests_complex = testList "complex" [
         class Zebra
     }"""
         Expect.trimEqual actual expected ""
+    testCase "Class" <| fun _ ->
+        let actual =
+            let bankacc = "BankAccount"
+            siren.classDiagram [
+                classDiagram.``class``(bankacc)
+                classDiagram.idAttr(bankacc,"owner", "String", classMemberVisibility.Public)
+                classDiagram.idAttr(bankacc,"balance", "Bigdecimal", classMemberVisibility.Public)
+                classDiagram.idFunction(bankacc,"deposit", "amount", classMemberVisibility = classMemberVisibility.Public)
+                classDiagram.idFunction(bankacc,"withdrawal", "amount", classMemberVisibility = classMemberVisibility.Public)
+            ]
+            |> siren.withTitle ("Bank example")
+            |> siren.write
+        let expected = """---
+title: Bank example
+---
+classDiagram
+    class BankAccount
+    BankAccount : +String owner
+    BankAccount : +Bigdecimal balance
+    BankAccount : +deposit(amount)
+    BankAccount : +withdrawal(amount)
+"""
+        Expect.trimEqual actual expected ""
+    testCase "Generic Types" <| fun _ ->
+        let actual =
+            let square = "Square"
+            siren.classDiagram [
+                classDiagram.``class``(square, generic="Shape", members=[
+                    classDiagram.classAttr("id", "int")
+                    classDiagram.classAttr("position", "List<int>")
+                    classDiagram.classFunction("setPoints", "List<int> points")
+                    classDiagram.classFunction("getPoints", returnType = "List<int>")
+                ])
+                classDiagram.idAttr(square, "messages", "List<string>", classMemberVisibility.Private)
+                classDiagram.idFunction(square, "setMessages", "List<string> messages", classMemberVisibility = classMemberVisibility.Public)
+                classDiagram.idFunction(square, "getMessages", returnType = "List<string>", classMemberVisibility = classMemberVisibility.Public)
+                classDiagram.idFunction(square, "getDistanceMatrix", returnType = "List<List<int>>", classMemberVisibility = classMemberVisibility.Public)
+            ]
+            |> siren.write
+        let expected = """classDiagram
+    class Square~Shape~{
+        int id
+        List~int~ position
+        setPoints(List~int~ points)
+        getPoints() List~int~
+    }
+    Square : -List~string~ messages
+    Square : +setMessages(List~string~ messages)
+    Square : +getMessages() List~string~
+    Square : +getDistanceMatrix() List~List~int~~
+"""
+        Expect.trimEqual actual expected ""
+    testCase "Annotations" <| fun _ ->
+        let actual =
+            siren.classDiagram [
+                classDiagram.``class``("Shape", members=[
+                    classDiagram.Interface()
+                    classDiagram.classAttr("noOfVertices")
+                    classDiagram.classFunction("draw")
+                ])
+                classDiagram.``class``("Color", members=[
+                    classDiagram.enumeration()
+                    classDiagram.classAttr("RED")
+                    classDiagram.classAttr("BLUE")
+                    classDiagram.classAttr("GREEN")
+                    classDiagram.classAttr("WHITE")
+                    classDiagram.classAttr("BLACK")
+                ])
+            ]
+            |> siren.write
+        let expected = """classDiagram
+    class Shape{
+        <<Interface>>
+        noOfVertices
+        draw()
+    }
+    class Color{
+        <<Enumeration>>
+        RED
+        BLUE
+        GREEN
+        WHITE
+        BLACK
+    }
+"""
+        Expect.trimEqual actual expected ""
+    testCase "Diagram Direction" <| fun _ ->
+        let actual =
+            let student, idCard, bike = "Student", "IdCard", "Bike"
+            siren.classDiagram [
+                classDiagram.directionRL
+                classDiagram.``class``(student, members=[
+                    classDiagram.raw("-idCard : IdCard")
+                ])
+                classDiagram.``class``(idCard, members=[
+                    classDiagram.raw("-id : int")
+                    classDiagram.raw("-name : string")
+                ])
+                classDiagram.``class``(bike, members=[
+                    classDiagram.raw("-id : int")
+                    classDiagram.raw("-name : string")
+                ])
+                classDiagram.relationshipAggregation (student, idCard, "carries", classCardinality.one, classCardinality.one)
+                classDiagram.relationshipAggregation (student, bike, "rides", classCardinality.one, classCardinality.one)
+            ]
+            |> siren.write
+        let expected = """classDiagram
+    direction RL
+    class Student{
+        -idCard : IdCard
+    }
+    class IdCard{
+        -id : int
+        -name : string
+    }
+    class Bike{
+        -id : int
+        -name : string
+    }
+    Student "1" --o "1" IdCard : carries
+    Student "1" --o "1" Bike : rides
+"""
+        Expect.trimEqual actual expected ""
 ]
 
 let main = testList "ClassDiagram" [
@@ -259,5 +382,5 @@ let main = testList "ClassDiagram" [
     tests_rlts
     tests_member
     tests_class
-    tests_complex
+    tests_docs
 ]
