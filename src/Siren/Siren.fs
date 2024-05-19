@@ -158,11 +158,11 @@ type sequence =
 [<AttachMembers>]
 type classMemberVisibility =
 
-    [<CompiledName("``public``")>]
+    //[<CompiledName("``public``")>]
     static member Public = ClassMemberVisibility.Public
-    [<CompiledName("``private``")>]
+    //[<CompiledName("``private``")>]
     static member Private = ClassMemberVisibility.Private
-    [<CompiledName("``protected``")>]
+    //[<CompiledName("``protected``")>]
     static member Protected = ClassMemberVisibility.Protected
     static member packageInternal = ClassMemberVisibility.PackageInternal
     static member custom str = ClassMemberVisibility.Custom str
@@ -171,9 +171,9 @@ type cmv = classMemberVisibility
 
 [<AttachMembers>]
 type classMemberClassifier =
-    [<CompiledName("``abstract``")>]
+    //[<CompiledName("``abstract``")>]
     static member Abstract = ClassMemberClassifier.Abstract
-    [<CompiledName("``static``")>]
+    //[<CompiledName("``static``")>]
     static member Static = ClassMemberClassifier.Static
     static member custom str = ClassMemberClassifier.Custom str
 
@@ -211,7 +211,10 @@ type classRltsType =
 [<AttachMembers>]
 type classDiagram =
     static member raw (txt: string) = ClassDiagramElement txt
-    static member ``class`` (id: string, ?name: string, ?generic: string, ?members: #seq<ClassDiagramElement>) = 
+
+    static member ``class`` (id: string, members: #seq<ClassDiagramElement>) = 
+        ClassDiagramWrapper (ClassDiagram.formatClass id None None + "{","}", List.ofSeq members) 
+    static member classId (id: string, ?name: string, ?generic: string, ?members: #seq<ClassDiagramElement>) = 
         if members.IsSome then ClassDiagramWrapper (ClassDiagram.formatClass id name generic + "{","}", List.ofSeq members.Value) 
         else ClassDiagram.formatClass id name generic |> ClassDiagramElement
 
@@ -251,9 +254,9 @@ type classDiagram =
     static member ``namespace`` (name: string, children: #seq<ClassDiagramElement>) =
         if Seq.isEmpty children then ClassDiagramNone 
         else ClassDiagramWrapper (sprintf "namespace %s {" name,"}", List.ofSeq children)
-    [<CompiledName("``interface``")>]
+    //[<CompiledName("``interface``")>]
     static member Interface (?id: string) : ClassDiagramElement = ClassDiagram.formatAnnotation id "Interface" |> ClassDiagramElement 
-    [<CompiledName("``abstract``")>]
+    //[<CompiledName("``abstract``")>]
     static member Abstract (?id: string) : ClassDiagramElement = ClassDiagram.formatAnnotation id "Abstract" |> ClassDiagramElement
     static member service (?id: string) : ClassDiagramElement = ClassDiagram.formatAnnotation id "Service" |> ClassDiagramElement
     static member enumeration (?id: string) : ClassDiagramElement = ClassDiagram.formatAnnotation id "Enumeration" |> ClassDiagramElement

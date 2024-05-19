@@ -17,9 +17,9 @@ public static class Utils
     public static List<string> GetMemberNameDifferences(Type type1, Type type2)
     {
         List<string> differences = new List<string>();
-
-        var type1Members = type1.GetMembers().Select(m => m.Name);
-        var type2Members = type2.GetMembers().Select(m => m.Name);
+        //transform string to lower
+        var type1Members = type1.GetMembers().Select(m => m.Name.ToLower());
+        var type2Members = type2.GetMembers().Select(m => m.Name.ToLower());
         differences.AddRange(type1Members.Except(type2Members));
         differences.AddRange(type2Members.Except(type1Members));
 

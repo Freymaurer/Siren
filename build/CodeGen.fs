@@ -81,7 +81,7 @@ let generateCSharpCode<'A>() =
     csharpCode
 
 let test() = 
-    generateCSharpCode<Siren.flowchart>()
+    generateCSharpCode<Siren.classDiagram>()
     |> printfn "%A"
     //for memberInfo in staticMembersInfo do
     //    let name, parameters, returnType = memberInfo

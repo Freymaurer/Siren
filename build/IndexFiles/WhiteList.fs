@@ -29,8 +29,8 @@ let WhiteList = [|
         "flowchart"; 
         "notePosition"; 
         "sequence"; 
-        "memberVisibility"; 
-        "memberClassifier"; 
+        "classMemberVisibility"; 
+        "classMemberClassifier"; 
         "classDirection"; 
         "classCardinality"; 
         "classRltsType"; 

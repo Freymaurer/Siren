@@ -7,7 +7,7 @@ let private tests_click = testList "click" [
     testCase "href" <| fun _ ->
         let actual =
             siren.classDiagram [
-                classDiagram.``class`` "ClassA"
+                classDiagram.classId "ClassA"
                 classDiagram.clickHref ("ClassA", @"https://mermaid.js.org/syntax/classDiagram.html#setting-the-direction-of-the-diagram")
             ]
             |> siren.write
@@ -32,7 +32,7 @@ let private tests_namespace = testList "namespace" [
         let actual =
             siren.classDiagram [
                 classDiagram.``namespace``("BaseShapes", [
-                    classDiagram.``class``("classA")
+                    classDiagram.classId("classA")
                 ])
             ]
             |> siren.write
@@ -92,7 +92,7 @@ let private tests_member = testList "member" [
         let actual = 
             let ba = "BankAccount"
             siren.classDiagram [
-                classDiagram.``class`` ba
+                classDiagram.classId ba
                 classDiagram.idAttr(ba,"owner", "String")
                 classDiagram.idAttr(ba,"balance", "BigDecimal", classMemberVisibility.Public)
                 classDiagram.idFunction(ba,"deposit", "amount", classMemberVisibility = classMemberVisibility.Public)
@@ -109,7 +109,7 @@ let private tests_member = testList "member" [
         let actual = 
             let ba = "BankAccount"
             siren.classDiagram [
-                classDiagram.``class`` ba
+                classDiagram.classId ba
                 classDiagram.idAttr(ba,"owner", "String", classMemberClassifier = classMemberClassifier.Abstract)
                 classDiagram.idAttr(ba,"owner", "float", classMemberClassifier = classMemberClassifier.Static)
             ]
@@ -124,7 +124,7 @@ let private tests_member = testList "member" [
         let actual = 
             let ba = "BankAccount"
             siren.classDiagram [
-                classDiagram.``class`` ba
+                classDiagram.classId ba
                 classDiagram.idAttr(ba,"owner","String", classMemberVisibility.packageInternal, classMemberClassifier.Abstract)
                 classDiagram.idAttr(ba,"owner", "float", classMemberVisibility.Public , classMemberClassifier.Static)
             ]
@@ -141,7 +141,7 @@ let private tests_class = testList "class" [
     testCase "id-only" <| fun _ ->
         let actual = 
             siren.classDiagram [
-                classDiagram.``class``("Animal")
+                classDiagram.classId("Animal")
             ]
             |> siren.write
         let expected = """classDiagram
@@ -151,7 +151,7 @@ let private tests_class = testList "class" [
     testCase "id+name" <| fun _ ->
         let actual = 
             siren.classDiagram [
-                classDiagram.``class``("Animal", "Such a cool thing")
+                classDiagram.classId("Animal", "Such a cool thing")
             ]
             |> siren.write
         let expected = """classDiagram
@@ -161,7 +161,7 @@ let private tests_class = testList "class" [
     testCase "id+name+generic" <| fun _ ->
         let actual = 
             siren.classDiagram [
-                classDiagram.``class``("Animal", "Such a cool thing","Animal")
+                classDiagram.classId("Animal", "Such a cool thing","Animal")
                 classDiagram.idAttr("Animal", "sex", "String", cmv.Public, cmc.Static)
             ]
             |> siren.write
@@ -173,7 +173,7 @@ let private tests_class = testList "class" [
     testCase "members" <| fun _ ->
         let actual = 
             siren.classDiagram [
-                classDiagram.``class``("BankAccount", "Treasure chest",members=[
+                classDiagram.classId("BankAccount", "Treasure chest",members=[
                     classDiagram.classAttr("owner","String", classMemberVisibility.Public)
                     classDiagram.classAttr("balance","BigDecimal", classMemberVisibility.Public)
                     classDiagram.classFunction("deposit", "amount", "bool", classMemberVisibility.Public)
@@ -195,7 +195,7 @@ let private tests_class = testList "class" [
 let private tests_docs = testList "docs" [
     testCase "animals" <| fun _ ->
         let actual =
-            let duck,animal,zebra,fish = "Duck","Animal","Zebra", "Fish"
+            let duck,animal,zebra,fish = "Duck","Animal","Zebra","Fish"
             siren.classDiagram [
                 classDiagram.note "From Duck till Zebra"
                 classDiagram.relationshipInheritance(duck, animal)
@@ -220,7 +220,7 @@ let private tests_docs = testList "docs" [
                     classDiagram.classFunction("run", classMemberVisibility = classMemberVisibility.Public)
                 ])
                 classDiagram.``namespace``("Mammals", [
-                    classDiagram.``class``(zebra)
+                    classDiagram.classId(zebra)
                 ])
             ]
             |> siren.write
@@ -255,7 +255,7 @@ let private tests_docs = testList "docs" [
         let actual =
             let bankacc = "BankAccount"
             siren.classDiagram [
-                classDiagram.``class``(bankacc)
+                classDiagram.classId(bankacc)
                 classDiagram.idAttr(bankacc,"owner", "String", classMemberVisibility.Public)
                 classDiagram.idAttr(bankacc,"balance", "Bigdecimal", classMemberVisibility.Public)
                 classDiagram.idFunction(bankacc,"deposit", "amount", classMemberVisibility = classMemberVisibility.Public)
@@ -278,7 +278,7 @@ classDiagram
         let actual =
             let square = "Square"
             siren.classDiagram [
-                classDiagram.``class``(square, generic="Shape", members=[
+                classDiagram.classId(square, generic="Shape", members=[
                     classDiagram.classAttr("id", "int")
                     classDiagram.classAttr("position", "List<int>")
                     classDiagram.classFunction("setPoints", "List<int> points")
