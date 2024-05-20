@@ -34,88 +34,6 @@ let private tests_state = testList "state" [
     }
 """
         Expect.trimEqual actual expected ""
-    testCase "composite-nested" <| fun _ ->
-        let actual =
-            let First, Second, second, Third, third = "First", "Second", "second", "Third", "third"
-            siren.stateV2 [
-                stateDiagram.transition (stateDiagram.startEnd,First)
-                stateDiagram.stateComposite(First, [
-                    stateDiagram.transition(stateDiagram.startEnd, Second)
-
-                    stateDiagram.stateComposite(Second, [
-                        stateDiagram.transition(stateDiagram.startEnd, second)
-                        stateDiagram.transition(second, Third)
-
-                        stateDiagram.stateComposite(Third, [
-                            stateDiagram.transition(stateDiagram.startEnd, third)
-                            stateDiagram.transition(third, stateDiagram.startEnd)
-                        ])
-                    ])
-                ])
-            ]
-            |> siren.write
-        let expected = """stateDiagram-v2
-    [*] --> First
-    state First {
-        [*] --> Second
-        state Second {
-            [*] --> second
-            second --> Third
-            state Third {
-                [*] --> third
-                third --> [*]
-            }
-        }
-    }
-"""
-        Expect.trimEqual actual expected ""
-
-    testCase "choice" <| fun _ ->
-        let actual =
-            let if_state, isPositive = "if_state", "IsPositive"
-            siren.stateV2 [
-                stateDiagram.stateChoice if_state
-                stateDiagram.transition(stateDiagram.startEnd, isPositive)
-                stateDiagram.transition(isPositive, if_state)
-                stateDiagram.transition(if_state, "False", "if n < 0")
-                stateDiagram.transition(if_state, "True", "if n >= 0")
-            ]
-            |> siren.write
-        let expected = """stateDiagram-v2
-    state if_state <<choice>>
-    [*] --> IsPositive
-    IsPositive --> if_state
-    if_state --> False : if n < 0
-    if_state --> True : if n >= 0
-"""
-        Expect.trimEqual actual expected ""
-    testCase "fork" <| fun _ ->
-        let actual =
-            let fork_state, join_state, State2, State3, State4 = "fork_state", "join_state", "State2", "State3", "State4"
-            siren.stateV2 [
-                stateDiagram.stateFork fork_state
-                stateDiagram.transition(stateDiagram.startEnd, fork_state)
-                stateDiagram.transition(fork_state, State2)
-                stateDiagram.transition(fork_state, State3)
-                stateDiagram.stateJoin join_state
-                stateDiagram.transition(State2, join_state)
-                stateDiagram.transition(State3, join_state)
-                stateDiagram.transition(join_state, State4)
-                stateDiagram.transition(State4, stateDiagram.startEnd)
-            ]
-            |> siren.write
-        let expected = """   stateDiagram-v2
-    state fork_state <<fork>>
-    [*] --> fork_state
-    fork_state --> State2
-    fork_state --> State3
-    state join_state <<join>>
-    State2 --> join_state
-    State3 --> join_state
-    join_state --> State4
-    State4 --> [*]
-"""
-        Expect.trimEqual actual expected ""
 ] 
 
 let private tests_transition = testList "transition" [
@@ -166,10 +84,119 @@ let private tests_note = testList "note" [
         Expect.trimEqual actual expected ""
 ]
 
-let private tests_concurrency = testList "Concurrency" [
-    testCase "docs" <| fun _ ->
+
+let private tests_docs = testList "docs" [
+    testCase "Simple" <| fun _ ->
         let actual =
-            let Active, NumLockOff, NumLockOn, CapsLockOff, CapsLockOn = "Active", "NumLockOff", "NumLockOn", "CapsLockOff", "CapsLockOn"
+            let Still, Moving, Crash = "Still", "Moving", "Crash"
+            siren.stateV2 [
+                stateDiagram.transitionStart(Still)
+                stateDiagram.transitionEnd(Still)
+                stateDiagram.transition(Still, Moving)
+                stateDiagram.transition(Moving, Still)
+                stateDiagram.transition(Moving, Crash)
+                stateDiagram.transitionEnd(Crash)
+            ]
+            |> siren.withTitle("Simple sample")
+            |> siren.write
+        let expected = """---
+title: Simple sample
+---
+stateDiagram-v2
+    [*] --> Still
+    Still --> [*]
+    Still --> Moving
+    Moving --> Still
+    Moving --> Crash
+    Crash --> [*]
+
+"""
+        Expect.trimEqual actual expected ""
+    testCase "composite-nested" <| fun _ ->
+        let actual =
+            let First, Second, second, Third, third = "First", "Second", "second", "Third", "third"
+            siren.stateV2 [
+                stateDiagram.transition (stateDiagram.startEnd,First)
+                stateDiagram.stateComposite(First, [
+                    stateDiagram.transition(stateDiagram.startEnd, Second)
+
+                    stateDiagram.stateComposite(Second, [
+                        stateDiagram.transition(stateDiagram.startEnd, second)
+                        stateDiagram.transition(second, Third)
+
+                        stateDiagram.stateComposite(Third, [
+                            stateDiagram.transition(stateDiagram.startEnd, third)
+                            stateDiagram.transition(third, stateDiagram.startEnd)
+                        ])
+                    ])
+                ])
+            ]
+            |> siren.write
+        let expected = """stateDiagram-v2
+    [*] --> First
+    state First {
+        [*] --> Second
+        state Second {
+            [*] --> second
+            second --> Third
+            state Third {
+                [*] --> third
+                third --> [*]
+            }
+        }
+    }
+"""
+        Expect.trimEqual actual expected ""
+    testCase "choice" <| fun _ ->
+        let actual =
+            let if_state, isPositive = "if_state", "IsPositive"
+            siren.stateV2 [
+                stateDiagram.stateChoice if_state
+                stateDiagram.transition(stateDiagram.startEnd, isPositive)
+                stateDiagram.transition(isPositive, if_state)
+                stateDiagram.transition(if_state, "False", "if n < 0")
+                stateDiagram.transition(if_state, "True", "if n >= 0")
+            ]
+            |> siren.write
+        let expected = """stateDiagram-v2
+    state if_state <<choice>>
+    [*] --> IsPositive
+    IsPositive --> if_state
+    if_state --> False : if n < 0
+    if_state --> True : if n >= 0
+"""
+        Expect.trimEqual actual expected ""
+    testCase "fork" <| fun _ ->
+        let actual =
+            let fork_state, join_state, State2, State3, State4 = "fork_state", "join_state", "State2", "State3", "State4"
+            siren.stateV2 [
+                stateDiagram.stateFork fork_state
+                stateDiagram.transition(stateDiagram.startEnd, fork_state)
+                stateDiagram.transition(fork_state, State2)
+                stateDiagram.transition(fork_state, State3)
+                stateDiagram.stateJoin join_state
+                stateDiagram.transition(State2, join_state)
+                stateDiagram.transition(State3, join_state)
+                stateDiagram.transition(join_state, State4)
+                stateDiagram.transition(State4, stateDiagram.startEnd)
+            ]
+            |> siren.write
+        let expected = """stateDiagram-v2
+    state fork_state <<fork>>
+    [*] --> fork_state
+    fork_state --> State2
+    fork_state --> State3
+    state join_state <<join>>
+    State2 --> join_state
+    State3 --> join_state
+    join_state --> State4
+    State4 --> [*]
+"""
+        Expect.trimEqual actual expected ""
+    testCase "Concurrency" <| fun _ ->
+        let actual =
+            let Active, NumLockOff, NumLockOn, CapsLockOff, CapsLockOn, ScrollLockOff, ScrollLockOn = 
+                "Active", "NumLockOff", "NumLockOn", "CapsLockOff", "CapsLockOn", "ScrollLockOff", "ScrollLockOn"
             let EvNumLockPressed = "EvNumLockPressed"
             let EvCapsLockPressed = "EvCapsLockPressed"
             siren.state [
@@ -182,6 +209,10 @@ let private tests_concurrency = testList "Concurrency" [
                     stateDiagram.transitionStart(CapsLockOff)
                     stateDiagram.transition(CapsLockOff, CapsLockOn, EvCapsLockPressed)
                     stateDiagram.transition(CapsLockOn, CapsLockOff, EvCapsLockPressed)
+                    stateDiagram.concurrency
+                    stateDiagram.transitionStart(ScrollLockOff)
+                    stateDiagram.transition(ScrollLockOff, ScrollLockOn, "EvScrollLockPressed")
+                    stateDiagram.transition(ScrollLockOn, ScrollLockOff, "EvScrollLockPressed")
                 ])
             ]
             |> siren.write
@@ -195,13 +226,14 @@ let private tests_concurrency = testList "Concurrency" [
         [*] --> CapsLockOff
         CapsLockOff --> CapsLockOn : EvCapsLockPressed
         CapsLockOn --> CapsLockOff : EvCapsLockPressed
+        --
+        [*] --> ScrollLockOff
+        ScrollLockOff --> ScrollLockOn : EvScrollLockPressed
+        ScrollLockOn --> ScrollLockOff : EvScrollLockPressed
     }
 """
         Expect.trimEqual actual expected ""
-]
-
-let private tests_direction = testList "direction" [
-    testCase "docs" <| fun _ ->
+    testCase "direction" <| fun _ ->
         let actual =
             let A, B, C, D, a, b = "A", "B", "C", "D", "a", "b"
             siren.state [
@@ -228,10 +260,7 @@ let private tests_direction = testList "direction" [
     B --> D
 """
         Expect.trimEqual actual expected ""
-]
-
-let private tests_comment = testList "comment" [
-    testCase "docs" <| fun _ ->
+    testCase "comment" <| fun _ ->
         let actual =
             let A, B, C, D, a, b = "A", "B", "C", "D", "a", "b"
             siren.state [
@@ -262,12 +291,11 @@ let private tests_comment = testList "comment" [
         Expect.trimEqual actual expected ""
 ]
 
+
 let main = testList "StateDiagram" [
     tests_state
     tests_transition
     tests_note
-    tests_concurrency
-    tests_direction
-    tests_comment
+    tests_docs
 ]
 
