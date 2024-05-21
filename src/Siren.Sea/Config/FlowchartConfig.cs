@@ -7,40 +7,40 @@ using System.Threading.Tasks;
 
 public static class flowchartConfig
 {
-    public static (string, string) custom(string key, string value)
-         => Siren.flowchartConfig.custom(key, value).ToValueTuple();
-    public static (string, string) defaultRenderer(string renderer)
-         => Siren.flowchartConfig.defaultRenderer(renderer).ToValueTuple();
-    public static (string, string) defaultRendererElk
-         => Siren.flowchartConfig.defaultRendererElk.ToValueTuple();
-    public static (string, string) defaultRendererDagreD3
-         => Siren.flowchartConfig.defaultRendererDagreD3.ToValueTuple();
-    public static (string, string) defaultRendererDagreWrapper
-         => Siren.flowchartConfig.defaultRendererDagreWrapper.ToValueTuple();
-    public static (string, string) titleTopMargin(int px)
-         => Siren.flowchartConfig.titleTopMargin(px).ToValueTuple();
-    public static (string, string) subGraphTitleMargin(int top, int bottom)
-         => Siren.flowchartConfig.subGraphTitleMargin(top, bottom).ToValueTuple();
-    public static (string, string) arrowMarkerAbsolute(bool b)
-         => Siren.flowchartConfig.arrowMarkerAbsolute(b).ToValueTuple();
-    public static (string, string) diagramPadding(int px)
-         => Siren.flowchartConfig.diagramPadding(px).ToValueTuple();
-    public static (string, string) htmlLabels(bool b)
-         => Siren.flowchartConfig.htmlLabels(b).ToValueTuple();
-    public static (string, string) nodeSpacing(int px)
-         => Siren.flowchartConfig.nodeSpacing(px).ToValueTuple();
-    public static (string, string) rankSpacing(int px)
-         => Siren.flowchartConfig.rankSpacing(px).ToValueTuple();
-    public static (string, string) curve(string name)
-         => Siren.flowchartConfig.curve(name).ToValueTuple();
-    public static (string, string) curveBasis
-         => Siren.flowchartConfig.curveBasis.ToValueTuple();
-    public static (string, string) curveLinear
-         => Siren.flowchartConfig.curveLinear.ToValueTuple();
-    public static (string, string) curveCardianal
-         => Siren.flowchartConfig.curveCardianal.ToValueTuple();
-    public static (string, string) padding(int px)
-         => Siren.flowchartConfig.padding(px).ToValueTuple();
-    public static (string, string) wrappingWidth(int px)
-         => Siren.flowchartConfig.wrappingWidth(px).ToValueTuple();
+    public static ConfigVariable custom(string key, string value)
+         => Siren.flowchartConfig.custom(key, value);
+    public static ConfigVariable defaultRenderer(string renderer)
+         => Siren.flowchartConfig.defaultRenderer(renderer);
+    public static ConfigVariable defaultRendererElk
+         => Siren.flowchartConfig.defaultRendererElk;
+    public static ConfigVariable defaultRendererDagreD3
+         => Siren.flowchartConfig.defaultRendererDagreD3;
+    public static ConfigVariable defaultRendererDagreWrapper
+         => Siren.flowchartConfig.defaultRendererDagreWrapper;
+    public static ConfigVariable titleTopMargin(int px)
+         => Siren.flowchartConfig.titleTopMargin(px);
+    public static ConfigVariable subGraphTitleMargin(int top, int bottom)
+         => Siren.flowchartConfig.subGraphTitleMargin(top, bottom);
+    public static ConfigVariable arrowMarkerAbsolute(bool b)
+         => Siren.flowchartConfig.arrowMarkerAbsolute(b);
+    public static ConfigVariable diagramPadding(int px)
+         => Siren.flowchartConfig.diagramPadding(px);
+    public static ConfigVariable htmlLabels(bool b)
+         => Siren.flowchartConfig.htmlLabels(b);
+    public static ConfigVariable nodeSpacing(int px)
+         => Siren.flowchartConfig.nodeSpacing(px);
+    public static ConfigVariable rankSpacing(int px)
+         => Siren.flowchartConfig.rankSpacing(px);
+    public static ConfigVariable curve(string name)
+         => Siren.flowchartConfig.curve(name);
+    public static ConfigVariable curveBasis
+         => Siren.flowchartConfig.curveBasis;
+    public static ConfigVariable curveLinear
+         => Siren.flowchartConfig.curveLinear;
+    public static ConfigVariable curveCardianal
+         => Siren.flowchartConfig.curveCardianal;
+    public static ConfigVariable padding(int px)
+         => Siren.flowchartConfig.padding(px);
+    public static ConfigVariable wrappingWidth(int px)
+         => Siren.flowchartConfig.wrappingWidth(px);
 }

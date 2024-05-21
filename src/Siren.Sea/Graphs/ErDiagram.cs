@@ -28,8 +28,10 @@ public static class erDiagram
 {
     public static ERDiagramElement raw(string line)
          => Siren.erDiagram.raw(line);
-    public static ERDiagramElement entity(string id, Optional<string> alias = default, Optional<IEnumerable<ERAttribute>> attr = default)
-         => Siren.erDiagram.entity(id, alias.ToOption(), attr.ToOption());
+    public static ERDiagramElement entity(string id, Optional<IEnumerable<ERAttribute>> attr = default)
+         => Siren.erDiagram.entity(id, attr.ToOption());
+    public static ERDiagramElement entityAlias(string id, string alias, Optional<IEnumerable<ERAttribute>> attr = default)
+         => Siren.erDiagram.entityAlias(id, alias, attr.ToOption());
     public static ERDiagramElement relationship(string id1, ERCardinalityType erCardinality1, string id2, ERCardinalityType erCardinality2, string message, Optional<bool> isOptional = default)
          => Siren.erDiagram.relationship(id1, erCardinality1, id2, erCardinality2, message, isOptional.ToOption());
     public static ERAttribute attribute(string attrType, string name, Optional<IEnumerable<ERKeyType>> keys = default, Optional<string> comment = default)

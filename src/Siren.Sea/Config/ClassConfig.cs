@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 
 public static class classConfig
 {
-    public static (string, string) custom(string key, string value)
-         => Siren.classConfig.custom(key, value).ToValueTuple();
-    public static (string, string) defaultRenderer(string renderer)
-         => Siren.classConfig.defaultRenderer(renderer).ToValueTuple();
-    public static (string, string) defaultRendererElk
-         => Siren.classConfig.defaultRendererElk.ToValueTuple();
-    public static (string, string) defaultRendererDagreD3
-         => Siren.classConfig.defaultRendererDagreD3.ToValueTuple();
-    public static (string, string) defaultRendererDagreWrapper
-         => Siren.classConfig.defaultRendererDagreWrapper.ToValueTuple();
+    public static ConfigVariable custom(string key, string value)
+         => Siren.classConfig.custom(key, value);
+    public static ConfigVariable defaultRenderer(string renderer)
+         => Siren.classConfig.defaultRenderer(renderer);
+    public static ConfigVariable defaultRendererElk
+         => Siren.classConfig.defaultRendererElk;
+    public static ConfigVariable defaultRendererDagreD3
+         => Siren.classConfig.defaultRendererDagreD3;
+    public static ConfigVariable defaultRendererDagreWrapper
+         => Siren.classConfig.defaultRendererDagreWrapper;
 }

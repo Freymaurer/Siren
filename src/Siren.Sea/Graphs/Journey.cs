@@ -9,6 +9,8 @@ public static class journey
          => Siren.journey.title(name);
     public static JourneyElement section(string name)
          => Siren.journey.section(name);
-    public static JourneyElement task(string name, int score, Optional<IEnumerable<string>> actors = default)
-         => Siren.journey.task(name, score, actors.ToOption());
+    public static JourneyElement task(string name, int score, string[] actors)
+         => Siren.journey.task(name, score, actors);
+    public static JourneyElement taskEmpty(string name, int score)
+         => Siren.journey.taskEmpty(name, score);
 }

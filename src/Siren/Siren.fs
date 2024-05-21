@@ -341,11 +341,16 @@ type erCardinality =
 [<AttachMembers>]
 type erDiagram =
     static member raw (line: string) = ERDiagramElement line
-    static member entity (id: string, ?alias: string, ?attr: #seq<ERAttribute>) = 
+    static member entity (id: string, ?attr: #seq<ERAttribute>) = 
         if attr.IsSome then 
             let children = [for attr in attr.Value do ERDiagram.formatAttribute attr |> ERDiagramElement] // of attributes
-            ERDiagramWrapper (ERDiagram.formatEntityWrapper id alias, "}", children) 
-        else ERDiagram.formatEntityNode id alias |> ERDiagramElement
+            ERDiagramWrapper (ERDiagram.formatEntityWrapper id None, "}", children) 
+        else ERDiagram.formatEntityNode id None |> ERDiagramElement
+    static member entityAlias (id: string, alias: string, ?attr: #seq<ERAttribute>) = 
+        if attr.IsSome then 
+            let children = [for attr in attr.Value do ERDiagram.formatAttribute attr |> ERDiagramElement] // of attributes
+            ERDiagramWrapper (ERDiagram.formatEntityWrapper id (Some alias), "}", children) 
+        else ERDiagram.formatEntityNode id (Some alias) |> ERDiagramElement
     static member relationship(id1, erCardinality1, id2, erCardinality2, message, ?isOptional: bool) = 
         ERDiagram.formatRelationship id1 erCardinality1 id2 erCardinality2 message isOptional |> ERDiagramElement
     static member attribute(attrType: string, name: string, ?keys: #seq<ERKeyType>, ?comment: string) : ERAttribute = 
@@ -357,7 +362,8 @@ type journey =
     static member raw (line: string) = JourneyElement line
     static member title (name: string) = sprintf "title %s" name |> JourneyElement
     static member section (name: string) = sprintf "section %s" name |> JourneyElement
-    static member task (name: string, score: int, ?actors: #seq<string>) = UserJourney.formatTask name score actors |> JourneyElement
+    static member task (name: string, score: int, actors: #seq<string>) = UserJourney.formatTask name score (Some actors) |> JourneyElement
+    static member taskEmpty (name: string, score: int) = UserJourney.formatTask name score None |> JourneyElement
 
 
 [<AttachMembers>]
@@ -718,20 +724,24 @@ type siren =
         diagram.Config.Theme <- Some theme
         diagram
 
-    static member withGraphConfig (config: Dictionary<string, string>) (diagram: SirenElement) =
+    static member withGraphConfig (configFunc: ResizeArray<ConfigVariable> -> unit) (diagram: SirenElement) =
+        let config = defaultArg diagram.Config.GraphConfig (ResizeArray<ConfigVariable>())
+        configFunc config
         diagram.Config.GraphConfig <- Some config
         diagram
 
-    static member withThemeVariables (themeVariables: Dictionary<string, string>) (diagram: SirenElement) =
+    static member withThemeVariables (themeVariablesFunc: ResizeArray<ThemeVariable> -> unit) (diagram: SirenElement) =
+        let themeVariables = defaultArg diagram.Config.ThemeVariables (ResizeArray<ThemeVariable>())
+        themeVariablesFunc themeVariables
         diagram.Config.ThemeVariables <- Some themeVariables
         diagram
 
-    static member addThemeVariable (key: string, value: string) (diagram: SirenElement) =
-        diagram.Config.AddThemeVariable(key, value)
+    static member addThemeVariable (var: ThemeVariable) (diagram: SirenElement) =
+        diagram.Config.AddThemeVariable(var)
         diagram
 
-    static member addGraphConfigVariable (key: string, value: string) (diagram: SirenElement) =
-        diagram.Config.AddGraphConfig(key, value)
+    static member addGraphConfigVariable (var: ConfigVariable) (diagram: SirenElement) =
+        diagram.Config.AddGraphConfig(var)
         diagram
 
     static member write(diagram: SirenElement) =

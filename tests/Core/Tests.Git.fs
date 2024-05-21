@@ -151,14 +151,14 @@ let main = testList "Git" [
             ]
             |> siren.withTitle "Test"
             |> siren.withTheme theme.forest
-            |> siren.withGraphConfig(System.Collections.Generic.Dictionary(Map [
-                "parallelCommits", "true"
-                "showCommitLabel", "true"
-            ]))
-            |> siren.withThemeVariables(System.Collections.Generic.Dictionary(Map [
-                "commitLabelColor", "white"
-                "git0", "black"
-            ]))
+            |> siren.withGraphConfig(fun c ->
+                c.Add(gitGraphConfig.parallelCommits true)
+                c.Add(gitGraphConfig.showCommitLabel true)
+            )
+            |> siren.withThemeVariables(fun t ->
+                t.Add(gitTheme.commitLabelColor "white")
+                t.Add(gitTheme.git0 "black")
+            )
             |> siren.write
         let expected = """---
 title: Test

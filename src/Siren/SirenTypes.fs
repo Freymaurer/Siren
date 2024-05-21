@@ -544,40 +544,36 @@ with
 
 open System.Collections.Generic
 
+type ConfigVariable =
+    | ConfigVariable of string * string
+
+type ThemeVariable =
+    | ThemeVariable of string * string
+
 /// https://mermaid.js.org/config/configuration.html
 [<AttachMembers>]
 type SirenConfig(graph: SirenGraph, ?title, ?theme, ?graphConfig, ?themeVariable) =
     member val Graph: SirenGraph = graph with get
     member val Title: string option = title with get, set
     member val Theme: string option = theme with get, set
-    member val GraphConfig: Dictionary<string, string> option = graphConfig with get, set
-    member val ThemeVariables: Dictionary<string, string> option = themeVariable with get, set
+    member val GraphConfig: ResizeArray<ConfigVariable> option = graphConfig with get, set
+    member val ThemeVariables: ResizeArray<ThemeVariable> option = themeVariable with get, set
 
-    member this.AddGraphConfig(key: string, value: string) =
+    member this.AddGraphConfig(var: ConfigVariable) =
         match this.GraphConfig with
-        | Some config -> config.Add(key, value)
+        | Some config -> config.Add(var)
         | None -> 
-            let config = new Dictionary<string, string>()
-            config.Add(key, value)
+            let config = new ResizeArray<ConfigVariable>()
+            config.Add(var)
             this.GraphConfig <- Some config
 
-    member this.RemoveGraphConfig(key: string) =
-        match this.GraphConfig with
-        | Some config -> config.Remove(key) |> ignore
-        | None -> ()
-
-    member this.AddThemeVariable(key: string, value: string) = 
+    member this.AddThemeVariable(var: ThemeVariable) = 
         match this.ThemeVariables with
-        | Some theme -> theme.Add(key, value)
+        | Some theme -> theme.Add(var)
         | None -> 
-            let theme = new Dictionary<string, string>()
-            theme.Add(key, value)
+            let theme = new ResizeArray<ThemeVariable>()
+            theme.Add(var)
             this.ThemeVariables <- Some theme
-
-    member this.RemoveThemeVariable(key: string) =
-        match this.ThemeVariables with
-        | Some theme -> theme.Remove(key) |> ignore
-        | None -> ()
 
     member this.ToYamlAst() = 
         let hasInnerConfig = this.GraphConfig.IsSome || this.ThemeVariables.IsSome || this.Theme.IsSome
@@ -592,7 +588,7 @@ type SirenConfig(graph: SirenGraph, ?title, ?theme, ?graphConfig, ?themeVariable
                         |> fun b -> b + ":" 
                         |> Yaml.line
                         Yaml.level [
-                            for KeyValue(key, value) in config do
+                            for ConfigVariable(key, value) in config do
                                 yield Yaml.line $"{key}: {value}"
                         ]
                     | None -> ()
@@ -600,7 +596,7 @@ type SirenConfig(graph: SirenGraph, ?title, ?theme, ?graphConfig, ?themeVariable
                     | Some theme -> 
                         Yaml.line "themeVariables:"
                         Yaml.level [
-                            for KeyValue(key, value) in theme do
+                            for ThemeVariable(key, value) in theme do
                                 yield Yaml.line $"{key}: {value}"
                         ]
                     | None -> ()
@@ -644,20 +640,24 @@ type SirenElement = {
         this.Config.Theme <- Some theme
         this
 
-    member this.withGraphConfig (config: Dictionary<string, string>) =
+    member this.withGraphConfig (configFunc: ResizeArray<ConfigVariable> -> unit) =
+        let config = defaultArg this.Config.GraphConfig (ResizeArray<ConfigVariable>())
+        configFunc config
         this.Config.GraphConfig <- Some config
         this
 
-    member this.withThemeVariables (themeVariables: Dictionary<string, string>) =
+    member this.withThemeVariables (themeVariablesFunc: ResizeArray<ThemeVariable> -> unit) =
+        let themeVariables = defaultArg this.Config.ThemeVariables (ResizeArray<ThemeVariable>())
+        themeVariablesFunc themeVariables
         this.Config.ThemeVariables <- Some themeVariables
         this
 
-    member this.addThemeVariable (key: string, value: string) =
-        this.Config.AddThemeVariable(key, value)
+    member this.addThemeVariable (var: ThemeVariable) =
+        this.Config.AddThemeVariable(var)
         this
 
-    member this.addGraphConfigVariable (key: string, value: string) =
-        this.Config.AddGraphConfig(key, value)
+    member this.addGraphConfigVariable (var: ConfigVariable) =
+        this.Config.AddGraphConfig(var)
         this
 
     member this.write() =

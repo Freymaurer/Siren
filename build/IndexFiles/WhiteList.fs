@@ -7,6 +7,7 @@ let WhiteList = [|
         "gitTheme"; 
         "timelineTheme"; 
         "xyChartTheme"; 
+        "pieTheme";
         // Config
         "flowchartConfig"; 
         "sequenceConfig"; 

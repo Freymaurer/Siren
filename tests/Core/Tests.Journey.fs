@@ -3,10 +3,10 @@
 open Fable.Pyxpecto
 open Siren
 
-let main = testList "Journey" [
-    testCase "complex" <| fun _ ->
-        let Me, Cat = "Me", "Cat"
+let tests_docs = testList "docs" [
+    testCase "Workday" <| fun _ ->
         let actual = 
+            let Me, Cat = "Me", "Cat"
             siren.journey [
                 journey.title "My working day"
                 journey.section "Go to work"
@@ -29,11 +29,14 @@ let main = testList "Journey" [
     Sit down: 5: Me
 """
         Expect.trimEqual actual expected ""
+]
+
+let main = testList "Journey" [
     testCase "no actors" <| fun _ ->
         let actual = 
             siren.journey [
                 journey.title "My working day"
-                journey.task("My house exists alone", 5)
+                journey.taskEmpty("My house exists alone", 5)
             ]
             |> siren.write
         let expected = """journey
@@ -41,5 +44,6 @@ let main = testList "Journey" [
     My house exists alone: 5
 """
         Expect.trimEqual actual expected ""
+    tests_docs
 ]
 

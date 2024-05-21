@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 public static class timelineConfig
 {
-    public static (string, string) custom(string key, string value)
-         => Siren.timelineConfig.custom(key, value).ToValueTuple();
-    public static (string, string) disableMulticolor(bool value)
-         => Siren.timelineConfig.disableMulticolor(value).ToValueTuple();
-    public static (string, string) padding(int value)
-         => Siren.timelineConfig.padding(value).ToValueTuple();
+    public static ConfigVariable custom(string key, string value)
+         => Siren.timelineConfig.custom(key, value);
+    public static ConfigVariable disableMulticolor(bool value)
+         => Siren.timelineConfig.disableMulticolor(value);
+    public static ConfigVariable padding(int value)
+         => Siren.timelineConfig.padding(value);
 }

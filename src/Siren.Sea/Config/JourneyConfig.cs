@@ -7,16 +7,16 @@ using System.Threading.Tasks;
 
 public static class journeyConfig
 {
-    public static (string, string) custom(string key, string value)
-         => Siren.journeyConfig.custom(key, value).ToValueTuple();
-    public static (string, string) diagramMarginX(int value)
-         => Siren.journeyConfig.diagramMarginX(value).ToValueTuple();
-    public static (string, string) diagramMarginY(int value)
-         => Siren.journeyConfig.diagramMarginY(value).ToValueTuple();
-    public static (string, string) leftMargin(int value)
-         => Siren.journeyConfig.leftMargin(value).ToValueTuple();
-    public static (string, string) width(int value)
-         => Siren.journeyConfig.width(value).ToValueTuple();
-    public static (string, string) height(int value)
-         => Siren.journeyConfig.height(value).ToValueTuple();
+    public static ConfigVariable custom(string key, string value)
+         => Siren.journeyConfig.custom(key, value);
+    public static ConfigVariable diagramMarginX(int value)
+         => Siren.journeyConfig.diagramMarginX(value);
+    public static ConfigVariable diagramMarginY(int value)
+         => Siren.journeyConfig.diagramMarginY(value);
+    public static ConfigVariable leftMargin(int value)
+         => Siren.journeyConfig.leftMargin(value);
+    public static ConfigVariable width(int value)
+         => Siren.journeyConfig.width(value);
+    public static ConfigVariable height(int value)
+         => Siren.journeyConfig.height(value);
 }

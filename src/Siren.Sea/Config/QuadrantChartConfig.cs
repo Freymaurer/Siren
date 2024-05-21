@@ -7,44 +7,44 @@ using System.Threading.Tasks;
 
 public static class quadrantChartConfig
 {
-    public static (string, string) custom(string key, string value)
-         => Siren.quadrantChartConfig.custom(key, value).ToValueTuple();
-    public static (string, string) chartWidth(int value)
-         => Siren.quadrantChartConfig.chartWidth(value).ToValueTuple();
-    public static (string, string) chartHeight(int value)
-         => Siren.quadrantChartConfig.chartHeight(value).ToValueTuple();
-    public static (string, string) titleFontSize(int value)
-         => Siren.quadrantChartConfig.titleFontSize(value).ToValueTuple();
-    public static (string, string) titlePadding(int value)
-         => Siren.quadrantChartConfig.titlePadding(value).ToValueTuple();
-    public static (string, string) quadrantPadding(int value)
-         => Siren.quadrantChartConfig.quadrantPadding(value).ToValueTuple();
-    public static (string, string) xAxisLabelPadding(int value)
-         => Siren.quadrantChartConfig.xAxisLabelPadding(value).ToValueTuple();
-    public static (string, string) yAxisLabelPadding(int value)
-         => Siren.quadrantChartConfig.yAxisLabelPadding(value).ToValueTuple();
-    public static (string, string) xAxisLabelFontSize(int value)
-         => Siren.quadrantChartConfig.xAxisLabelFontSize(value).ToValueTuple();
-    public static (string, string) yAxisLabelFontSize(int value)
-         => Siren.quadrantChartConfig.yAxisLabelFontSize(value).ToValueTuple();
-    public static (string, string) quadrantLabelFontSize(int value)
-         => Siren.quadrantChartConfig.quadrantLabelFontSize(value).ToValueTuple();
-    public static (string, string) quadrantTextTopPadding(int value)
-         => Siren.quadrantChartConfig.quadrantTextTopPadding(value).ToValueTuple();
-    public static (string, string) pointTextPadding(int value)
-         => Siren.quadrantChartConfig.pointTextPadding(value).ToValueTuple();
-    public static (string, string) pointLabelFontSize(int value)
-         => Siren.quadrantChartConfig.pointLabelFontSize(value).ToValueTuple();
-    public static (string, string) pointRadius(int value)
-         => Siren.quadrantChartConfig.pointRadius(value).ToValueTuple();
-    public static (string, string) yAxisPosition(string value)
-         => Siren.quadrantChartConfig.yAxisPosition(value).ToValueTuple();
-    public static (string, string) yAxisPositionLeft
-         => Siren.quadrantChartConfig.yAxisPositionLeft.ToValueTuple();
-    public static (string, string) yAxisPositionRight
-         => Siren.quadrantChartConfig.yAxisPositionRight.ToValueTuple();
-    public static (string, string) quadrantInternalBorderStrokeWidth(int value)
-         => Siren.quadrantChartConfig.quadrantInternalBorderStrokeWidth(value).ToValueTuple();
-    public static (string, string) quadrantExternalBorderStrokeWidth(int value)
-         => Siren.quadrantChartConfig.quadrantExternalBorderStrokeWidth(value).ToValueTuple();
+    public static ConfigVariable custom(string key, string value)
+         => Siren.quadrantChartConfig.custom(key, value);
+    public static ConfigVariable chartWidth(int value)
+         => Siren.quadrantChartConfig.chartWidth(value);
+    public static ConfigVariable chartHeight(int value)
+         => Siren.quadrantChartConfig.chartHeight(value);
+    public static ConfigVariable titleFontSize(int value)
+         => Siren.quadrantChartConfig.titleFontSize(value);
+    public static ConfigVariable titlePadding(int value)
+         => Siren.quadrantChartConfig.titlePadding(value);
+    public static ConfigVariable quadrantPadding(int value)
+         => Siren.quadrantChartConfig.quadrantPadding(value);
+    public static ConfigVariable xAxisLabelPadding(int value)
+         => Siren.quadrantChartConfig.xAxisLabelPadding(value);
+    public static ConfigVariable yAxisLabelPadding(int value)
+         => Siren.quadrantChartConfig.yAxisLabelPadding(value);
+    public static ConfigVariable xAxisLabelFontSize(int value)
+         => Siren.quadrantChartConfig.xAxisLabelFontSize(value);
+    public static ConfigVariable yAxisLabelFontSize(int value)
+         => Siren.quadrantChartConfig.yAxisLabelFontSize(value);
+    public static ConfigVariable quadrantLabelFontSize(int value)
+         => Siren.quadrantChartConfig.quadrantLabelFontSize(value);
+    public static ConfigVariable quadrantTextTopPadding(int value)
+         => Siren.quadrantChartConfig.quadrantTextTopPadding(value);
+    public static ConfigVariable pointTextPadding(int value)
+         => Siren.quadrantChartConfig.pointTextPadding(value);
+    public static ConfigVariable pointLabelFontSize(int value)
+         => Siren.quadrantChartConfig.pointLabelFontSize(value);
+    public static ConfigVariable pointRadius(int value)
+         => Siren.quadrantChartConfig.pointRadius(value);
+    public static ConfigVariable yAxisPosition(string value)
+         => Siren.quadrantChartConfig.yAxisPosition(value);
+    public static ConfigVariable yAxisPositionLeft
+         => Siren.quadrantChartConfig.yAxisPositionLeft;
+    public static ConfigVariable yAxisPositionRight
+         => Siren.quadrantChartConfig.yAxisPositionRight;
+    public static ConfigVariable quadrantInternalBorderStrokeWidth(int value)
+         => Siren.quadrantChartConfig.quadrantInternalBorderStrokeWidth(value);
+    public static ConfigVariable quadrantExternalBorderStrokeWidth(int value)
+         => Siren.quadrantChartConfig.quadrantExternalBorderStrokeWidth(value);
 }

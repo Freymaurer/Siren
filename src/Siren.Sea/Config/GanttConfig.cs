@@ -7,68 +7,68 @@ using System.Threading.Tasks;
 
 public static class ganttConfig
 {
-    public static (string, string) custom(string key, string value)
-         => Siren.ganttConfig.custom(key, value).ToValueTuple() ;
-    public static (string, string) titleTopMargin(int px)
-         => Siren.ganttConfig.titleTopMargin(px).ToValueTuple();
-    public static (string, string) barHeight(int px)
-         => Siren.ganttConfig.barHeight(px).ToValueTuple();
-    public static (string, string) barGap(int px)
-         => Siren.ganttConfig.barGap(px).ToValueTuple();
-    public static (string, string) topPadding(int px)
-         => Siren.ganttConfig.topPadding(px).ToValueTuple();
-    public static (string, string) leftPadding(int px)
-         => Siren.ganttConfig.leftPadding(px).ToValueTuple();
-    public static (string, string) rightPadding(int px)
-         => Siren.ganttConfig.rightPadding(px).ToValueTuple();
-    public static (string, string) gridLineStartPadding(int px)
-         => Siren.ganttConfig.gridLineStartPadding(px).ToValueTuple();
-    public static (string, string) fontSize(int px)
-         => Siren.ganttConfig.fontSize(px).ToValueTuple();
-    public static (string, string) sectionFontSize(int px)
-         => Siren.ganttConfig.sectionFontSize(px).ToValueTuple();
-    public static (string, string) numberSectionStyles(int n)
-         => Siren.ganttConfig.numberSectionStyles(n).ToValueTuple();
-    public static (string, string) axisFormat(string format)
-         => Siren.ganttConfig.axisFormat(format).ToValueTuple();
-    public static (string, string) tickInterval(string format)
-         => Siren.ganttConfig.tickInterval(format).ToValueTuple();
-    public static (string, string) tickIntervalMillisecond(int ms)
-         => Siren.ganttConfig.tickIntervalMillisecond(ms).ToValueTuple();
-    public static (string, string) tickIntervalSecond(int s)
-         => Siren.ganttConfig.tickIntervalSecond(s).ToValueTuple();
-    public static (string, string) tickIntervalMinute(int min)
-         => Siren.ganttConfig.tickIntervalMinute(min).ToValueTuple();
-    public static (string, string) tickIntervalHour(int hour)
-         => Siren.ganttConfig.tickIntervalHour(hour).ToValueTuple();
-    public static (string, string) tickIntervalDay(int day)
-         => Siren.ganttConfig.tickIntervalDay(day).ToValueTuple();
-    public static (string, string) tickIntervalWeek(int week)
-         => Siren.ganttConfig.tickIntervalWeek(week).ToValueTuple();
-    public static (string, string) tickIntervalMonth(int month)
-         => Siren.ganttConfig.tickIntervalMonth(month).ToValueTuple();
-    public static (string, string) topAxis(bool b)
-         => Siren.ganttConfig.topAxis(b).ToValueTuple();
-    public static (string, string) displayMode(string mode)
-         => Siren.ganttConfig.displayMode(mode).ToValueTuple();
-    public static (string, string) displayModeDefault
-         => Siren.ganttConfig.displayModeDefault.ToValueTuple();
-    public static (string, string) displayModeCompact
-         => Siren.ganttConfig.displayModeCompact.ToValueTuple();
-    public static (string, string) weekday(string day)
-         => Siren.ganttConfig.weekday(day).ToValueTuple();
-    public static (string, string) weekdayMonday
-         => Siren.ganttConfig.weekdayMonday.ToValueTuple();
-    public static (string, string) weekdayTuesday
-         => Siren.ganttConfig.weekdayTuesday.ToValueTuple();
-    public static (string, string) weekdayWednesday
-         => Siren.ganttConfig.weekdayWednesday.ToValueTuple();
-    public static (string, string) weekdayThursday
-         => Siren.ganttConfig.weekdayThursday.ToValueTuple();
-    public static (string, string) weekdayFriday
-         => Siren.ganttConfig.weekdayFriday.ToValueTuple();
-    public static (string, string) weekdaySaturday
-         => Siren.ganttConfig.weekdaySaturday.ToValueTuple();
-    public static (string, string) weekdaySunday
-         => Siren.ganttConfig.weekdaySunday.ToValueTuple();
+    public static ConfigVariable custom(string key, string value)
+         => Siren.ganttConfig.custom(key, value) ;
+    public static ConfigVariable titleTopMargin(int px)
+         => Siren.ganttConfig.titleTopMargin(px);
+    public static ConfigVariable barHeight(int px)
+         => Siren.ganttConfig.barHeight(px);
+    public static ConfigVariable barGap(int px)
+         => Siren.ganttConfig.barGap(px);
+    public static ConfigVariable topPadding(int px)
+         => Siren.ganttConfig.topPadding(px);
+    public static ConfigVariable leftPadding(int px)
+         => Siren.ganttConfig.leftPadding(px);
+    public static ConfigVariable rightPadding(int px)
+         => Siren.ganttConfig.rightPadding(px);
+    public static ConfigVariable gridLineStartPadding(int px)
+         => Siren.ganttConfig.gridLineStartPadding(px);
+    public static ConfigVariable fontSize(int px)
+         => Siren.ganttConfig.fontSize(px);
+    public static ConfigVariable sectionFontSize(int px)
+         => Siren.ganttConfig.sectionFontSize(px);
+    public static ConfigVariable numberSectionStyles(int n)
+         => Siren.ganttConfig.numberSectionStyles(n);
+    public static ConfigVariable axisFormat(string format)
+         => Siren.ganttConfig.axisFormat(format);
+    public static ConfigVariable tickInterval(string format)
+         => Siren.ganttConfig.tickInterval(format);
+    public static ConfigVariable tickIntervalMillisecond(int ms)
+         => Siren.ganttConfig.tickIntervalMillisecond(ms);
+    public static ConfigVariable tickIntervalSecond(int s)
+         => Siren.ganttConfig.tickIntervalSecond(s);
+    public static ConfigVariable tickIntervalMinute(int min)
+         => Siren.ganttConfig.tickIntervalMinute(min);
+    public static ConfigVariable tickIntervalHour(int hour)
+         => Siren.ganttConfig.tickIntervalHour(hour);
+    public static ConfigVariable tickIntervalDay(int day)
+         => Siren.ganttConfig.tickIntervalDay(day);
+    public static ConfigVariable tickIntervalWeek(int week)
+         => Siren.ganttConfig.tickIntervalWeek(week);
+    public static ConfigVariable tickIntervalMonth(int month)
+         => Siren.ganttConfig.tickIntervalMonth(month);
+    public static ConfigVariable topAxis(bool b)
+         => Siren.ganttConfig.topAxis(b);
+    public static ConfigVariable displayMode(string mode)
+         => Siren.ganttConfig.displayMode(mode);
+    public static ConfigVariable displayModeDefault
+         => Siren.ganttConfig.displayModeDefault;
+    public static ConfigVariable displayModeCompact
+         => Siren.ganttConfig.displayModeCompact;
+    public static ConfigVariable weekday(string day)
+         => Siren.ganttConfig.weekday(day);
+    public static ConfigVariable weekdayMonday
+         => Siren.ganttConfig.weekdayMonday;
+    public static ConfigVariable weekdayTuesday
+         => Siren.ganttConfig.weekdayTuesday;
+    public static ConfigVariable weekdayWednesday
+         => Siren.ganttConfig.weekdayWednesday;
+    public static ConfigVariable weekdayThursday
+         => Siren.ganttConfig.weekdayThursday;
+    public static ConfigVariable weekdayFriday
+         => Siren.ganttConfig.weekdayFriday;
+    public static ConfigVariable weekdaySaturday
+         => Siren.ganttConfig.weekdaySaturday;
+    public static ConfigVariable weekdaySunday
+         => Siren.ganttConfig.weekdaySunday;
 }

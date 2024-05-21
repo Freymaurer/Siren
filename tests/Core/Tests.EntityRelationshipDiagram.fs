@@ -8,7 +8,7 @@ let private tests_entity = testList "entity" [
         let actual =
             siren.erDiagram [
                 erDiagram.entity ("CUSTOMER")
-                erDiagram.entity ("ORDER", "CUSTOMER ORDER")
+                erDiagram.entityAlias ("ORDER", "CUSTOMER ORDER")
             ]
             |> siren.write
         let expected = """erDiagram
@@ -19,7 +19,7 @@ let private tests_entity = testList "entity" [
     testCase "attributes" <| fun _ ->
         let actual =
             siren.erDiagram [
-                erDiagram.entity ("ORDER", "CUSTOMER ORDER", attr=[
+                erDiagram.entityAlias ("ORDER", "CUSTOMER ORDER", attr=[
                     erDiagram.attribute("string", "name")
                     erDiagram.attribute("string", "driverLicence", [erKey.fk; erKey.pk], "Just some example")
                     erDiagram.attribute("string", "carRegistrationNumber", comment="no keys")
@@ -73,27 +73,27 @@ let private tests_relationship = testList "relationship" [
         Expect.trimEqual actual expected ""
 ]
 
-let private tests_complex = testList "complex" [
+let private tests_docs = testList "docs" [
     testCase "Manufacturer" <| fun _ ->
-        let CAR, NAMED_DRIVER, PERSON, MANUFACTURER = "CAR", "NAMED-DRIVER", "PERSON", "MANUFACTURER"
         let actual =
+            let CAR, NAMED_DRIVER, PERSON, MANUFACTURER = "CAR", "NAMED-DRIVER", "PERSON", "MANUFACTURER"
             siren.erDiagram [
                 erDiagram.relationship (CAR, erCardinality.onlyOne, NAMED_DRIVER, erCardinality.zeroOrMany, "allows")
-                erDiagram.entity (CAR,attr=[
+                erDiagram.entity (CAR, [
                     erDiagram.attribute("string", "registrationNumber", [erKey.pk])
                     erDiagram.attribute("string", "make")
                     erDiagram.attribute("string", "model")
                     erDiagram.attribute("string[]", "parts")
                 ])
                 erDiagram.relationship (PERSON, erCardinality.onlyOne, NAMED_DRIVER, erCardinality.zeroOrMany, "is")
-                erDiagram.entity (PERSON,attr=[
+                erDiagram.entity (PERSON, [
                     erDiagram.attribute("string", "driversLicense", [erKey.pk], "The license is #")
                     erDiagram.attribute("string(99)", "firstName", comment="Only 99 characters are allowed")
                     erDiagram.attribute("string", "lastName")
                     erDiagram.attribute("string", "phone", [erKey.uk])
                     erDiagram.attribute("int", "age")
                 ])
-                erDiagram.entity(NAMED_DRIVER, attr=[
+                erDiagram.entity(NAMED_DRIVER, [
                     erDiagram.attribute("string", "carRegistrationNumber", [erKey.pk; erKey.fk])
                     erDiagram.attribute("string", "driverLicence", [erKey.pk; erKey.fk])
                 ])
@@ -128,6 +128,6 @@ let private tests_complex = testList "complex" [
 let main = testList "EntityRelationshipDiagram" [
     tests_entity
     tests_relationship
-    tests_complex
+    tests_docs
 ]
 

@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 public static class pieConfig
 {
-    public static (string, string) custom(string key, string value)
-         => Siren.pieConfig.custom(key, value).ToValueTuple();
-    public static (string, string) textPosition(double value)
-         => Siren.pieConfig.textPosition(value).ToValueTuple();
+    public static ConfigVariable custom(string key, string value)
+         => Siren.pieConfig.custom(key, value);
+    public static ConfigVariable textPosition(double value)
+         => Siren.pieConfig.textPosition(value);
 }

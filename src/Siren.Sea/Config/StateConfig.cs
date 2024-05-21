@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 public static class stateConfig
 {
-    public static (string, string) custom(string key, string value)
-         => Siren.stateConfig.custom(key, value).ToValueTuple();
-    public static (string, string) titleTopMargin(int value)
-         => Siren.stateConfig.titleTopMargin(value).ToValueTuple();
+    public static ConfigVariable custom(string key, string value)
+         => Siren.stateConfig.custom(key, value);
+    public static ConfigVariable titleTopMargin(int value)
+         => Siren.stateConfig.titleTopMargin(value);
 }
