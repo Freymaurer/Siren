@@ -3,8 +3,8 @@
 open Fable.Pyxpecto
 open Siren
 
-let main = testList "Mindmap" [
-    testCase "docs" <| fun _ ->
+let tests_docs = testList "docs" [
+    testCase "example" <| fun _ ->
         let actual =
             siren.mindmap [
                 mindmap.circleId("root","mindmap", [
@@ -73,5 +73,9 @@ Unicode works too: 🤓`"]
         id2["`The dog in **the** hog... a *very long text* that wraps to a new line`"]
 """
         Expect.trimEqual actual expected ""
+]
+
+let main = testList "Mindmap" [
+    tests_docs
 ]
 
