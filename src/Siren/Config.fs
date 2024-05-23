@@ -1,5 +1,6 @@
 ﻿namespace Siren
 
+open Util
 open Fable.Core
 
 // official docs: https://mermaid.js.org/config/schema-docs/config.html
@@ -16,11 +17,11 @@ type flowchartConfig =
     static member titleTopMargin(px:int) = ConfigVariable <| ("titleTopMargin", string px)
     /// Default: {"top": 0, "bottom": 0 }
     static member subGraphTitleMargin(top: int, bottom: int) = ConfigVariable <| ("subGraphTitleMargin", sprintf "{\"top\": %i, \"bottom\": %i}" top bottom)
-    static member arrowMarkerAbsolute(b: bool) = ConfigVariable <| ("arrowMarkerAbsolute", string b)
+    static member arrowMarkerAbsolute(b: bool) = ConfigVariable <| ("arrowMarkerAbsolute", Bool.toString b)
     /// Default: 20
     static member diagramPadding(px: int) = ConfigVariable <| ("diagramPadding", string px)
     /// Default: true
-    static member htmlLabels(b: bool) = ConfigVariable <| ("htmlLabels", string b)
+    static member htmlLabels(b: bool) = ConfigVariable <| ("htmlLabels", Bool.toString b)
     /// Default: 50
     static member nodeSpacing(px: int) = ConfigVariable <| ("nodeSpacing", string px)
     /// Default: 50
@@ -38,8 +39,8 @@ type flowchartConfig =
 [<AttachMembers>]
 type sequenceConfig =
     static member custom (key: string, value: string) = ConfigVariable <| (key, value)
-    static member arrowMarkerAbsolute (b: bool) = ConfigVariable <| ("arrowMarkerAbsolute", string b)
-    static member hideUnusedParticipants (b: bool) = ConfigVariable <| ("hideUnusedParticipants", string b)
+    static member arrowMarkerAbsolute (b: bool) = ConfigVariable <| ("arrowMarkerAbsolute", Bool.toString b)
+    static member hideUnusedParticipants (b: bool) = ConfigVariable <| ("hideUnusedParticipants", Bool.toString b)
     /// Default: 10
     static member activationWidth (px: int) = ConfigVariable <| ("activationWidth", string px)
     /// Default: 50
@@ -66,12 +67,12 @@ type sequenceConfig =
     static member messageAligncCenter           = ConfigVariable <| ("messageAlign", "center")
     static member messageAlignRight             = ConfigVariable <| ("messageAlign", "right")
     /// Default: true
-    static member mirrorActors (b:bool) = ConfigVariable <| ("mirrorActors", string b)
+    static member mirrorActors (b:bool) = ConfigVariable <| ("mirrorActors", Bool.toString b)
     // static member forceMenus (b:bool) = "forceMenus", string b //Did not work
     /// Default: 1 
     static member bottomMarginAdj (px: int) = ConfigVariable <| ("bottomMarginAdj", string px)
     //static member rightAngles (b: bool) = "rightAngles", string b //Did not work
-    static member showSequenceNumbers (b: bool) = ConfigVariable <| ("showSequenceNumbers", string b)
+    static member showSequenceNumbers (b: bool) = ConfigVariable <| ("showSequenceNumbers", Bool.toString b)
     /// Default: "14"
     static member actorFontSize (s: string) = ConfigVariable <| ("actorFontSize", s) //TODO: Multiple types
     // Default: "\"Open Sans\", sans-serif"
@@ -95,7 +96,7 @@ type sequenceConfig =
     // static member messageFontFamily (s:string) = "messageFontFamily", s //TODO: Multiple types
     /// Default: "400"
     static member messageFontWeight (s:string) = ConfigVariable <| ("messageFontWeight", s) //TODO: Multiple types
-    static member wrap (b: bool) = ConfigVariable <| ("wrap", string b)
+    static member wrap (b: bool) = ConfigVariable <| ("wrap", Bool.toString b)
     /// Default: 10
     static member wrapPadding (px: int) = ConfigVariable <| ("wrapPadding", string px)
     // Default: 50
@@ -140,7 +141,7 @@ type ganttConfig =
     static member tickIntervalDay(day:int) = ConfigVariable <| ("tickInterval", sprintf "%iday" day)
     static member tickIntervalWeek(week:int) = ConfigVariable <| ("tickInterval", sprintf "%iweek" week)
     static member tickIntervalMonth(month:int) = ConfigVariable <| ("tickInterval", sprintf "%imonth" month)
-    static member topAxis(b:bool) = ConfigVariable <| ("topAxis", string b)
+    static member topAxis(b:bool) = ConfigVariable <| ("topAxis", Bool.toString b)
     static member displayMode(mode: string) = ConfigVariable <| ("displayMode", sprintf "\"%s\"" mode)
     static member displayModeDefault = ConfigVariable <| ("displayMode", sprintf "\"\"")
     static member displayModeCompact = ConfigVariable <| ("displayMode", sprintf "\"compact\"")
@@ -191,7 +192,7 @@ type journeyConfig =
 [<AttachMembers>]
 type timelineConfig =
     static member custom (key: string, value: string) = ConfigVariable <| (key, value)
-    static member disableMulticolor (value: bool) = ConfigVariable <| ("disableMulticolor", string value)
+    static member disableMulticolor (value: bool) = ConfigVariable <| ("disableMulticolor", Bool.toString value)
     static member padding (value: int) = ConfigVariable <| ("disableMulticolor", string value)
 
 [<AttachMembers>]
@@ -295,9 +296,14 @@ type sankeyConfig =
     static member linkColorGradient = ConfigVariable <| ("linkColor", "gradient")
     
 module private XYChartHelpers =
-    let inline optionStringBind (key:string) (value:'A option) =
+    let inline optionIntBind (key:string) (value:int option) =
         match value with
         | Some value -> Some (key, string value)
+        | None -> None
+
+    let inline optionBoolBind (key:string) (value:bool option) =
+        match value with
+        | Some value -> Some (key, Bool.toString value)
         | None -> None
 
     let mkAxisConfig (parameters: (string*string) list) =
@@ -323,17 +329,17 @@ type xyChartConfig =
         ?showLabel: bool, ?labelFontSize: int, ?labelPadding: int, ?showTitle: bool, ?titleFontSize: int,
         ?titlePadding: int, ?showTick: bool, ?tickLength: int, ?tickWidth: int, ?showAxisLine: bool, ?axisLineWidth: int) =
             name, [
-                XYChartHelpers.optionStringBind "showLabel" showLabel
-                XYChartHelpers.optionStringBind "labelFontSize" labelFontSize
-                XYChartHelpers.optionStringBind "labelPadding" labelPadding
-                XYChartHelpers.optionStringBind "showTitle" showTitle
-                XYChartHelpers.optionStringBind "titleFontSize" titleFontSize
-                XYChartHelpers.optionStringBind "titlePadding" titlePadding
-                XYChartHelpers.optionStringBind "showTick" showTick
-                XYChartHelpers.optionStringBind "tickLength" tickLength
-                XYChartHelpers.optionStringBind "tickWidth" tickWidth
-                XYChartHelpers.optionStringBind "showAxisLine" showAxisLine
-                XYChartHelpers.optionStringBind "axisLineWidth" axisLineWidth
+                XYChartHelpers.optionBoolBind "showLabel" showLabel
+                XYChartHelpers.optionIntBind "labelFontSize" labelFontSize
+                XYChartHelpers.optionIntBind "labelPadding" labelPadding
+                XYChartHelpers.optionBoolBind "showTitle" showTitle
+                XYChartHelpers.optionIntBind "titleFontSize" titleFontSize
+                XYChartHelpers.optionIntBind "titlePadding" titlePadding
+                XYChartHelpers.optionBoolBind "showTick" showTick
+                XYChartHelpers.optionIntBind "tickLength" tickLength
+                XYChartHelpers.optionIntBind "tickWidth" tickWidth
+                XYChartHelpers.optionBoolBind "showAxisLine" showAxisLine
+                XYChartHelpers.optionIntBind "axisLineWidth" axisLineWidth
             ]
             |> List.choose id
             |> XYChartHelpers.mkAxisConfig
@@ -375,13 +381,13 @@ type gitGraphConfig =
     static member mainBranchName (value: string) = ConfigVariable <| ("mainBranchName", value)
     static member mainBranchOrder (value: string) = ConfigVariable <| ("mainBranchOrder", value)
     /// Default: true
-    static member showCommitLabel (value: bool) = ConfigVariable <| ("showCommitLabel", string value)
+    static member showCommitLabel (value: bool) = ConfigVariable <| ("showCommitLabel", Bool.toString value)
     /// Default: true
-    static member showBranches (value: bool) = ConfigVariable <| ("showBranches", string value)
+    static member showBranches (value: bool) = ConfigVariable <| ("showBranches", Bool.toString value)
     /// Default: true
-    static member rotateCommitLabel (value: bool) = ConfigVariable <| ("rotateCommitLabel", string value)
+    static member rotateCommitLabel (value: bool) = ConfigVariable <| ("rotateCommitLabel", Bool.toString value)
     /// Default: false
-    static member parallelCommits (value: bool) = ConfigVariable <| ("parallelCommits ", string value)
+    static member parallelCommits (value: bool) = ConfigVariable <| ("parallelCommits", Bool.toString value)
 
 
 [<AttachMembers>]

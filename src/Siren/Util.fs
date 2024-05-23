@@ -9,3 +9,10 @@ module Option =
         match opt with
         | Some a -> mapping a
         | None -> def
+
+module Bool =
+
+    let toString (b: bool) =
+        match b with
+        | true -> "true"
+        | false -> "false"

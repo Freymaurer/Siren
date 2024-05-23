@@ -3,8 +3,8 @@
 open Fable.Pyxpecto
 open Siren
 
-let main = testList "Quadrant" [
-    testCase "docs" <| fun _ ->
+let tests_docs = testList "docs" [
+    testCase "Engagement" <| fun _ ->
         let actual =
             siren.quadrant [
                 quadrant.title "Reach and engagement of campaigns" 
@@ -41,5 +41,9 @@ let main = testList "Quadrant" [
     Campaign F: [0.35, 0.78]
 """
         Expect.trimEqual actual expected ""
+]
+
+let main = testList "Quadrant" [
+    tests_docs
 ]
 

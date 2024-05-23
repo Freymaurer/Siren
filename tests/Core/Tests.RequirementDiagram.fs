@@ -3,8 +3,8 @@
 open Fable.Pyxpecto
 open Siren
 
-let main = testList "RequirementDiagram" [
-    testCase "docs" <| fun _ ->
+let tests_docs = testList "docs" [
+    testCase "Large Example" <| fun _ ->
         let actual =
             siren.requirement [
                 requirement.requirement("test_req", "1", "the test text.", rqRisk.high, rqMethod.test)
@@ -93,3 +93,6 @@ let main = testList "RequirementDiagram" [
         Expect.trimEqual actual expected ""
 ]
 
+let main = testList "RequirementDiagram" [
+    tests_docs
+]
