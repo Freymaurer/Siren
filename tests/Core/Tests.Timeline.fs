@@ -3,30 +3,8 @@
 open Fable.Pyxpecto
 open Siren
 
-let main = testList "Timeline" [
-    testCase "social-media" <| fun _ ->
-        let actual =
-            siren.timeline [
-                timeline.title "History of Social Media Platform"
-                timeline.single("2002", "LinkedIn")
-                timeline.period("2003")
-                timeline.multiple("2004", ["Facebook"; "Google"])
-                timeline.single("2005", "Youtube")
-                timeline.single("2006", "Twitter")
-            ]
-            |> siren.write
-        let expected = """timeline
-    title History of Social Media Platform
-    2002 : LinkedIn
-    2003
-    2004
-        : Facebook
-        : Google
-    2005 : Youtube
-    2006 : Twitter
-"""
-        Expect.trimEqual actual expected ""
-    testCase "docs" <| fun _ ->
+let tests_docs = testList "docs" [
+    testCase "example" <| fun _ ->
         let actual =
             siren.timeline [
                 timeline.title "MermaidChart 2023 Timeline"
@@ -74,5 +52,31 @@ let main = testList "Timeline" [
             : sub-point 4b
 """
         Expect.trimEqual actual expected ""
+]
+
+let main = testList "Timeline" [
+    testCase "social-media" <| fun _ ->
+        let actual =
+            siren.timeline [
+                timeline.title "History of Social Media Platform"
+                timeline.single("2002", "LinkedIn")
+                timeline.period("2003")
+                timeline.multiple("2004", ["Facebook"; "Google"])
+                timeline.single("2005", "Youtube")
+                timeline.single("2006", "Twitter")
+            ]
+            |> siren.write
+        let expected = """timeline
+    title History of Social Media Platform
+    2002 : LinkedIn
+    2003
+    2004
+        : Facebook
+        : Google
+    2005 : Youtube
+    2006 : Twitter
+"""
+        Expect.trimEqual actual expected ""
+    
 ]
 

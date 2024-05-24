@@ -1,6 +1,6 @@
 from siren.index import siren, state_diagram, direction, formatting
 
-class Teststate_diagram:
+class TestsState:
 
     def test_simple(self):
         Still, Moving, Crash = "Still", "Moving", "Crash"

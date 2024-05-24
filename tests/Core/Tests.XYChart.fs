@@ -3,8 +3,8 @@
 open Fable.Pyxpecto
 open Siren
 
-let main = testList "XYChart" [
-    testCase "empty" <| fun _ ->
+let tests_docs = testList "docs" [
+    testCase "Sales Revenue" <| fun _ ->
         let actual =
             siren.xyChart [
                 xyChart.title "Sales Revenue"
@@ -22,5 +22,9 @@ let main = testList "XYChart" [
     line [5000, 6000, 7500, 8200, 9500, 10500, 11000, 10200, 9200, 8500, 7000, 6000]
 """
         Expect.trimEqual actual expected ""
+]
+
+let main = testList "XYChart" [
+    tests_docs
 ]
 

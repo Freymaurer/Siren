@@ -3,17 +3,8 @@
 open Fable.Pyxpecto
 open Siren
 
-let main = testList "Sankey" [
-    let PumpedHeat = "Pumped heat"
-    testCase "empty" <| fun _ ->
-        let actual =
-            siren.sankey [
-            ]
-            |> siren.write
-        let expected = """sankey-beta
-"""
-        Expect.trimEqual actual expected ""
-    testCase "bioconversion" <| fun _ ->
+let tests_docs = testList "docs" [
+        testCase "bioconversion" <| fun _ ->
         let actual =
             siren.sankey [
                 sankey.links("Bio-conversion", [
@@ -27,6 +18,19 @@ let main = testList "Sankey" [
 "Bio-conversion","Losses",26.862000
 "Bio-conversion","Solid",280.322000
 "Bio-conversion","Gas",81.144000
+"""
+        Expect.trimEqual actual expected ""
+]
+
+let main = testList "Sankey" [
+    tests_docs
+    let PumpedHeat = "Pumped heat"
+    testCase "empty" <| fun _ ->
+        let actual =
+            siren.sankey [
+            ]
+            |> siren.write
+        let expected = """sankey-beta
 """
         Expect.trimEqual actual expected ""
     testCase "electricity" <| fun _ ->

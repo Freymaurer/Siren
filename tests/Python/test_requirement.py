@@ -1,6 +1,6 @@
 from siren.index import siren, requirement, rq_method, rq_risk
 
-class TestQuadrantChart:
+class TestRequirement:
 
   def test_engagement(self):
       actual = (

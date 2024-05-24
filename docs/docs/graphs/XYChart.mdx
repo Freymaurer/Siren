@@ -1,5 +1,10 @@
+---
+sidebar_label: XY Chart
+---
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+
+## Example
 
 <Tabs groupId="preferred-lang" queryString>
 <TabItem value="fsharp" label="F#">
@@ -16,57 +21,48 @@ siren.xyChart [
 ```
 
 </TabItem>
+<TabItem value="csharp" label="C#">
+
+```csharp
+siren.xyChart([
+    xyChart.title("Sales Revenue"),
+    xyChart.xAxis(["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]),
+    xyChart.yAxisNamedRange("Revenue (in $)", 4000, 11000),
+    xyChart.bar([5000, 6000, 7500, 8200, 9500, 10500, 11000, 10200, 9200, 8500, 7000, 6000]),
+    xyChart.line([5000, 6000, 7500, 8200, 9500, 10500, 11000, 10200, 9200, 8500, 7000, 6000])
+]).write();
+```
+
+</TabItem>
 <TabItem value="py" label="Python">
 
 ```py
-import siren.siren as siren
-
-def chart():
-    return siren.siren.flowchart(siren.direction.bt(), [
-        siren.flowchart.subgraph("space", [
-            siren.flowchart.direction_bt(),
-            siren.flowchart.link_dotted_arrow(
-                "earth",
-                "moon",
-                siren.formatting.unicode("🚀"),
-                6
-            ),
-            siren.flowchart.node_round("moon"),
-            siren.flowchart.subgraph("atmosphere",[
-                siren.flowchart.node_circle("earth")
-            ])
-        ])
-    ])
-siren.siren.write(chart())
+siren.xy_chart([
+    xy_chart.title("Sales Revenue"),
+    xy_chart.x_axis(["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]),
+    xy_chart.y_axis_named_range("Revenue (in $)", 4000, 11000),
+    xy_chart.bar([5000, 6000, 7500, 8200, 9500, 10500, 11000, 10200, 9200, 8500, 7000, 6000]),
+    xy_chart.line([5000, 6000, 7500, 8200, 9500, 10500, 11000, 10200, 9200, 8500, 7000, 6000])
+]).write()
 ```
 
 </TabItem>
 <TabItem value="js" label="JavaScript">
 
 ```js
-import {siren, flowchart, direction, formatting } from "./siren/Siren.js"
-
-const chart = 
-  siren.flowchart(direction.bt, [
-      flowchart.subgraph("space",[
-          flowchart.directionBT,
-          flowchart.linkDottedArrow(
-            "earth", 
-            "moon", 
-            formatting.unicode("🚀"),
-            6
-          ),
-          flowchart.nodeRound("moon"),
-          flowchart.subgraph("atmosphere",[
-            flowchart.nodeCircle("earth")
-          ])
-      ])
-  ]);
-siren.write(chart);
+siren.xyChart([
+    xyChart.title("Sales Revenue"),
+    xyChart.xAxis(["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]),
+    xyChart.yAxisNamedRange("Revenue (in $)", 4000, 11000),
+    xyChart.bar([5000, 6000, 7500, 8200, 9500, 10500, 11000, 10200, 9200, 8500, 7000, 6000]),
+    xyChart.line([5000, 6000, 7500, 8200, 9500, 10500, 11000, 10200, 9200, 8500, 7000, 6000])
+]).write();
 ```
 
 </TabItem>
 </Tabs>
+
+{/* output */}
 
 <Tabs>
 <TabItem value="graph" label="Graph">
