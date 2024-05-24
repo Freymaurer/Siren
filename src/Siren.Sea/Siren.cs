@@ -36,6 +36,8 @@ public static class siren
          => Siren.siren.sankey(children);
     public static SirenElement xyChart(IEnumerable<XYChartElement> children, Optional<bool> isHorizontal = default)
          => Siren.siren.xyChart(children, isHorizontal.ToOption());
+    public static SirenElement block(IEnumerable<BlockElement> children)
+         => Siren.siren.block(children);
     public static String write(SirenElement diagram)
          => Siren.siren.write(diagram);
 }

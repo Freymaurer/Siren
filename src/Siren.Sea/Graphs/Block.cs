@@ -2,7 +2,7 @@
 
 using Util;
 
-public static class blockGraph
+public static class Block
 {
     public static BlockElement columns(int count)
          => Siren.block.columns(count);
