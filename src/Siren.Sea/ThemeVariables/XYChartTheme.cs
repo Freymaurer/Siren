@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 
 public static class xyChartTheme
 {
+    public static ThemeVariable custom(string key, string value)
+         => Siren.xyChartTheme.custom(key, value);
     public static ThemeVariable backgroundColor(string color)
          => Siren.xyChartTheme.backgroundColor(color);
     public static ThemeVariable titleColor(string color)

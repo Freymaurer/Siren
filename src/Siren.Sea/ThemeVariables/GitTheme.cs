@@ -6,6 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 public static class gitTheme
 {
+    public static ThemeVariable custom(string key, string value)
+         => Siren.pieTheme.custom(key, value);
     public static ThemeVariable git0(string color)
          => Siren.gitTheme.git0(color);
     public static ThemeVariable git1(string color)

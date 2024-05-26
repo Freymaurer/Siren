@@ -6,6 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 public static class quadrantTheme
 {
+    public static ThemeVariable custom(string key, string value)
+         => Siren.quadrantTheme.custom(key, value);
     public static ThemeVariable quadrant1Fill(string color)
          => Siren.quadrantTheme.quadrant1Fill(color);
     public static ThemeVariable quadrant2Fill(string color)

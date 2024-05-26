@@ -3,12 +3,14 @@
 let WhiteList = [|
         "SirenElement"
         // ThemeVaruiables
+        "themeVariable"
         "quadrantTheme"; 
         "gitTheme"; 
         "timelineTheme"; 
         "xyChartTheme"; 
         "pieTheme";
         // Config
+        "graphConfig";
         "flowchartConfig"; 
         "sequenceConfig"; 
         "ganttConfig"; 

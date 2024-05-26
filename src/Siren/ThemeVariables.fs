@@ -3,6 +3,10 @@
 open Fable.Core
 
 [<AttachMembers>]
+type themeVariable =
+    static member custom (key: string, value: string) = ThemeVariable <| (key, value)
+
+[<AttachMembers>]
 type quadrantTheme =
     static member custom (key: string, value: string) = ThemeVariable <| (key, value)
     static member quadrant1Fill (color: string) = ThemeVariable <| ("quadrant1Fill", color)
@@ -23,6 +27,7 @@ type quadrantTheme =
 
 [<AttachMembers>]
 type gitTheme =
+    static member custom (key: string, value: string) = ThemeVariable <| (key, value)
     static member git0 (color: string) = ThemeVariable <| ("git0", color)
     static member git1 (color: string) = ThemeVariable <| ("git1", color)
     static member git2 (color: string) = ThemeVariable <| ("git2", color)
@@ -62,6 +67,7 @@ type gitTheme =
 
 [<AttachMembers>]
 type timelineTheme =
+    static member custom (key: string, value: string) = ThemeVariable <| (key, value)
     static member cScale0 (color: string) = ThemeVariable <| ("cScale0", color)
     static member cScale1 (color: string) = ThemeVariable <| ("cScale1", color)
     static member cScale2 (color: string) = ThemeVariable <| ("cScale2", color)
@@ -89,6 +95,7 @@ type timelineTheme =
 
 [<AttachMembers>]
 type xyChartTheme =
+    static member custom (key: string, value: string) = ThemeVariable <| (key, value)
     static member backgroundColor (color: string) = ThemeVariable <| ("backgroundColor", color)
     static member titleColor (color: string) = ThemeVariable <| ("titleColor", color)
     static member xAxisLabelColor (color: string) = ThemeVariable <| ("xAxisLabelColor", color)
@@ -103,5 +110,6 @@ type xyChartTheme =
 
 [<AttachMembers>]
 type pieTheme =
+    static member custom (key: string, value: string) = ThemeVariable <| (key, value)
     static member pieOuterStrokeWidth (lengthUnit: string) = ThemeVariable <| ("pieOuterStrokeWidth", lengthUnit)
     

@@ -6,6 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 public static class timelineTheme
 {
+    public static ThemeVariable custom(string key, string value)
+         => Siren.timelineTheme.custom(key, value);
     public static ThemeVariable cScale0(string color)
          => Siren.timelineTheme.cScale0(color);
     public static ThemeVariable cScale1(string color)

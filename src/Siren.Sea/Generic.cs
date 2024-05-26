@@ -7,6 +7,16 @@ using System.Threading.Tasks;
 
 using static Siren.Formatting;
 
+public static class graphConfig
+{
+    public static ConfigVariable custom(string key, string value) => Siren.graphConfig.custom(key, value);
+}
+
+public static class themeVariable
+{
+    public static ThemeVariable custom(string key, string value) => Siren.themeVariable.custom(key, value);
+}
+
 public static class notePosition
 {
     public static NotePosition over => Siren.notePosition.over;

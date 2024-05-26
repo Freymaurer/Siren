@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 
 public static class pieTheme
 {
+    public static ThemeVariable custom(string key, string value)
+         => Siren.pieTheme.custom(key, value);
     public static ThemeVariable pieOuterStrokeWidth(string lengthUnit)
          => Siren.pieTheme.pieOuterStrokeWidth(lengthUnit);
 }

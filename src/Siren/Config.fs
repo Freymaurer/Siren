@@ -6,6 +6,10 @@ open Fable.Core
 // official docs: https://mermaid.js.org/config/schema-docs/config.html
 
 [<AttachMembers>]
+type graphConfig =
+    static member custom (key: string, value: string) = ConfigVariable <| (key, value)
+
+[<AttachMembers>]
 type flowchartConfig =
     static member custom (key, value) = ConfigVariable <| (key, value)
     /// Default: "dagre-wrapper"
