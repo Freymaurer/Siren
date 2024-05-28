@@ -1,7 +1,5 @@
 ﻿module CodeGen
 
-open System
-open System.Reflection
 open System.Reflection
 
 [<LiteralAttribute>]
@@ -13,7 +11,7 @@ let transformParameterTypeName (paramTypeName: string)=
     | "Int32" -> "int"
     | "Double" -> "double"
     | "FSharpOption`1" -> FSharpOptionDefault // this is not always true but a good approximation
-    | "Tuple`2" -> "(string,string)"
+    | "Tuple`2" -> "(string,string)" // this is not always true but a good approximation
     | "Boolean" -> "bool"
     | _ -> paramTypeName
 
@@ -81,7 +79,7 @@ let generateCSharpCode<'A>() =
     csharpCode
 
 let test() = 
-    generateCSharpCode<Siren.classDiagram>()
+    generateCSharpCode<Siren.classDiagram>() // Here you can pass any type you want to generate C# code for
     |> printfn "%A"
     //for memberInfo in staticMembersInfo do
     //    let name, parameters, returnType = memberInfo

@@ -2,7 +2,6 @@
 
 open System
 open System.IO
-open System.Text.RegularExpressions
 
 let private getAllJsFiles(path: string) = 
     Util.getAllFiles(path,"*.py")

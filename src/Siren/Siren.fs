@@ -484,7 +484,7 @@ type requirement =
     static member satisfies (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RDRelationship.Satisfies |> RequirementDiagramElement
     static member verifies (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RDRelationship.Verifies |> RequirementDiagramElement
     static member refines (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RDRelationship.Refines |> RequirementDiagramElement
-    static member traces (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RDRelationship.Traces |> RequirementDiagramElement
+    static member traces (id1, id2) = RequirementDiagram.formatRelationship id1 id2 RDRelationship.Traces |> RequirementDiagramElement  
 
 [<AttachMembers>]
 type gitType =

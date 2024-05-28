@@ -1,0 +1,997 @@
+---
+slug: Library Design
+title: Library Design
+authors: freyk
+tags: [fable, library, api, design, helper]
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Libary Design
+
+Siren consists of one main code base written in F#. This code base is then transpiled to JavaScript, TypeScript, Python and made accessible from C#.
+
+## Idea 💡
+
+During a hackathon for our research data management consortium, we were discussing ideas for visualizing graph like structures in a way that allows easy gitlab integration and can be understood and used by any level of user. The idea we pursued was to add `.md` files with mermaid graphs for an easy overview. So why not write a domain specific language for mermaid graphs to make creation of such graphs easier and more error proof. Good idea, but what programming language should we use? In our consortium we have several groups, some using JavaScript, some Python, some (us) .NET or more specifically F#. Because i already have quite some experience using [Fable][Fable], i did the mental checklist to see if it would be a good fit for this project.
+
+- [x] *Does not need any dependencies.* Mermaid graphs, are mostly YAML, so no complex syntax.
+- [x] *Does not require IO interaction.* We can simply focus on writing our mermaid graph as string and allow the user to do whatever they want with it.
+- [x] *Only Fable compatible languages needed.* We are already very happy offering such a tool in Python, JavaScript and F#.
+
+.. and thats it 🎉 So we can start developing a libary with one codebase for 4 [5] languages.
+
+## What is Fable?
+
+Fable is a F# to X transpiler. It started out targeting only JavaScript, using a naming reference to the popular [Babel](https://babeljs.io) JavaScript transpiler. Now Fable aims to support multiple languages, all in different states. At the time of writing, the offical Fable docs state the following:
+
+| Language | Status | 
+|---|---|
+| JavaScript | Stable |
+| TypeScript |	Stable| 
+| Dart |	Beta| 
+| Python |	Beta| 
+| Rust |	Alpha| 
+| PHP |	Experimental| 
+
+### Benefits
+
+- **Type Safety**. F# is a statically typed language, which means that the compiler can catch many errors before they even happen.
+- **Lightweight Syntax**. F# has a very lightweight syntax, which makes it easy to read and write. It does not require a lot of boilerplate code and you can get right into the meat of your program.
+- **Testing(?)**. Main codebase is written in F# as well as most tests. This allows us to also transpile the tests to other languages and run them there. This is a big advantage, as we can be sure that the tests are the same in all languages.
+
+:::note[But why the question mark behind testing?]
+
+Because we can recycle the tests, to ensure correct functionality, but we still must test if the library can be used from all supported languages without hurdles.
+:::
+
+## API Design
+
+To make the code look and feel as native as possible in all languages, there are some things we need to consider. But first let us have a look at fable transpiled code.
+
+:::info
+The following code will use the [Fable REPL][REPL] to transpile code for easy showcasing!
+:::
+
+
+<Tabs>
+<TabItem value="fsharp" label="F#">
+```fsharp
+let helloWorld = printfn "Hello World"
+```
+</TabItem>
+
+<TabItem value="js" label="JavaScript">
+```js
+import { printf, toConsole } from "fable-library-js/String.js";
+
+export const helloWorld = toConsole(printf("Hello World"));
+```
+</TabItem>
+
+<TabItem value="py" label="Python">
+```python
+from fable_library_js.string import (to_console, printf)
+
+hello_world: None = to_console(printf("Hello World"))
+```
+</TabItem>
+</Tabs>
+
+We can already notice some things:
+
+- Fable tries to transpile into native syntax, so for example snake_case in Python and camelCase in JavaScript
+- Fable has some wrappers for functions which might have native equivalents. In F# `printfn` is used to print to the console, in JavaScript `console.log` and in Python `print`. But Fable uses their own printf function to ensure 100% correct f# transpilation.
+
+Next we will have a look at a class with some member functions.
+
+<Tabs>
+<TabItem value="fsharp" label="F#">
+```fsharp
+type MyClass =
+    static member add (x: int) (y: int) = x + y
+```
+</TabItem>
+
+<TabItem value="js" label="JavaScript">
+```js
+import { class_type } from "fable-library-js/Reflection.js";
+
+export class MyClass {
+    constructor() {
+    }
+}
+
+export function MyClass_$reflection() {
+    return class_type("Test.MyClass", undefined, MyClass);
+}
+
+export function MyClass_add(x, y) {
+    return x + y;
+}
+```
+</TabItem>
+
+<TabItem value="py" label="Python">
+```python
+from fable_library_js.reflection import (TypeInfo, class_type)
+
+def _expr0() -> TypeInfo:
+    return class_type("Test.MyClass", None, MyClass)
+
+
+class MyClass:
+    ...
+
+MyClass_reflection = _expr0
+
+def MyClass_add(x: int, y: int) -> int:
+    return x + y
+```
+</TabItem>
+</Tabs>
+
+Oh no, this does not look good. Fable does a thing called [*name mangling*](https://fable.io/docs/javascript/features.html#name-mangling). 
+Have a look at the offical docs for a deeper view on this topic.
+For now its enought to know, this is done to allow overloading functions in F#.
+
+### Using `[<AttachMembers>]`
+
+But we can tell Fable that we know what we are doing and ignore name mangling.
+
+<Tabs>
+<TabItem value="fsharp" label="F#">
+```fsharp
+open Fable.Core
+
+[<AttachMembers>]
+type MyClass =
+    static member add (x: int) (y: int) = x + y
+```
+</TabItem>
+
+<TabItem value="js" label="JavaScript">
+```js
+import { class_type } from "fable-library-js/Reflection.js";
+
+export class MyClass {
+    constructor() {
+    }
+    static add(x, y) {
+        return x + y;
+    }
+}
+```
+</TabItem>
+
+<TabItem value="py" label="Python">
+```python
+from fable_library_js.reflection import (TypeInfo, class_type)
+
+class MyClass:
+    @staticmethod
+    def add(x: int, y: int) -> int:
+        return x + y
+```
+</TabItem>
+</Tabs>
+
+That looks better and allows us to do the following in all 3 languages: `MyClass.add`.
+This is the basic design i chose to use for most user facing api. All F#/Fable code not easily usable from other languages is hidden behind a facade like this.
+
+### C# Compatibility
+
+Strangely enough allowing C# users the same ease of use as Python and JavaScript users is the hardest. 
+This is because C# has some issues with F# *optional parameters* and F# *tuples*.
+
+In F# we can define a function like this:
+
+```fsharp
+[<AttachMembers>]
+type flowchart =
+    static member raw (txt: string) = FlowchartElement txt
+    static member id (txt: string) = FlowchartElement txt
+    static member node (id: string, ?name: string) : FlowchartElement = ...
+
+flowchart.node("My id")
+flowchart.node("My id", "My name")
+```
+
+Using the F# function in C# will result in an error, when you try to do `flowchart.node("My id")`, as `?name` is a `Microsoft.FSharp.Core.FSharpOption<string>` without any default information.
+
+By creating a C# access layer we can avoid this issue for C# users:
+
+:::info
+The C# extensions for optional parameters and tuples are taken from [Plotly.NET](https://github.com/plotly/Plotly.NET) with the help from my dear colleague [Kevin Schneider][KevinS].
+:::
+
+<Tabs>
+<TabItem value="flow" label="Flowchart.cs">
+```csharp
+public static class flowchart
+{
+    public static FlowchartElement raw(string txt) => Siren.flowchart.raw(txt);
+
+    public static FlowchartElement id(string txt) => Siren.flowchart.raw(txt);
+
+    public static FlowchartElement node(string id, Optional<string> name = default) =>
+        Siren.flowchart.node(id, name.ToOption());
+    //...
+}
+```
+</TabItem>
+
+<TabItem value="fsharp" label="OptionExtension.cs">
+```csharp
+/// <summary>
+/// Helper type for handling the special way the Plotly.NET core API uses generics.
+/// In short, the problem arises because many optional parameters of Plotly.NET's core API are generics 
+/// with a type constraint for `IConvertible`. This means that these parameters can be both value and reference types 
+/// (e.g. `double` and `System.DateTime` both implement IConvertible).
+/// If we now have a optional parameter of type `T? where T: IConvertible` the compiler will not allow this 
+/// without further type constrainst to eithe reference or value type.
+/// This is a problem because we want to 1. allow both, and 2. have a reliable way of determining if the value was not set 
+/// because the F# API expects to be passed `Option.None` in that case.
+/// There exist other workarounds like checking if the value is default or null, but that changes valid default values actually set to null as well.
+/// </summary>
+/// <typeparam name="T"></typeparam>
+/// <param name="Value">The value to mark as optional</param>
+/// <param name="IsSome">Wether or not the wrapped value is valid. This is used downstream to determine wether to wrap this value into `Option.Some` (if true) or `Option.None` (if false)</param>
+public readonly record struct Optional<T>(T Value, bool IsSome)
+{
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="Value"></param>
+    public static implicit operator Optional<T>(T Value) => new(Value, true);
+
+}
+/// <summary>
+/// Extension methods for the `Optional` class
+/// </summary>
+public static class OptionalExtensions
+{
+    /// <summary>
+    /// Converts the `Optional` value to `Some(value)` if the value is valid, or `None` if it is not.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="opt">The `Optional` value to convert to a F# Option</param>
+    /// <returns>opt converted to `Option`</returns>
+    static internal Microsoft.FSharp.Core.FSharpOption<T> ToOption<T>(this Optional<T> opt) => opt.IsSome ? new(opt.Value) : Microsoft.FSharp.Core.FSharpOption<T>.None;
+}
+```
+</TabItem>
+</Tabs>
+
+A similar issue arises with F# tuples:
+
+<Tabs>
+<TabItem value="flow" label="Flowchart.fs">
+```fsharp
+[<AttachMembers>]
+type flowchart =
+    static member stylesNode (nodeId: string, styles:#seq<string*string>) = Flowchart.formatNodeStyles [nodeId] (List.ofSeq styles) |> FlowchartElement
+```
+</TabItem>
+
+<TabItem value="extension" label="TupleExtension.cs">
+```csharp
+/// <summary>
+/// Convenience to convert from C# struct tuple literals to the value tuple ones.
+/// </summary>
+internal static class TupleExtensions
+{
+    /// <summary>
+    /// Converts a tuple.
+    /// </summary>
+    internal static Tuple<T1, T2> ToTuple<T1, T2>(this ValueTuple<T1, T2> t) => Tuple.Create(t.Item1, t.Item2);
+}
+```
+</TabItem>
+
+<TabItem value="fsharp" label="Flowchart.cs">
+```csharp
+/// <summary>
+/// Convenience to convert from C# struct tuple literals to the value tuple ones.
+/// </summary>
+public static class flowchart
+{
+    public static FlowchartElement stylesNode(string nodeId, (string, string)[] styles) =>
+        Siren.flowchart.stylesNode(nodeId, styles.Select(t => t.ToTuple()));
+}
+```
+</TabItem>
+</Tabs>
+
+#### Code generator helper
+
+These incompatibilities are not only annoying but providing a consistently native C# experience, requires a wrapping for all apis.
+To make this easier, i created a code generator that takes a F# file and generates the C# wrapper for it. .. Or at least 95% of it. The rest is done by hand.
+
+<details>
+<summary>Code Generator</summary>
+<div>
+```fsharp
+open System.Reflection
+
+[<LiteralAttribute>]
+let FSharpOptionDefault = "Optional<string>"
+
+let transformParameterTypeName (paramTypeName: string)=
+    match paramTypeName with
+    | "String" -> "string"
+    | "Int32" -> "int"
+    | "Double" -> "double"
+    | "FSharpOption`1" -> FSharpOptionDefault // this is not always true but a good approximation
+    | "Tuple`2" -> "(string,string)" // this is not always true but a good approximation
+    | "Boolean" -> "bool"
+    | _ -> paramTypeName
+
+type ParameterInfo = {
+    Type: string
+    Name: string
+} with
+    member this.FSharpParam =
+        match this with
+        | {Type = FSharpOptionDefault} -> this.Name + ".ToOption()"
+        | _ -> this.Name
+    member this.CSharpParam =
+       match this with
+       | {Type = FSharpOptionDefault} -> sprintf "%s %s = default" this.Type this.Name
+       | _ -> sprintf "%s %s" this.Type this.Name
+
+    static member create(typeName: string, name: string) =
+        {Type = transformParameterTypeName typeName; Name = name}
+
+let generateCSharpCode<'A>() =
+
+    let t = typeof<'A>
+    let members = t.GetMethods(BindingFlags.Static ||| BindingFlags.Public)
+
+    let mutable csharpCode = sprintf "public static class %s\n{\n" t.Name
+    for m in members do
+        let methodName = 
+            let name0 = m.Name
+            if name0.StartsWith("get_") then
+                name0.Substring(4)
+            else
+                name0
+        let returnType = m.ReturnType.Name
+        let params0 = 
+            m.GetParameters() 
+            |> Array.map (fun p -> ParameterInfo.create(p.ParameterType.Name, p.Name))
+        let csharpParameters =
+            if params0.Length = 0 then
+                ""
+            else    
+                params0
+                |> Array.map _.CSharpParam
+                |> String.concat(", ")
+                |> fun s -> "(" + s + ")"
+        
+        let fsharpParameters = 
+            if params0.Length = 0 then
+                ""
+            else    
+                params0 
+                |> Array.map _.FSharpParam
+                |> String.concat(", ")
+                |> fun s -> "(" + s + ")"
+        
+        let methodSignature = $"public static {transformParameterTypeName returnType} {methodName}{csharpParameters}"
+        let methodBody = 
+            if methodName.StartsWith("get_") then
+                let withoutGet = methodName.Substring(4)
+                $"return Siren.{t.Name}.{withoutGet};"
+            else
+                $" => Siren.{t.Name}.{methodName}{fsharpParameters};"
+        csharpCode <- csharpCode + $"    {methodSignature}\n        {methodBody}\n"
+
+    csharpCode <- csharpCode + "}\n"
+    csharpCode
+
+let test() = 
+    generateCSharpCode<Siren.classDiagram>() // Here you can pass any type you want to generate C# code for
+    |> printfn "%A"
+```
+</div>
+</details>
+
+This is something i did not want to spend a lot of time on, so when i quickly wrote this and noticed it was able to create most of the C# code correctly.
+I think improving this code to create everything perfectly would be awesome, but would have taken me longer thant fixing the few mistakes it makes by hand.
+
+#### Maintainability
+
+This is a big issue. Whenever i update my f# api i must also update the c# wrapper.
+Changes are mostly catched by the compiler but missings functions are not.
+
+That is why i added unit tests to check the count and name of a c# and f# class and compare it for equality:
+
+```csharp
+public static class Utils
+{
+    public static int GetMemberCount(Type type)
+    {
+        var members = type.GetMembers();
+        return members.Length;
+    }
+
+    public static List<string> GetMemberNameDifferences(Type type1, Type type2)
+    {
+        List<string> differences = new List<string>();
+        //transform string to lower
+        var type1Members = type1.GetMembers().Select(m => m.Name.ToLower());
+        var type2Members = type2.GetMembers().Select(m => m.Name.ToLower());
+        differences.AddRange(type1Members.Except(type2Members));
+        differences.AddRange(type2Members.Except(type1Members));
+
+        return differences;
+    }
+
+    public static void CompareClasses(Type csharpType, Type fsharpType)
+    {
+        int csharpMemberCount = GetMemberCount(csharpType);
+        int fsharpMemberCount = GetMemberCount(fsharpType);
+        List<string> differences = GetMemberNameDifferences(fsharpType, csharpType);
+
+        Assert.Empty(differences);
+        Assert.Equal(fsharpMemberCount, csharpMemberCount);
+    }
+}
+```
+
+This at least helps me to catch missing functions in the c# wrapper, even if i still have to write them by hand.
+
+### Python/JavaScript import and Index files
+
+F# and C# use namespaces to organize code. I can have multiple files with the same namespace and access all functions simply by writing `open Siren`/`using Siren.Sea;`.
+
+In Python and JavaScript this is not possible. Here imports happen on a file basis. So i needed to have a single file that imports all other files and exports them.
+
+Luckily this file can be created automatically!
+
+<details>
+<summary>Index File</summary>
+<div>
+<Tabs>
+<TabItem value="util" label="Util.fs">
+```fsharp
+module Index.Util
+
+open System
+open System.IO
+open System.Text.RegularExpressions
+
+type FileInformation = {
+    FilePath : string
+    Lines : string []
+} with
+    static member create(filePath: string, lines: string []) = {
+        FilePath = filePath
+        Lines = lines
+    }
+
+let getAllFiles(path: string, extension: string) = 
+    let options = EnumerationOptions()
+    options.RecurseSubdirectories <- true
+    IO.Directory.EnumerateFiles(path,extension,options)
+    |> Seq.filter (fun s -> s.Contains("fable_modules") |> not)
+    |> Array.ofSeq
+
+let findClasses (rootPath: string) (cois: string []) (regexPattern: string -> string) (filePaths: seq<string>) = 
+    let files = [|
+        for fp in filePaths do
+            yield FileInformation.create(fp, System.IO.File.ReadAllLines (fp))
+    |]
+    let importStatements = ResizeArray()
+    let findClass (className: string) = 
+        /// maybe set this as default if you do not want any whitelist
+        let classNameDefault = @"[a-zA-Z_0-9]"
+        let pattern = Regex.Escape(className) |> regexPattern
+        let regex = Regex(pattern)
+        let mutable found = false
+        let mutable result = None
+        let enum = files.GetEnumerator()
+        while not found && enum.MoveNext() do
+            let fileInfo = enum.Current :?> FileInformation
+            for line in fileInfo.Lines do
+                let m = regex.Match(line)
+                match m.Success with
+                | true -> 
+                    found <- true
+                    result <- Some <| (className, IO.Path.GetRelativePath(rootPath,fileInfo.FilePath))
+                | false ->
+                    ()
+        match result with
+        | None ->
+            failwithf "Unable to find %s" className
+        | Some r ->
+            importStatements.Add r
+    for coi in cois do findClass coi
+    importStatements
+    |> Array.ofSeq
+
+let writeIndexFile (path: string) (fileName: string) (content: string) =
+    let filePath = Path.Combine(path, fileName)
+    File.WriteAllText(filePath, content)
+```
+</TabItem>
+
+<TabItem value="js" label="Indexjs.fs">
+```fsharp
+let private getAllJsFiles(path: string) = 
+    Util.getAllFiles(path,"*.js")
+
+let private pattern (className: string) = sprintf @"^export class (?<ClassName>%s)+[\s{].*({)?" className
+
+let private findJsClasses (rootPath: string) (whiteList: string []) (filePaths: string []) = 
+    Util.findClasses rootPath whiteList pattern filePaths
+
+open System.Text
+
+let private createImportStatements (info: (string*string) []) =
+    let sb = StringBuilder()
+    let importCollection = info |> Array.groupBy snd |> Array.map (fun (p,a) -> p, a |> Array.map fst )
+    for filePath, imports in importCollection do
+        let p = filePath.Replace("\\","/")
+        sb.Append "export { " |> ignore
+        sb.AppendJoin(", ", imports) |> ignore
+        sb.Append " } from " |> ignore
+        sb.Append (sprintf "\"./%s\"" p) |> ignore
+        sb.Append ";" |> ignore
+        sb.AppendLine() |> ignore
+    sb.ToString()
+
+let private generateIndexfile (rootPath: string, fileName: string, whiteList: string []) =
+    getAllJsFiles(rootPath)
+    |> findJsClasses rootPath whiteList
+    |> createImportStatements
+    |> Util.writeIndexFile rootPath fileName
+
+let generate(rootPath: string) = 
+    generateIndexfile(rootPath, "index.js", WhiteList.WhiteList)
+```
+</TabItem>
+
+<TabItem value="py" label="Indexpy.fs">
+```fsharp
+open System
+open System.IO
+
+let private getAllJsFiles(path: string) = 
+    Util.getAllFiles(path,"*.py")
+
+let private pattern (className: string) = sprintf @"^class (?<ClassName>%s)+(\(|:).*$" className
+
+let private findPyClasses (rootPath: string) (whiteList: string []) (filePaths: string []) = 
+    Util.findClasses rootPath whiteList pattern filePaths
+
+open System.Text
+
+let private createImportStatements (info: (string*string) []) =
+    let sb = StringBuilder()
+    let importCollection = info |> Array.groupBy snd |> Array.map (fun (p,a) -> p, a |> Array.map fst )
+    for filePath, imports in importCollection do
+        let p = filePath |> Path.GetFileNameWithoutExtension
+        sb.Append (sprintf "from .%s import " p) |> ignore
+        sb.AppendJoin(", ", imports) |> ignore
+        sb.AppendLine() |> ignore
+    sb.ToString()
+
+let private generateIndexfile (rootPath: string, fileName: string, whiteList: string []) =
+    getAllJsFiles(rootPath)
+    |> findPyClasses rootPath whiteList
+    |> createImportStatements
+    |> Util.writeIndexFile rootPath fileName
+
+let generate(rootPath: string) = 
+    // code to make camelcase to snakecase
+    /// This is because we currently snake_case everything that does not start with a capital letter
+    let camelCaseToSnakeCase (str: string) = 
+        if Char.IsUpper str.[0] then
+            str 
+        else
+            str 
+            |> Seq.fold (fun (acc: string) c -> 
+                if Char.IsUpper c then 
+                    acc + "_" + string (Char.ToLower c) 
+                else 
+                    acc + string c
+            ) ""
+    let snake_case_white_list = WhiteList.WhiteList |> Array.map camelCaseToSnakeCase
+    generateIndexfile(rootPath, "index.py", snake_case_white_list)
+```
+</TabItem>
+<TabItem value="whitelist" label="WhiteList.fs">
+```fsharp
+module Index.WhiteList
+
+let WhiteList = [|
+        "SirenElement"
+        // ThemeVaruiables
+        "themeVariable"
+        "quadrantTheme"; 
+        "gitTheme"; 
+        "timelineTheme"; 
+        "xyChartTheme"; 
+        "pieTheme";
+        // Config
+        "graphConfig";
+        "flowchartConfig"; 
+        "sequenceConfig"; 
+        "ganttConfig"; 
+        "journeyConfig"; 
+        "timelineConfig"; 
+        "classConfig"; 
+        "stateConfig"; 
+        "erConfig"; 
+        "quadrantChartConfig"; 
+        "pieConfig"; 
+        "sankeyConfig"; 
+        "xyChartConfig"; 
+        "mindmapConfig"; 
+        "gitGraphConfig"; 
+        "requirementConfig"; 
+        // Graphs and Helpers
+        "formatting"; 
+        "direction"; 
+        "flowchart"; 
+        "notePosition"; 
+        "sequence"; 
+        "classMemberVisibility"; 
+        "classMemberClassifier"; 
+        "classDirection"; 
+        "classCardinality"; 
+        "classRltsType"; 
+        "classDiagram"; 
+        "stateDiagram"; 
+        "erKey"; 
+        "erCardinality"; 
+        "erDiagram"; 
+        "journey"; 
+        "ganttTime"; 
+        "ganttTags"; 
+        "ganttUnit"; 
+        "gantt"; 
+        "pieChart"; 
+        "quadrant"; 
+        "rqRisk"; 
+        "rqMethod"; 
+        "requirement"; 
+        "gitType"; 
+        "git"; 
+        "mindmap"; 
+        "timeline"; 
+        "sankey"; 
+        "xyChart"; 
+        "block"; 
+        "theme"; 
+        "siren"; 
+    |]
+```
+</TabItem>
+</Tabs>
+
+</div>
+</details>
+
+The resulting files look like this:
+
+<Tabs>
+<TabItem value="js" label="index.js">
+```js
+export { SirenElement } from "./SirenTypes.js";
+export { themeVariable, quadrantTheme, gitTheme, timelineTheme, xyChartTheme, pieTheme } from "./ThemeVariables.js";
+export { graphConfig, flowchartConfig, sequenceConfig, ganttConfig, journeyConfig, timelineConfig, classConfig, stateConfig, erConfig, quadrantChartConfig, pieConfig, sankeyConfig, xyChartConfig, mindmapConfig, gitGraphConfig, requirementConfig } from "./Config.js";
+export { formatting, direction, flowchart, notePosition, sequence, classMemberVisibility, classMemberClassifier, classDirection, classCardinality, classRltsType, classDiagram, stateDiagram, erKey, erCardinality, erDiagram, journey, ganttTime, ganttTags, ganttUnit, gantt, pieChart, quadrant, rqRisk, rqMethod, requirement, gitType, git, mindmap, timeline, sankey, xyChart, block, theme, siren } from "./Siren.js";
+```
+</TabItem>
+<TabItem value="py" label="index.py">
+```py
+from .siren_types import SirenElement
+from .theme_variables import theme_variable, quadrant_theme, git_theme, timeline_theme, xy_chart_theme, pie_theme
+from .config import graph_config, flowchart_config, sequence_config, gantt_config, journey_config, timeline_config, class_config, state_config, er_config, quadrant_chart_config, pie_config, sankey_config, xy_chart_config, mindmap_config, git_graph_config, requirement_config
+from .siren import formatting, direction, flowchart, note_position, sequence, class_member_visibility, class_member_classifier, class_direction, class_cardinality, class_rlts_type, class_diagram, state_diagram, er_key, er_cardinality, er_diagram, journey, gantt_time, gantt_tags, gantt_unit, gantt, pie_chart, quadrant, rq_risk, rq_method, requirement, git_type, git, mindmap, timeline, sankey, xy_chart, block, theme, siren
+```
+</TabItem>
+</Tabs>
+
+## Publish
+
+:::warning
+WIP
+:::
+
+## Deep Dive
+
+From here on are some additional issues i encountered during development.
+
+### Overloads
+
+The concept of allowing different inputs for the same function exists in f#, as well as python and javascript. 
+By using the `[<AttachMembers>]` attribute we are not longer allowed to use standard f# overloads. 
+Because JavaScript does not have the same kind of type interference it is unable to recognice which function should be invoked:
+
+<Tabs>
+<TabItem value="fsharp" label="F#">
+```fsharp
+open Fable.Core
+
+[<AttachMembers>]
+type MyClass =
+    static member add (x: int, y: int) = x * y // this should be invoked
+    static member add (x: string, y: string) = x + y
+
+let result = MyClass.add(10, 20)
+
+printfn "%A" result
+```
+</TabItem>
+
+<TabItem value="js" label="JavaScript">
+```js
+import { class_type } from "fable-library-js/Reflection.js";
+import { printf, toConsole } from "fable-library-js/String.js";
+
+export class MyClass {
+    constructor() {
+    }
+    static add(x, y) {
+        return x * y;
+    }
+    static add(x, y) { // This shadows the function above and is invoked
+        return x + y;
+    }
+}
+
+export const result = MyClass.add(10, 20); // This will return 30
+
+toConsole(printf("%A"))(result);
+
+```
+</TabItem>
+</Tabs>
+
+#### Erased Unions
+
+It is possible to imitate js overload behaviour by using [erased unions](https://fable.io/docs/javascript/features.html#erased-unions).
+Here we use a Fable provides discriminate union called ``U2``(``U3``, ``U4``...). After transpilation it is replaced by a js type check.
+
+<Tabs>
+<TabItem value="fsharp" label="F#">
+```fsharp
+open Fable.Core
+open Fable.Core.JsInterop
+
+[<AttachMembers>]
+type MyClass =
+    static member test (arg: U2<string, int>) = 
+        match arg with
+        | U2.Case1 s -> printfn "This is a string: %s" s
+        | U2.Case2 i -> printfn "This is a integer: %i" i
+
+let result = MyClass.test(U2.Case2 10) // or MyClass.test(!^10)
+
+printfn "%A" result
+```
+</TabItem>
+
+<TabItem value="js" label="JavaScript">
+```js
+import { printf, toConsole } from "fable-library-js/String.js";
+import { class_type } from "fable-library-js/Reflection.js";
+
+export class MyClass {
+    constructor() {
+    }
+    static test(arg) {
+        if (typeof arg === "number") {
+            const i = arg;
+            toConsole(printf("This is a integer: %i"))(i);
+        }
+        else {
+            const s = arg;
+            toConsole(printf("This is a string: %s"))(s);
+        }
+    }
+}
+
+export const result = MyClass.test(10);
+
+toConsole(printf("%A"))(); // This is a integer: 10
+```
+</TabItem>
+</Tabs>
+
+As you can see, this looks really nice in JavaScript, but is cumbersome to use in F#. 
+
+It would be possible to do do both and use f# overloads and shadow them with the erased union. But this would add more additional maintainance work.
+
+:::info[Compiler Statements]
+We can use `#if FABLE_COMPILER ... #else ... #endif` syntax to include code only in certain compiler states. 
+
+In the following example the erased union is only used (and accessible!) when the code is transpiled by Fable to JavaScript.
+:::
+
+```fsharp
+[<AttachMembers>]
+type MyClass =
+// highlight-next-line
+#if FABLE_COMPILER_JAVASCRIPT
+    static member test (arg: U2<string, int>) = 
+        match arg with
+        | U2.Case1 s -> printfn "This is a string: %s" s
+        | U2.Case2 i -> printfn "This is a integer: %i" i
+// highlight-next-line
+#else
+    static member test(arg: int) =
+        printfn "This is a integer: %i" arg
+    static member test(arg: string) =
+        printfn "This is a string: %s" arg
+// highlight-next-line
+#endif
+
+let result = MyClass.test(10)
+```
+
+This would allow us to use the erased union only in JavaScript and use the F# overloads in F#. But i have not investigated how this would work for python 😅.
+
+Due to the additional workload i decided to avoid using overloads in the api. Instead i tried finding the core functions and functions, which allow additional inputs with a different name:
+
+```fsharp
+type sequence =
+    static member note(id: string, text: string, ?notePosition: NotePosition) = //..
+    static member noteSpanning(id1: string, id2, text: string, ?notePosition: NotePosition) = //..
+```
+
+### JavaScript optional parameters
+
+Using functions with multiple optional parameters is easily done in F#, C# and Python, but can get quite annoying in JavaScript:
+
+<Tabs>
+<TabItem value="js" label="JavaScript">
+```js
+// tripple null ...
+requirement.requirement("my id", null, null, null, rqMethod.test)
+```
+</TabItem>
+
+<TabItem value="f" label="F#">
+```fsharp
+// easy!
+requirement.requirement("My Id", rqMethod = rqMethod.analysis)
+```
+</TabItem>
+
+<TabItem value="py" label="Python">
+```python
+# easy!
+requirement.requirement("My Id", rq_method = rq_method.analysis)
+```
+</TabItem>
+
+<TabItem value="c" label="C#">
+```csharp
+// easy!
+Requirement.requirement("My Id", rqMethod: rqMethod.analysis)
+```
+</TabItem>
+</Tabs>
+
+The JavaScript native approach would be using an object with only the values you want to set.
+There is even a way to tell Fable to transpile parameters as object using the `[ParamObject]` attribute.
+
+<Tabs>
+<TabItem value="f" label="F#">
+```fsharp
+open Fable.Core
+open Fable.Core.JsInterop
+
+[<AttachMembers>]
+type MyClass =
+    [<ParamObject(1)>] // Start creating obj from params at index 1
+    static member test (name: int, ?id: string, ?text: string, ?rqRisk: string, ?rqMethod: string) =
+        0
+
+
+MyClass.test(10, rqRisk = "Hello")
+MyClass.test(10)
+```
+</TabItem>
+
+<TabItem value="js" label="JavaScript">
+```js
+import { class_type } from "fable-library-js/Reflection.js";
+
+export class MyClass {
+    constructor() {
+    }
+    static test(name, { id, text, rqRisk, rqMethod }) {
+        return 0;
+    }
+}
+
+MyClass.test(10, {
+    rqRisk: "Hello",
+});
+
+MyClass.test(10, {}); // Oh oh. Why an empty object?
+```
+</TabItem>
+</Tabs>
+
+As you can see adding *no* optional parameters requires an empty object, as Fable checks if the value at object key xyz is null and not if the object is null. 
+Without the empty object the function would throw an error, whenever any of the optional parameters is referenced in the function. (Bad example as i just return 0).
+
+### Member Names 
+
+Different languages have different expectations for member names. Aside from styling best practises, there are some things that are not possible in all languages.
+
+:::info
+F# typically uses PascalCase for class names and camelCase for member names. 
+For easier usage i ignore this rule and used camelCase for everything.
+:::
+
+#### F# reserved keywords
+
+The first issue i encountered where reserved keywords in F#.
+
+For example ` classDiagram.``class`` `. *"class"* is a reserved keyword which is not allowed in F#. 
+The standard solution is wrapping the name in backticks. But at least for me on VisualStudio Community this resulted in issues with my auto complete.
+This resulted in me handling this issue inconsistently. The issues i encountered were mostly in (optional) parameters, which is why i changed their names to PascalCase:
+
+For members i mostly stayed true to the backtick syntax.
+
+```fsharp
+[<AttachMembers>]
+type classMemberClassifier =
+    // abstract is a reserved keyword
+    static member Abstract = ClassMemberClassifier.Abstract
+    // static is a reserved keyword
+    static member Static = ClassMemberClassifier.Static
+    static member custom str = ClassMemberClassifier.Custom str
+
+[<AttachMembers>]
+type classDiagram =
+    static member ``class`` (id: string, members: #seq<ClassDiagramElement>) = 
+```
+
+The C# wrapper used the C# best practise syntax `@class`, which worked fine for me.
+
+#### C# - Member name = enclosing type
+
+I encountered this issue first for `block.block`. In C# member names are not allowed to be the same as the enclosing type.
+
+As i am not a very experienced C# developer, i am still rather undecided on how to handle this issue. 
+So far I have been using `Block.block`, as I am thinking about using PascalCase for all classes in C#. And if only to mute the warnings in VS Community.
+
+If you have a strong opinion about this topic, please let me know! I am interested in hearing your thoughts.
+
+#### Transpiled names
+
+And back to `classDiagram.``class`` `. While JavaScript does not seem to care about this topic to much, Python does.
+
+JavaScript gives us the best result, the F# backtick syntax is transpiled to a simple camelCase name `classDiagram.class`.
+
+Python on the other hand has `class` also as reserved keyword. Fable transpiles it to `classDiagram.class_`. 
+Which raises the question if i should simply apply this syntax to all cases with naming problems.
+
+### Docs/Native Test Maintainance
+
+The core library + C# wrapper were done rather quickly. I can also recycle my F# unit tests to check if transpilation works as expected, using [Fable.Pyxpecto](https://github.com/Freymaurer/Fable.Pyxpecto).
+
+But testing correct native accessibillity and writing docs (showcasing the test cases) was the most time consuming part and something i am not happy with.
+
+Here are some ideas on how to improve this:
+
+- Theoretically, i could use the transpiled tests for docs. But i still have to remove the Fable specific helper functions and replace them with native ones.
+- *[Kevin S.][KevinS]* had an idea, repurposing jupyter notebooks for docs and testing. To at least unify the testing and docs. 
+
+If you have any ideas on how to improve this, please let me know!
+
+
+{/* References */}
+[Fable]: https://fable.io
+[REPL]: https://fable.io/repl/
+[KevinS]: https://github.com/kMutagene
