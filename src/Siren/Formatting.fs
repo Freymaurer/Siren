@@ -191,7 +191,7 @@ module ClassDiagram =
 
     type ClassRelationshipType with
 
-        member this.ToFormatString(?direction: ClassRelationshipDirection, ?isDotted: bool) =
+        member this.ToFormatString(direction: ClassRelationshipDirection option, isDotted: bool option) =
             let isDotted = defaultArg isDotted false
             let dotted = ".."
             let solid = "--"
@@ -267,11 +267,11 @@ module ClassDiagram =
         sprintf "%s%s %s %s%s%s" id1 car1 link car2 id2 label
 
     let formatRelationship id1 id2 (rltsType: ClassRelationshipType) (label: string option) (cardinality1: ClassCardinality option) (cardinality2: ClassCardinality option) =
-        let link = rltsType.ToFormatString()
+        let link = rltsType.ToFormatString(None, None)
         formatRelationship0 id1 id2 link label cardinality1 cardinality2
 
     let formatRelationshipCustom id1 id2 (rltsType: ClassRelationshipType) (direction) (dotted) (label: string option) (cardinality1: ClassCardinality option) (cardinality2: ClassCardinality option) =
-        let link = rltsType.ToFormatString(?direction=direction, ?isDotted=dotted)
+        let link = rltsType.ToFormatString(direction, dotted)
         formatRelationship0 id1 id2 link label cardinality1 cardinality2
 
     let formatAnnotation (id0: string option) (annotation: string) = 

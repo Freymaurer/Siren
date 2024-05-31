@@ -25,15 +25,7 @@ let handleNative (args: string list) =
         )
     else
         let dirPath = ProjectInfo.TestPaths.JSNativeDirectory + "/siren"
-        let fableTranspile =
-            CmdLine.empty
-            |> CmdLine.appendRaw "fable"
-            |> CmdLine.appendRaw ProjectInfo.Projects.Siren
-            |> CmdLine.appendPrefix "--outDir" dirPath
-            |> CmdLine.appendRaw "--noCache"
-            |> CmdLine.toString
-        Command.Run("dotnet", fableTranspile)
-        Index.JS.generate dirPath
+        Bundle.TypeScript.Main(dirPath)
         Command.Run(
             "npx",
             mochaComand

@@ -429,9 +429,11 @@ type gantt =
 type pieChart =
     static member raw (line: string) = PieChartElement line
     static member data (name: string, value: float) = PieChart.formatData name value |> PieChartElement
-    static member data (name: string, value: int) = PieChart.formatData name value |> PieChartElement
-
-
+    #if !FABLE_COMPILER
+    // Need this function to tell dotnet that int should be written as "5" and not "5.0".
+    // Cannot allow function for fable, because typescript will not allow shadowing
+    static member data (name: string, value: int) = PieChart.formatData name value |> PieChartElement 
+    #endif
 
 [<AttachMembers>]
 type quadrant =

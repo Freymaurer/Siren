@@ -43,6 +43,18 @@ let main argv =
             Test.Python.handleNative args
             Test.JavaScript.handleNative args
         | _ -> printHelp ()
+    | "bundle" :: args ->
+        match args with
+        | "ts" :: _ -> 
+            Bundle.TypeScript.Main(ProjectInfo.Packages.JS)
+        | "py" :: _ ->
+            Bundle.Python.Main(ProjectInfo.Packages.PY)
+        | _ -> ()
+    | "publish" :: args ->
+        match args with
+            | "npm" :: _ -> 
+                Publish.Npm.Main()
+            | _ -> ()
     | "examples" :: _ ->
         Examples.Flowchart.writeMoonRocketExample()
         Examples.EntityRelationshipDiagram.writeCarExample()
@@ -53,9 +65,9 @@ let main argv =
     | "index" :: args ->
         match args with
         | "js" :: _ -> 
-            Index.JS.generate @"C:\Users\Kevin\source\repos\Siren\tests\JavaScript\siren"
+            Index.JS.generate @"C:\Users\Kevin\source\repos\Siren\tests\JavaScript\siren" false
         | "py" :: _ -> 
-            Index.PY.generate @"C:\Users\Kevin\source\repos\Siren\tests\Python\siren"
+            Index.PY.generate @"C:\Users\Kevin\source\repos\Siren\tests\Python\siren" 
         | _ -> printHelp ()
     | _ -> printHelp ()
 

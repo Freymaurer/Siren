@@ -6,7 +6,17 @@ open Build.Utils.Path
 
 let root = Path.Resolve()
 
-let [<Literal>] PackageFolder = "./pkg"
+[<Literal>]
+let Version = "0.1.0"
+
+[<Literal>]
+let PyprojectTOML = "./pyproject.toml"
+
+[<Literal>]
+let PackageJSON = "./package.json"
+
+[<Literal>]
+let README = "./README.md"
 
 module TestPaths =
 
@@ -18,7 +28,14 @@ module TestPaths =
 
 module Packages =
 
-    let NET = Path.Resolve(PackageFolder, "NET")
+    [<Literal>]
+    let PackageFolder = "./dist"
+
+    let NET = Path.Resolve(PackageFolder, "net")
+    let JS = Path.Resolve(PackageFolder, "js")
+    let TS = Path.Resolve(PackageFolder, "ts")
+    let PY = Path.Resolve(PackageFolder, "py")
+
 
 module Projects =
 

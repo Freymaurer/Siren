@@ -13,6 +13,10 @@
     <Compile Include="CodeGen.fs" />
     <Compile Include="Util.fs" />
     <Compile Include="ProjectInfo.fs" />
+    <Compile Include="Bundle\TypeScript.fs" />
+    <Compile Include="Bundle\Python.fs" />
+    <Compile Include="Publish\PyPi.fs" />
+    <Compile Include="Publish\Npm.fs" />
     <Compile Include="Test\CSharp.fs" />
     <Compile Include="Test\Python.fs" />
     <Compile Include="Test\JavaScript.fs" />

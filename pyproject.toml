@@ -1,15 +1,16 @@
 [tool.poetry]
-name = "siren"
-version = "1.0.0"
-description = ""
+name = "siren-dsl"
+version = "0.0.1"
+description = "A simple dsl for creating mermaid graphs!"
 authors = ["Kevin Frey <freymaurer@gmx.de>"]
 maintainers = []
 readme = "README.md"
 repository = "https://github.com/Freymaurer/Siren"
-keywords = []
+keywords = ["mermaid", "dsl", "fable", "graphs"]
 
 [tool.poetry.dependencies]
 python = "^3.11"
+fable-library = "^0.9.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.1.1"

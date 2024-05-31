@@ -1,14 +1,18 @@
 {
-  "name": "siren",
-  "version": "1.0.0",
-  "description": "",
+  "name": "siren-dsl",
+  "description": "A simple dsl for creating mermaid graphs!",
+  "keywords": ["mermaid", "dsl", "fable", "graphs"],
+  "version": "0.1.0",
   "main": "index.js",
+  "types": "index.d.ts",
   "type": "module",
   "directories": {
     "test": "tests"
   },
+  "files": [ "dist/js" ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "fable": "dotnet fable src/Siren -o dist --lang ts --fableLib fable-library --noReflection",
+    "build": "npm run fable && tsc --outDir ./dist --declaration --noEmit false"
   },
   "repository": {
     "type": "git",
@@ -21,6 +25,10 @@
   },
   "homepage": "https://github.com/Freymaurer/Siren#readme",
   "devDependencies": {
-    "mocha": "^10.4.0"
+    "mocha": "^10.4.0",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "fable-library": "^1.1.1"
   }
 }

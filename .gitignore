@@ -176,9 +176,6 @@ DocProject/Help/*.hhp
 DocProject/Help/Html2
 DocProject/Help/html
 
-# Click-Once directory
-publish/
-
 # Publish Web Output
 *.[Pp]ublish.xml
 *.azurePubxml
@@ -402,3 +399,4 @@ tests/JavaScript/siren/
 tests/Python/siren/
 .venv
 /docs/.vscode
+/dist
