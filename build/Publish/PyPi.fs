@@ -37,7 +37,7 @@ let private updateVersion =
     let regex = Regex(pattern)
     let file = File.ReadAllText(ProjectInfo.PyprojectTOML)
     let updatedFile = regex.Replace(file, $"version = \"{ProjectInfo.Version}\"")
-    File.WriteAllText(ProjectInfo.PackageJSON, updatedFile)
+    File.WriteAllText(ProjectInfo.PyprojectTOML, updatedFile)
     File.WriteAllText(Path.Combine([|ProjectInfo.Packages.PY; "pyproject.toml"|]), updatedFile)
 
 open System

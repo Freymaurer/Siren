@@ -37,7 +37,8 @@ module Packages =
     [<Literal>]
     let PackageFolder = "./dist"
 
-    let NET = Path.Resolve(PackageFolder, "net")
+    let FSHARP = Path.Resolve(PackageFolder, "fsharp")
+    let CSHARP = Path.Resolve(PackageFolder, "csharp")
     let JS = Path.Resolve(PackageFolder, "js")
     let TS = Path.Resolve(PackageFolder, "ts")
     let PY = Path.Resolve(PackageFolder, "py")
@@ -45,6 +46,9 @@ module Packages =
 
 module Projects =
 
+    [<Literal>]
     let Siren = "./src/Siren/Siren.fsproj"
+    [<Literal>]
+    let SirenSea = "./src/Siren.Sea/Siren.Sea.csproj"
     let TestsSiren = System.IO.Path.Combine(TestPaths.CoreDirectory, "Siren.Tests.fsproj")
     let TestsSirenSea = System.IO.Path.Combine(TestPaths.CSharpDirectory, "Siren.Sea.Tests.csproj")

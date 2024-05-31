@@ -49,14 +49,32 @@ let main argv =
             Bundle.TypeScript.Main(ProjectInfo.Packages.JS)
         | "py" :: _ ->
             Bundle.Python.Main(ProjectInfo.Packages.PY)
-        | _ -> ()
+        | "f#" :: _ ->
+            Bundle.Net.Main(ProjectInfo.Projects.Siren, ProjectInfo.Packages.FSHARP)
+        | "c#" :: _ ->
+            Bundle.Net.Main(ProjectInfo.Projects.SirenSea, ProjectInfo.Packages.CSHARP)
+        | _ -> printHelp ()
     | "publish" :: args ->
         match args with
-            | "npm" :: _ -> 
-                Publish.Npm.Main()
-            | "pypi" :: _ -> 
-                Publish.PyPi.Main()
-            | _ -> ()
+        | "full" :: _ ->
+            // bundle
+            Bundle.TypeScript.Main(ProjectInfo.Packages.JS)
+            Bundle.Python.Main(ProjectInfo.Packages.PY)
+            Bundle.Net.Main(ProjectInfo.Projects.Siren, ProjectInfo.Packages.FSHARP)
+            Bundle.Net.Main(ProjectInfo.Projects.SirenSea, ProjectInfo.Packages.CSHARP)
+            // publish
+            Publish.Npm.Main()
+            Publish.PyPi.Main()
+            Publish.Nuget.Main(ProjectInfo.Packages.FSHARP)
+            Publish.Nuget.Main(ProjectInfo.Packages.CSHARP)
+        | "npm" :: _ -> 
+            Publish.Npm.Main()
+        | "pypi" :: _ -> 
+            Publish.PyPi.Main()
+        | "nuget" :: _ -> 
+            Publish.Nuget.Main(ProjectInfo.Packages.FSHARP)
+            Publish.Nuget.Main(ProjectInfo.Packages.CSHARP)
+        | _ -> printHelp ()
     | "examples" :: _ ->
         Examples.Flowchart.writeMoonRocketExample()
         Examples.EntityRelationshipDiagram.writeCarExample()

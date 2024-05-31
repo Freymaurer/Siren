@@ -5,8 +5,21 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
+	<PropertyGroup>
+		<Authors>Kevin Frey, Christopher Lux, Kevin Schneider</Authors>
+		<Description>A simple dsl for creating mermaid graphs!</Description>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<!--<PackageIcon>logo.png</PackageIcon>-->
+		<PackageTags>mermaid graphs F# fable fable-library fable-dotnet fable-javascript fable-python fable-typescript</PackageTags>
+		<PackageProjectUrl>https://github.com/Freymaurer/Siren</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/Freymaurer/Siren</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+	</PropertyGroup>
+
   <ItemGroup>
     <Content Remove="C:\Users\Kevin\.nuget\packages\fable.core\4.3.0\contentFiles\any\netstandard2.0\CHANGELOG.md" />
+	<None Include="..\..\README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
   <ItemGroup>
@@ -21,6 +34,14 @@
 
   <ItemGroup>
     <PackageReference Include="Fable.Core" Version="4.3.0" />
+  </ItemGroup>
+
+  <!-- Add source files to "fable" folder in Nuget package -->
+  <ItemGroup>
+  	<!-- Include all files that are compiled with this project -->
+  	<Content Include="@(Compile)" Pack="true" PackagePath="fable/%(RelativeDir)%(Filename)%(Extension)" />
+  	<!-- Include the project file itself as well -->
+  	<Content Include="$(MSBuildThisFileFullPath)" Pack="true" PackagePath="fable/" />
   </ItemGroup>
 
 </Project>
