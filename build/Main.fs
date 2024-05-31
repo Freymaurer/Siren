@@ -54,6 +54,8 @@ let main argv =
         match args with
             | "npm" :: _ -> 
                 Publish.Npm.Main()
+            | "pypi" :: _ -> 
+                Publish.PyPi.Main()
             | _ -> ()
     | "examples" :: _ ->
         Examples.Flowchart.writeMoonRocketExample()

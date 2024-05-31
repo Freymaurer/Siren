@@ -18,6 +18,12 @@ let PackageJSON = "./package.json"
 [<Literal>]
 let README = "./README.md"
 
+module Keys =
+    
+    let [<Literal>] PyPi = "PYPI_KEY"
+    let [<Literal>] NPM = "NPM_KEY"
+    let [<Literal>] Nuget = "NUGET_KEY"
+
 module TestPaths =
 
     let [<Literal>] BaseDirectory = "./tests"
