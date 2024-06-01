@@ -10,32 +10,32 @@ type FeatureItem = {
 
 const FeatureList: FeatureItem[] = [
   {
-    title: 'Easy to Use',
+    title: 'Explorative API',
     Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        Siren is designed to be an explorative API. It is easy to use and easy to
+        understand. It is a great tool for beginners and experts alike.
       </>
     ),
   },
   {
-    title: 'Focus on What Matters',
+    title: 'No more typos!',
     Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        Experts find Siren reduces the number of typos in their mermaid graphs by 99.99%*!
+        <br></br>
+        <sup style={{fontSize: '0.75rem'}}>* This is a made-up statistic.</sup>
       </>
     ),
   },
   {
-    title: 'Powered by React',
+    title: 'Choose your poison!',
     Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        Siren is available for F#, C#, Python and JavaScript (with added Types)!
       </>
     ),
   },

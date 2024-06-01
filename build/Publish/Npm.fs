@@ -35,6 +35,6 @@ let Main() =
     printfn "Ready to publish version %s to npm. Continue? (y/n)" ProjectInfo.Version
     match Console.ReadLine() with
     | "y" ->
-        printfn "YEAH!"
         Command.Run("npm", publish)
+        printfn "YEAH!"
     | _ -> printfn "Aborted"

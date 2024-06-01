@@ -45,14 +45,14 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
+            'https://github.com/Freymaurer/Siren/tree/main/docs/',
         },
         blog: {
           showReadingTime: true,
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
+            'https://github.com/Freymaurer/Siren/tree/main/docs/',
         },
         theme: {
           customCss: './src/css/custom.css',
@@ -65,9 +65,9 @@ const config: Config = {
     // Replace with your project's social card
     image: 'img/docusaurus-social-card.jpg',
     navbar: {
-      title: 'Siren - Docs',
+      title: 'Siren',
       logo: {
-        alt: 'My Site Logo',
+        alt: 'Siren Logo',
         src: 'img/logo.svg',
       },
       items: [
@@ -92,8 +92,8 @@ const config: Config = {
           title: 'Docs',
           items: [
             {
-              label: 'Tutorial',
-              to: '/docs/intro',
+              label: 'Installation',
+              to: '/docs/installation',
             },
           ],
         },
@@ -128,12 +128,12 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} Siren, Inc. Built with Docusaurus.`,
     },
     prism: {
       theme: prismThemes.github,
       darkTheme: prismThemes.dracula,
-      additionalLanguages: ['fsharp', 'csharp', 'yaml'],
+      additionalLanguages: ['fsharp', 'csharp', 'yaml', 'python', 'typescript'],
     },
     mermaid: {
       theme: {light: 'neutral'}

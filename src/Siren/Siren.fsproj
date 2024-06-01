@@ -9,7 +9,7 @@
 		<Authors>Kevin Frey, Christopher Lux, Kevin Schneider</Authors>
 		<Description>A simple dsl for creating mermaid graphs!</Description>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<!--<PackageIcon>logo.png</PackageIcon>-->
+		<PackageIcon>logo.png</PackageIcon>
 		<PackageTags>mermaid graphs F# fable fable-library fable-dotnet fable-javascript fable-python fable-typescript</PackageTags>
 		<PackageProjectUrl>https://github.com/Freymaurer/Siren</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/Freymaurer/Siren</RepositoryUrl>
@@ -20,6 +20,7 @@
   <ItemGroup>
     <Content Remove="C:\Users\Kevin\.nuget\packages\fable.core\4.3.0\contentFiles\any\netstandard2.0\CHANGELOG.md" />
 	<None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+	<None Include="..\..\assets\logo.png" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
   <ItemGroup>
