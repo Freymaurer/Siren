@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "siren-dsl"
-version = "0.0.1"
+version = "0.2.0"
 description = "A simple dsl for creating mermaid graphs!"
 authors = ["Kevin Frey <freymaurer@gmx.de>"]
 maintainers = []

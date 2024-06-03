@@ -23,9 +23,6 @@
     <Compile Include="Test\Python.fs" />
     <Compile Include="Test\JavaScript.fs" />
     <Compile Include="Test\FSharp.fs" />
-    <Compile Include="Examples\Util.fs" />
-    <Compile Include="Examples\Flowchart.fs" />
-    <Compile Include="Examples\EntityRelationshipDiagram.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
 

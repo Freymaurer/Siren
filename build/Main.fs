@@ -10,14 +10,34 @@ Usage: dotnet run <command> [<args>]
 Available commands:
     test                            Run the main tests suite
         Subcommands:
-            placeholder1            Run the tests for the legacy version
-            placeholder2            Run the tests for JavaScript
-            placeholder3            Run the tests for Newtonsoft
-            placeholder4            Run the tests for Python
+            f#                      Run f# tests in `Core`
+            c#                      Run c# tests in `CSharp`
+            js                      Run the js transpiled tests
+            js native               Run the native mocha tests
+            py                      Run the py transpiled tests
+            py native               Run the native pytest tests
 
-        Options for all except integration and standalone:
-            --plh                   Watch for changes and re-run the tests
-        """
+    bundle
+        Subcommands:
+            ts                      Bundle the TypeScript package
+            py                      Bundle the Python package
+            f#                      Bundle the F# package
+            c#                      Bundle the C# package
+
+    Publish
+        Subcommands:
+            full                    Run all tests, bundle all packages and publish all packages
+            npm                     Publish the npm package
+            pypi                    Publish the pypi package
+            nuget                   Publish the nuget package
+
+    codegen                         Print active class to console
+
+    index
+        Subcommands:
+            js                      Generate the js index file
+            py                      Generate the py index file
+"""
 
     printfn $"%s{helpText}"
 
@@ -57,6 +77,13 @@ let main argv =
     | "publish" :: args ->
         match args with
         | "full" :: _ ->
+            // test
+            Test.FSharp.handle []
+            Test.CSharp.handle args
+            Test.JavaScript.handle []
+            Test.Python.handle []
+            Test.Python.handleNative args
+            Test.JavaScript.handleNative args
             // bundle
             Bundle.TypeScript.Main(ProjectInfo.Packages.JS)
             Bundle.Python.Main(ProjectInfo.Packages.PY)
@@ -75,10 +102,7 @@ let main argv =
             Publish.Nuget.Main(ProjectInfo.Packages.FSHARP)
             Publish.Nuget.Main(ProjectInfo.Packages.CSHARP)
         | _ -> printHelp ()
-    | "examples" :: _ ->
-        Examples.Flowchart.writeMoonRocketExample()
-        Examples.EntityRelationshipDiagram.writeCarExample()
-    | "codegen" :: args ->
+    | "codegen" :: _ ->
         printfn "STARTING CODEGEN..."
         CodeGen.test() 
         printfn "ENDING CODEGEN..."

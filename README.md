@@ -1,162 +1,125 @@
 # Siren
 
-# Examples 
+Siren is a simple DSL for creating [Mermaid](https://mermaid.js.org) graphs YAML.
 
-## Flowchart
+Have a look at the docs here:
 
-Python currently not running due to:
-https://github.com/fable-compiler/Fable/issues/3808
+* [Installation]()
+* [Docs]()
+* [Blog post]()
 
-<!--Example1-->
-```fsharp
-diagram.flowchart(flowchartDirection.bt, [
-    flowchart.subgraph ("space", [
-        flowchart.directionBT
-        flowchart.linkDottedArrow("earth", "moon", formatting.unicode "🚀", 6)
-        flowchart.nodeRound "moon"
-        flowchart.subgraph ("atmosphere", [
-            flowchart.nodeCircle "earth"
-        ])
-    ])
-])
-|> siren.write
+<table>
+  <thead>
+    <tr>
+      <th>Latest Release</th>
+      <th>Downloads</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <a href="https://pypi.org/project/siren-dsl/">
+          <img src="https://img.shields.io/pypi/v/siren-dsl?logo=pypi" alt="latest release" />
+        </a>
+      </td>
+      <td>
+        <a href="https://pepy.tech/project/siren-dsl">
+          <img src="https://pepy.tech/badge/siren-dsl" alt="downloads" />
+        </a>
+      </td>
+    </tr>
+    <!-- js package -->
+    <tr>
+      <td>
+        <a href="https://www.npmjs.com/package/siren-dsl">
+          <img src="https://img.shields.io/npm/v/siren-dsl?logo=npm" alt="latest release" />
+        </a>
+      </td>
+      <td>
+        <a href="https://www.npmjs.com/package/siren-dsl">
+          <img src="https://img.shields.io/npm/dt/siren-dsl.svg" alt="downloads" />
+        </a>
+      </td>
+    </tr>
+    <!-- f# nuget package -->
+    <tr>
+      <td>
+        <a href="https://www.nuget.org/packages/Siren/">
+          <img src="https://img.shields.io/nuget/v/Siren?logo=nuget" alt="latest release" />
+        </a>
+      </td>
+      <td>
+        <a href="https://www.nuget.org/packages/Siren/">
+          <img src="https://img.shields.io/nuget/dt/Siren.svg" alt="downloads" />
+        </a>
+      </td>
+      <!-- c# nuget package "Siren.Sea" -->
+    </tr>
+    <tr>
+      <td>
+        <a href="https://www.nuget.org/packages/Siren.Sea/">
+          <img src="https://img.shields.io/nuget/v/Siren.Sea?logo=nuget" alt="latest release" />
+        </a>
+      </td>
+      <td>
+        <a href="https://www.nuget.org/packages/Siren.Sea/">
+          <img src="https://img.shields.io/nuget/dt/Siren.Sea.svg" alt="downloads" />
+        </a>
+      </td>
+  </tbody>
 
-```
+</table>
 
-```mermaid
-flowchart BT
-    subgraph space
-        direction BT
-        earth-......->|"🚀"|moon
-        moon(moon)
-        subgraph atmosphere
-            earth((earth))
-        end
-    end
+---
+## Contribution
 
-```
-<!--Example1-End-->
+If you have any ideas on how to improve the library, please feel free to contribute! The best way to get in contact is using the issues! 
 
-## Class Diagram
+---
+## Local Development
 
-<!--Example2-->
-```fsharp
-let duck,animal,zebra,fish = "Duck","Animal","Zebra", "Fish"
-siren.classDiagram [
-    classDiagram.note "From Duck till Zebra"
-    classDiagram.relationshipInheritance(duck, animal)
-    classDiagram.note(@"can fly\ncan swim\ncan dive\ncan help in debugging", duck)
-    classDiagram.relationshipInheritance(fish, animal)
-    classDiagram.relationshipInheritance(zebra, animal)
-    classDiagram.classMember(animal,"+int age")
-    classDiagram.classMember(animal,"+String gender")
-    classDiagram.classMember(animal,"+isMammal()")
-    classDiagram.classMember(animal,"+mate()")
-    classDiagram.class'(duck,members=[
-        "+String beakColor"
-        "+swim()"
-        "+quack()"
-    ])
-    classDiagram.class'(fish,members=[
-        "-int sizeInFeet"
-        "-canEat()"
-    ])
-    classDiagram.class'(zebra,members=[
-        "+bool is_wild"
-        "+run()"
-    ])
-    classDiagram.namespace'("Mammals", [
-        classDiagram.class'(zebra)
-    ])
-]
-|> siren.write
+### Requirements
 
-```
+Because this library targets multiple programming languages we need to support all of them:
 
-```mermaid
-classDiagram
-    note "From Duck till Zebra"
-    Duck --|> Animal
-    note for Duck "can fly\ncan swim\ncan dive\ncan help in debugging"
-    Fish --|> Animal
-    Zebra --|> Animal
-    Animal : +int age
-    Animal : +String gender
-    Animal : +isMammal()
-    Animal : +mate()
-    class Duck{
-        +String beakColor
-        +swim()
-        +quack()
-    }
-    class Fish{
-        -int sizeInFeet
-        -canEat()
-    }
-    class Zebra{
-        +bool is_wild
-        +run()
-    }
-    namespace Mammals {
-        class Zebra
-    }
+- [nodejs and npm](https://nodejs.org/en/download)
+    - verify with `node --version` (Tested with v20.10.0)
+    - verify with `npm --version` (Tested with v9.2.0)
+- [.NET SDK](https://dotnet.microsoft.com/en-us/download)
+    - verify with `dotnet --version` (Tested with 8.0.205)
+- [Python](https://www.python.org/downloads/)
+    - verify with `py --version` (Tested with 3.11.9, known to work only for >=3.11)
 
-```
-<!--Example2-End-->
+### Setup
 
-## Entity Relationship Diagram
+This needs to be done on a fresh download once. Paths for python venv executable might be different depending on the OS.
 
-<!--Example3-->
-```fsharp
-let CAR, NAMED_DRIVER, PERSON, MANUFACTURER = "CAR", "NAMED-DRIVER", "PERSON", "MANUFACTURER"
-siren.erDiagram [
-    erDiagram.relationship (CAR, erCardinality.onlyOne, NAMED_DRIVER, erCardinality.zeroOrMany, "allows")
-    erDiagram.entity (CAR,attr=[
-        erDiagram.attribute("string", "registrationNumber", [erKey.pk])
-        erDiagram.attribute("string", "make")
-        erDiagram.attribute("string", "model")
-        erDiagram.attribute("string[]", "parts")
-    ])
-    erDiagram.relationship (PERSON, erCardinality.onlyOne, NAMED_DRIVER, erCardinality.zeroOrMany, "is")
-    erDiagram.entity (PERSON,attr=[
-        erDiagram.attribute("string", "driversLicense", [erKey.pk], "The license is #")
-        erDiagram.attribute("string(99)", "firstName", comment="Only 99 characters are allowed")
-        erDiagram.attribute("string", "lastName")
-        erDiagram.attribute("string", "phone", [erKey.uk])
-        erDiagram.attribute("int", "age")
-    ])
-    erDiagram.entity(NAMED_DRIVER, attr=[
-        erDiagram.attribute("string", "carRegistrationNumber", [erKey.pk; erKey.fk])
-        erDiagram.attribute("string", "driverLicence", [erKey.pk; erKey.fk])
-    ])
-    erDiagram.relationship(MANUFACTURER,erCardinality.onlyOne,CAR,erCardinality.zeroOrMany,"makes")
-]
-|> siren.write
+1. `dotnet tool restore`
+2. `npm install`
+3. `py -m venv ./.venv`
+4. `.\.venv\Scripts\Activate.ps1`
+4. `python -m pip install -U pip setuptools`
+5. `python -m pip install poetry`
+6. `python -m poetry install --no-root`
 
-```
+### Testing
 
-```mermaid
-erDiagram
-    CAR only one to zero or many NAMED-DRIVER : allows
-    CAR {
-        string registrationNumber PK
-        string make
-        string model
-        string[] parts
-    }
-    PERSON only one to zero or many NAMED-DRIVER : is
-    PERSON {
-        string driversLicense PK "The license is #"
-        string(99) firstName "Only 99 characters are allowed"
-        string lastName
-        string phone UK
-        int age
-    }
-    NAMED-DRIVER {
-        string carRegistrationNumber PK, FK
-        string driverLicence PK, FK
-    }
-    MANUFACTURER only one to zero or many CAR : makes
+First activate python virtual environment (`.\.venv\Scripts\Activate.ps1`).
 
-```
-<!--Example3-End-->
+`.\build.cmd test`
+
+*or specify target*
+
+`.\build.cmd test [f#, c#, js [native], py [native]]`
+
+### Publish
+
+Requires API keys for Nuget and PyPi. 
+
+The following command will run all tests, bundle and then start publishing!
+
+`.\build.cmd publish full`
+
+*or only publish specific targets, without test and bundle*
+
+`.\build.cmd publish [npm, pypi, nuget]`
