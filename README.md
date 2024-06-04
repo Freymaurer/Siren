@@ -121,7 +121,7 @@ Requires API keys for Nuget and PyPi.
 
 The following command will run all tests, bundle and then start publishing!
 
-`.\build.cmd publish full`
+`.\build.cmd publish pipeline`
 
 *or only publish specific targets, without test and bundle*
 

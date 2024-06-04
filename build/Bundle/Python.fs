@@ -19,7 +19,9 @@ let private transpileFSharp(pyPath) =
     |> CmdLine.appendPrefix "-o" pyPath
     |> CmdLine.appendRaw "--noCache"
     |> CmdLine.appendPrefix "--lang" "py"
-    |> CmdLine.appendPrefix "--fableLib" "fable-library"
+    // comment out until fixed
+    // https://github.com/fable-compiler/Fable/issues/3832
+    //|> CmdLine.appendPrefix "--fableLib" "fable-library"
     |> CmdLine.appendRaw "--noReflection"
     |> CmdLine.toString
 

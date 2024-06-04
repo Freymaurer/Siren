@@ -26,7 +26,7 @@ Available commands:
 
     Publish
         Subcommands:
-            full                    Run all tests, bundle all packages and publish all packages
+            pipeline                Run all tests, bundle all packages and publish all packages
             npm                     Publish the npm package
             pypi                    Publish the pypi package
             nuget                   Publish the nuget package
@@ -76,7 +76,7 @@ let main argv =
         | _ -> printHelp ()
     | "publish" :: args ->
         match args with
-        | "full" :: _ ->
+        | "pipeline" :: _ ->
             // test
             Test.FSharp.handle []
             Test.CSharp.handle args
