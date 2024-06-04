@@ -12,6 +12,12 @@ import TabItem from '@theme/TabItem';
 
 Siren consists of one main code base written in F#. This code base is then transpiled to JavaScript, TypeScript, Python and made accessible from C#.
 
+:::tip[Fable.Multiverse]
+
+To make it as easy as possible to create a Fable library that publishes in multiple languages, I created a template called [Fable.Multiverse](https://github.com/Freymaurer/Fable.Multiverse) :tada:
+
+:::
+
 ## Idea 💡
 
 During a hackathon for our research data management consortium, we were discussing ideas for visualizing graph like structures in a way that allows easy gitlab integration and can be understood and used by any level of user. The idea we pursued was to add `.md` files with mermaid graphs for an easy overview. So why not write a domain specific language for mermaid graphs to make creation of such graphs easier and more error proof. Good idea, but what programming language should we use? In our consortium we have several groups, some using JavaScript, some Python, some (us) .NET or more specifically F#. Because i already have quite some experience using [Fable][Fable], i did the mental checklist to see if it would be a good fit for this project.
@@ -520,8 +526,10 @@ let writeIndexFile (path: string) (fileName: string) (content: string) =
 
 <TabItem value="js" label="Indexjs.fs">
 ```fsharp
-let private getAllJsFiles(path: string) = 
-    Util.getAllFiles(path,"*.js")
+module Index.JS
+
+let private getAllJsFiles (path: string) fileExtension = 
+    Util.getAllFiles(path,$"*.{fileExtension}")
 
 let private pattern (className: string) = sprintf @"^export class (?<ClassName>%s)+[\s{].*({)?" className
 
@@ -534,7 +542,7 @@ let private createImportStatements (info: (string*string) []) =
     let sb = StringBuilder()
     let importCollection = info |> Array.groupBy snd |> Array.map (fun (p,a) -> p, a |> Array.map fst )
     for filePath, imports in importCollection do
-        let p = filePath.Replace("\\","/")
+        let p = filePath.Replace("\\","/").Replace("ts","js")
         sb.Append "export { " |> ignore
         sb.AppendJoin(", ", imports) |> ignore
         sb.Append " } from " |> ignore
@@ -543,14 +551,15 @@ let private createImportStatements (info: (string*string) []) =
         sb.AppendLine() |> ignore
     sb.ToString()
 
-let private generateIndexfile (rootPath: string, fileName: string, whiteList: string []) =
-    getAllJsFiles(rootPath)
+let private generateIndexfile (rootPath: string, fileName: string, whiteList: string [], fileExtension: string) =
+    getAllJsFiles rootPath fileExtension
     |> findJsClasses rootPath whiteList
     |> createImportStatements
     |> Util.writeIndexFile rootPath fileName
 
-let generate(rootPath: string) = 
-    generateIndexfile(rootPath, "index.js", WhiteList.WhiteList)
+let generate(rootPath: string) (ts: bool) = 
+    let extension = if ts then "ts" else "js"
+    generateIndexfile(rootPath, $"index.{extension}", WhiteList.WhiteList, extension)
 ```
 </TabItem>
 
@@ -608,67 +617,67 @@ let generate(rootPath: string) =
 module Index.WhiteList
 
 let WhiteList = [|
-        "SirenElement"
-        // ThemeVaruiables
-        "themeVariable"
-        "quadrantTheme"; 
-        "gitTheme"; 
-        "timelineTheme"; 
-        "xyChartTheme"; 
-        "pieTheme";
-        // Config
-        "graphConfig";
-        "flowchartConfig"; 
-        "sequenceConfig"; 
-        "ganttConfig"; 
-        "journeyConfig"; 
-        "timelineConfig"; 
-        "classConfig"; 
-        "stateConfig"; 
-        "erConfig"; 
-        "quadrantChartConfig"; 
-        "pieConfig"; 
-        "sankeyConfig"; 
-        "xyChartConfig"; 
-        "mindmapConfig"; 
-        "gitGraphConfig"; 
-        "requirementConfig"; 
-        // Graphs and Helpers
-        "formatting"; 
-        "direction"; 
-        "flowchart"; 
-        "notePosition"; 
-        "sequence"; 
-        "classMemberVisibility"; 
-        "classMemberClassifier"; 
-        "classDirection"; 
-        "classCardinality"; 
-        "classRltsType"; 
-        "classDiagram"; 
-        "stateDiagram"; 
-        "erKey"; 
-        "erCardinality"; 
-        "erDiagram"; 
-        "journey"; 
-        "ganttTime"; 
-        "ganttTags"; 
-        "ganttUnit"; 
-        "gantt"; 
-        "pieChart"; 
-        "quadrant"; 
-        "rqRisk"; 
-        "rqMethod"; 
-        "requirement"; 
-        "gitType"; 
-        "git"; 
-        "mindmap"; 
-        "timeline"; 
-        "sankey"; 
-        "xyChart"; 
-        "block"; 
-        "theme"; 
-        "siren"; 
-    |]
+    "SirenElement"
+    // ThemeVaruiables
+    "themeVariable"
+    "quadrantTheme"; 
+    "gitTheme"; 
+    "timelineTheme"; 
+    "xyChartTheme"; 
+    "pieTheme";
+    // Config
+    "graphConfig";
+    "flowchartConfig"; 
+    "sequenceConfig"; 
+    "ganttConfig"; 
+    "journeyConfig"; 
+    "timelineConfig"; 
+    "classConfig"; 
+    "stateConfig"; 
+    "erConfig"; 
+    "quadrantChartConfig"; 
+    "pieConfig"; 
+    "sankeyConfig"; 
+    "xyChartConfig"; 
+    "mindmapConfig"; 
+    "gitGraphConfig"; 
+    "requirementConfig"; 
+    // Graphs and Helpers
+    "formatting"; 
+    "direction"; 
+    "flowchart"; 
+    "notePosition"; 
+    "sequence"; 
+    "classMemberVisibility"; 
+    "classMemberClassifier"; 
+    "classDirection"; 
+    "classCardinality"; 
+    "classRltsType"; 
+    "classDiagram"; 
+    "stateDiagram"; 
+    "erKey"; 
+    "erCardinality"; 
+    "erDiagram"; 
+    "journey"; 
+    "ganttTime"; 
+    "ganttTags"; 
+    "ganttUnit"; 
+    "gantt"; 
+    "pieChart"; 
+    "quadrant"; 
+    "rqRisk"; 
+    "rqMethod"; 
+    "requirement"; 
+    "gitType"; 
+    "git"; 
+    "mindmap"; 
+    "timeline"; 
+    "sankey"; 
+    "xyChart"; 
+    "block"; 
+    "theme"; 
+    "siren"; 
+|]
 ```
 </TabItem>
 </Tabs>
@@ -697,10 +706,40 @@ from .siren import formatting, direction, flowchart, note_position, sequence, cl
 </TabItem>
 </Tabs>
 
+
+
 ## Publish
 
+As soon as we get to the publishing step everything is back to standard for the respective languages.
+
+### .NET
+
+The easiest. We already have the required project files, no need to transpile. So we can simply use `dotnet pack` to create .nupkg files. 
+Then `dotnet nuget push` to push to [nuget.org](https://www.nuget.org).
+
+
 :::warning
-WIP
+These are not the exact CLI args used. Details can be found in the build project in the GitHub repository.
+:::
+
+### Pypi
+
+Also quite easy. Transpile f# code to python code, copy `pyproject.toml` and `README.md` into the `dist` folder and create `index.py` file. 
+Run `python -m poetry build` to create a publishing files. Then publish files with `python -m poetry publish`
+
+:::warning
+These are not the exact CLI args used. Details can be found in the build project in the GitHub repository.
+:::
+
+### JavaScript (+Types)
+
+For this i followed the Example of [Better Typed than Sorry](https://fable.io/blog/2023/2023-04-20-Better_Typed_than_Sorry.html) by [Alfonso García-Caro](https://github.com/alfonsogarciacaro).
+
+Transpile F# to TypeScript, then use `tsc` to transpile TypeScript to JavaScript and type information files (`*.d.ts`). Add the `index.js` file to the `dist folder`
+Then publish to npm with `npm publish`.
+
+:::warning
+These are not the exact CLI args used. Details can be found in the build project in the GitHub repository.
 :::
 
 ## Deep Dive

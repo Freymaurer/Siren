@@ -66,6 +66,7 @@ Have a look at the docs here:
           <img src="https://img.shields.io/nuget/dt/Siren.Sea.svg" alt="downloads" />
         </a>
       </td>
+    </tr>
   </tbody>
 
 </table>
@@ -98,9 +99,9 @@ This needs to be done on a fresh download once. Paths for python venv executable
 2. `npm install`
 3. `py -m venv ./.venv`
 4. `.\.venv\Scripts\Activate.ps1`
-4. `python -m pip install -U pip setuptools`
-5. `python -m pip install poetry`
-6. `python -m poetry install --no-root`
+5. `python -m pip install -U pip setuptools`
+6. `python -m pip install poetry`
+7. `python -m poetry install --no-root`
 
 ### Testing
 

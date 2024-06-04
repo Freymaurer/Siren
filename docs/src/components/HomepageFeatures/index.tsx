@@ -4,14 +4,14 @@ import styles from './styles.module.css';
 
 type FeatureItem = {
   title: string;
-  Svg: React.ComponentType<React.ComponentProps<'svg'>>;
+  Img: string;
   description: JSX.Element;
 };
 
 const FeatureList: FeatureItem[] = [
   {
     title: 'Explorative API',
-    Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
+    Img: 'img/feature_happy.jpeg',
     description: (
       <>
         Siren is designed to be an explorative API. It is easy to use and easy to
@@ -21,7 +21,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     title: 'No more typos!',
-    Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
+    Img: 'img/feature_thumbsup.jpeg',
     description: (
       <>
         Experts find Siren reduces the number of typos in their mermaid graphs by 99.99%*!
@@ -32,7 +32,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     title: 'Choose your poison!',
-    Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
+    Img: 'img/feature_wondering.jpeg',
     description: (
       <>
         Siren is available for F#, C#, Python and JavaScript (with added Types)!
@@ -41,11 +41,11 @@ const FeatureList: FeatureItem[] = [
   },
 ];
 
-function Feature({title, Svg, description}: FeatureItem) {
+function Feature({title, Img, description}: FeatureItem) {
   return (
     <div className={clsx('col col--4')}>
       <div className="text--center">
-        <Svg className={styles.featureSvg} role="img" />
+        <img style={{maxHeight: "300px"}} src={Img} role="img" />
       </div>
       <div className="text--center padding-horiz--md">
         <Heading as="h3">{title}</Heading>

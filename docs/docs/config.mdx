@@ -2,5 +2,125 @@
 sidebar_label: Config
 sidebar_position: 2
 ---
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Config
+
+Config variables are a concept used to adjust both rendering and behavior of some graphs.
+
+A good example for this are GitGraphs [offical documentation :books:](https://mermaid.js.org/syntax/gitgraph.html#customize-using-theme-variables).
+
+There are multiple ways to use config variables in Mermaid. Siren stays true to YAML and uses frontmatter syntax:
+
+```yaml
+---
+config:
+    theme: base
+    gitGraph:
+        showBranches: false
+---
+gitGraph
+    commit
+```
+
+In this example `showBranches` is part of the config options supported by GitGraphs.
+
+# Usage
+
+In Siren you can use config options in the following way:
 
 
+<Tabs groupId="preferred-lang" queryString>
+<TabItem value="fsharp" label="F#">
+
+```fsharp
+let hotfix = "hotfix"
+siren.git([
+    git.commit()
+    git.branch(hotfix)
+    git.checkout(hotfix)
+    git.commit()
+])
+    // use . syntax or pipe (|>) into siren.withTheme
+    .withTheme(theme.``base``)
+    .addGraphConfigVariable(gitGraphConfig.showBranches false)
+    .write()
+```
+
+</TabItem>
+<TabItem value="csharp" label="C#">
+
+```csharp
+string hotfix = "hotfix";
+string actual =
+    siren.git([
+        git.commit(),
+        git.branch(hotfix),
+        git.checkout(hotfix),
+        git.commit(),
+    ])
+        .withTheme(theme.@base)
+        .addGraphConfigVariable(gitGraphConfig.showBranches(false))
+        .write();
+```
+
+</TabItem>
+<TabItem value="py" label="Python">
+
+```python
+hotfix = "hotfix"
+actual = (
+    siren.git([
+        git.commit(),
+        git.branch(hotfix),
+        git.checkout(hotfix),
+        git.commit(),
+    ])
+        .with_theme(theme.base())
+        .add_graph_config_variable(git_graph_config.show_branches(False))
+        .write()
+)
+```
+
+</TabItem>
+<TabItem value="js" label="JavaScript">
+
+```js
+const hotfix = "hotfix";
+const actual =
+    siren.git([
+      git.commit(),
+      git.branch(hotfix),
+      git.checkout(hotfix),
+      git.commit(),
+  ])
+      .withTheme(theme.base)
+      .addGraphConfigVariable(gitGraphConfig.showBranches(false))
+      .write();
+```
+
+</TabItem>
+</Tabs>
+
+In case you cannot find a specifc config option you are looking for, you can always use:
+
+```csharp
+graphConfig.custom(configName, configValue)
+```
+
+Here an example in C# using `graphConfig.custom`.
+
+```csharp
+string hotfix = "hotfix";
+string actual =
+    siren.git([
+        git.commit(),
+        git.branch(hotfix),
+        git.checkout(hotfix),
+        git.commit(),
+    ])
+        .withTheme(theme.@base)
+        .addGraphConfigVariable(graphConfig.custom("showBranches", "false"))
+        .write();
+```
