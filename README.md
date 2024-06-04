@@ -23,7 +23,7 @@ Have a look at the docs here:
       </td>
       <td>
         <a href="https://pepy.tech/project/siren-dsl">
-          <img src="https://pepy.tech/badge/siren-dsl" alt="downloads" />
+          <img alt="Pepy Total Downlods" src="https://img.shields.io/pepy/dt/siren-dsl?label=siren-dsl&color=blue" />
         </a>
       </td>
     </tr>
@@ -36,7 +36,7 @@ Have a look at the docs here:
       </td>
       <td>
         <a href="https://www.npmjs.com/package/siren-dsl">
-          <img src="https://img.shields.io/npm/dt/siren-dsl.svg" alt="downloads" />
+          <img src="https://img.shields.io/npm/dt/siren-dsl?label=siren-dsl" alt="downloads" />
         </a>
       </td>
     </tr>
@@ -49,7 +49,7 @@ Have a look at the docs here:
       </td>
       <td>
         <a href="https://www.nuget.org/packages/Siren/">
-          <img src="https://img.shields.io/nuget/dt/Siren.svg" alt="downloads" />
+          <img src="https://img.shields.io/nuget/dt/Siren?label=Siren" alt="downloads" />
         </a>
       </td>
       <!-- c# nuget package "Siren.Sea" -->
@@ -62,13 +62,14 @@ Have a look at the docs here:
       </td>
       <td>
         <a href="https://www.nuget.org/packages/Siren.Sea/">
-          <img src="https://img.shields.io/nuget/dt/Siren.Sea.svg" alt="downloads" />
+          <img src="https://img.shields.io/nuget/dt/Siren.Sea?label=Siren.Sea" alt="downloads" />
         </a>
       </td>
     </tr>
   </tbody>
 
 </table>
+
 
 
 ---
