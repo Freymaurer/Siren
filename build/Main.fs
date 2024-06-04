@@ -109,9 +109,9 @@ let main argv =
     | "index" :: args ->
         match args with
         | "js" :: _ -> 
-            Index.JS.generate @"C:\Users\Kevin\source\repos\Siren\tests\JavaScript\siren" false
+            Index.JS.generate @"\tests\JavaScript\siren" false
         | "py" :: _ -> 
-            Index.PY.generate @"C:\Users\Kevin\source\repos\Siren\tests\Python\siren" 
+            Index.PY.generate @"\tests\Python\siren" "index.py"
         | _ -> printHelp ()
     | _ -> printHelp ()
 

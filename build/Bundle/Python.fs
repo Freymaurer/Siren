@@ -5,6 +5,7 @@ open BlackFox.CommandLine
 open Build
 
 open System.IO
+open Utils.Path.Operators
 
 let private clean(pyPath: string) =
     if Directory.Exists pyPath then
@@ -15,7 +16,7 @@ let private transpileFSharp(pyPath) =
     |> CmdLine.appendRaw "fable"
     // |> CmdLine.appendIf isWatch "--watch"
     |> CmdLine.appendRaw ProjectInfo.Projects.Siren
-    |> CmdLine.appendPrefix "-o" (Path.Combine(pyPath,"siren_dsl"))
+    |> CmdLine.appendPrefix "-o" pyPath
     |> CmdLine.appendRaw "--noCache"
     |> CmdLine.appendPrefix "--lang" "py"
     |> CmdLine.appendPrefix "--fableLib" "fable-library"
@@ -33,8 +34,9 @@ let private peotryBundle =
     |> CmdLine.toString
 
 let Main(pyDir: string) = 
+    let publishDir = pyDir </> "siren_dsl"
     clean(pyDir)
-    Command.Run("dotnet", transpileFSharp pyDir)
-    Index.PY.generate pyDir
+    Command.Run("dotnet", transpileFSharp publishDir)
+    Index.PY.generate publishDir "__init__.py"
     copyMetadata pyDir
     Command.Run("python", peotryBundle, workingDirectory=pyDir)
