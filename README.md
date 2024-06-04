@@ -4,9 +4,8 @@ Siren is a simple DSL for creating [Mermaid](https://mermaid.js.org) graphs YAML
 
 Have a look at the docs here:
 
-* [Installation]()
-* [Docs]()
-* [Blog post]()
+* [Docs](https://freymaurer.github.io/Siren/)
+* [Blog post](https://freymaurer.github.io/Siren/blog/Library%20Design)
 
 <table>
   <thead>
@@ -71,6 +70,9 @@ Have a look at the docs here:
 
 </table>
 
+
+---
+> if you are interested in creating a Fable library like this on your own you can use the template [Fable.Multiverse](https://github.com/Freymaurer/Fable.Multiverse)!
 ---
 ## Contribution
 
