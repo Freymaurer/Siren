@@ -3,8 +3,8 @@
   "description": "A simple dsl for creating mermaid graphs!",
   "keywords": [ "mermaid", "dsl", "fable", "graphs" ],
   "version": "0.2.0",
-  "main": "index.js",
-  "types": "index.d.ts",
+  "main": "dist/js/index.js",
+  "types": "dist/js/index.d.ts",
   "type": "module",
   "directories": {
     "test": "tests"
