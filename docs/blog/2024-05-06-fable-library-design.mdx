@@ -142,6 +142,10 @@ Oh no, this does not look good. Fable does a thing called [*name mangling*](http
 Have a look at the offical docs for a deeper view on this topic.
 For now its enought to know, this is done to allow overloading functions in F#.
 
+:::info[Edit- Tree-Shaking]
+[ncave][ncave] pointed also out to me that tree-shaking in JavaScript was facilitated in this way. As it was easier for bundlers to detect import of single functions, rather then unused class members.
+:::
+
 ### Using `[<AttachMembers>]`
 
 But we can tell Fable that we know what we are doing and ignore name mangling.
@@ -1035,3 +1039,4 @@ If you have any ideas on how to improve this, please let me know!
 [Fable]: https://fable.io
 [REPL]: https://fable.io/repl/
 [KevinS]: https://github.com/kMutagene
+[ncave]: https://github.com/ncave
