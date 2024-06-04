@@ -2,7 +2,7 @@
   "name": "siren-dsl",
   "description": "A simple dsl for creating mermaid graphs!",
   "keywords": [ "mermaid", "dsl", "fable", "graphs" ],
-  "version": "0.3.0",
+  "version": "0.3.2",
   "main": "dist/js/index.js",
   "types": "dist/js/index.d.ts",
   "type": "module",

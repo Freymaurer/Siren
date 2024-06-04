@@ -7,7 +7,7 @@ open Build.Utils.Path
 let root = Path.Resolve()
 
 [<Literal>]
-let Version = "0.3.1"
+let Version = "0.3.2"
 
 [<Literal>]
 let PyprojectTOML = "./pyproject.toml"
