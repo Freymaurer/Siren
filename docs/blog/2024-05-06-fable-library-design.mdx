@@ -565,9 +565,6 @@ let generate(rootPath: string) (ts: bool) =
 
 <TabItem value="py" label="Indexpy.fs">
 ```fsharp
-open System
-open System.IO
-
 let private getAllJsFiles(path: string) = 
     Util.getAllFiles(path,"*.py")
 
@@ -594,7 +591,7 @@ let private generateIndexfile (rootPath: string, fileName: string, whiteList: st
     |> createImportStatements
     |> Util.writeIndexFile rootPath fileName
 
-let generate(rootPath: string) = 
+let generate(rootPath: string) (name: string) = 
     // code to make camelcase to snakecase
     /// This is because we currently snake_case everything that does not start with a capital letter
     let camelCaseToSnakeCase (str: string) = 
@@ -609,7 +606,7 @@ let generate(rootPath: string) =
                     acc + string c
             ) ""
     let snake_case_white_list = WhiteList.WhiteList |> Array.map camelCaseToSnakeCase
-    generateIndexfile(rootPath, "index.py", snake_case_white_list)
+    generateIndexfile(rootPath, name, snake_case_white_list)
 ```
 </TabItem>
 <TabItem value="whitelist" label="WhiteList.fs">
@@ -696,7 +693,7 @@ export { graphConfig, flowchartConfig, sequenceConfig, ganttConfig, journeyConfi
 export { formatting, direction, flowchart, notePosition, sequence, classMemberVisibility, classMemberClassifier, classDirection, classCardinality, classRltsType, classDiagram, stateDiagram, erKey, erCardinality, erDiagram, journey, ganttTime, ganttTags, ganttUnit, gantt, pieChart, quadrant, rqRisk, rqMethod, requirement, gitType, git, mindmap, timeline, sankey, xyChart, block, theme, siren } from "./Siren.js";
 ```
 </TabItem>
-<TabItem value="py" label="index.py">
+<TabItem value="py" label="index.py/__init__.py">
 ```py
 from .siren_types import SirenElement
 from .theme_variables import theme_variable, quadrant_theme, git_theme, timeline_theme, xy_chart_theme, pie_theme
@@ -706,7 +703,11 @@ from .siren import formatting, direction, flowchart, note_position, sequence, cl
 </TabItem>
 </Tabs>
 
+:::info
 
+Python packages will default import whatever is in the `__init__.py` file. So we must simply name the index file for python as such (at least for publishing).
+
+:::
 
 ## Publish
 

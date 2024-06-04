@@ -3,6 +3,10 @@ sidebar_label: Installation
 sidebar_position: 1
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+
 # Installation
 
 Siren is available for use in JavaScript (with type support), Python, F# and C#. Depending on your preferred language you can use any best practises of installation.
@@ -73,3 +77,73 @@ You can find the latest releases below:
   </tbody>
 
 </table>
+
+# Reference
+
+
+
+<Tabs groupId="preferred-lang" queryString>
+<TabItem value="fsharp" label="F# (.fsx)">
+
+```fsharp
+#r "nuget: Siren"
+
+open Siren
+
+let graph =
+  siren.git [
+    git.commit()
+  ]
+  |> siren.write
+
+printfn "%s" graph
+```
+
+</TabItem>
+<TabItem value="csharp" label="C# (.ipynb)">
+
+```csharp
+// Using Polyglot Notebooks extensions
+#r "nuget:Siren.Sea"
+
+using Siren.Sea;
+
+string graph = 
+  siren.git([
+    git.commit(),
+  ]).write();
+
+Console.Write(graph);
+```
+
+</TabItem>
+<TabItem value="py" label="Python">
+
+```py
+from siren_dsl import siren, git
+
+str = (
+  siren.git([
+    git.commit()
+  ]).write()
+)
+
+print(str)
+```
+
+</TabItem>
+<TabItem value="js" label="JavaScript">
+
+```js
+import {siren, git} from 'siren-dsl';
+
+const str = siren.git([
+  git.commit()
+]).write();
+
+console.log(str);
+```
+
+</TabItem>
+</Tabs>
+
