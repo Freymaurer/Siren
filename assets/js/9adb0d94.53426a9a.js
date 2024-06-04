@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkdocs=self.webpackChunkdocs||[]).push([[120],{7689:e=>{e.exports=JSON.parse('{"label":"fable","permalink":"/Siren/blog/tags/fable","allTagsPath":"/Siren/blog/tags","count":1,"unlisted":false}')}}]);

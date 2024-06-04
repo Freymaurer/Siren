@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkdocs=self.webpackChunkdocs||[]).push([[5044],{7029:s=>{s.exports=JSON.parse('{"label":"library","permalink":"/Siren/blog/tags/library","allTagsPath":"/Siren/blog/tags","count":1,"unlisted":false}')}}]);
