@@ -71,9 +71,10 @@ Have a look at the docs here:
 </table>
 
 
-
----
+> [!TIP]
 > if you are interested in creating a Fable library like this on your own you can use the template [Fable.Multiverse](https://github.com/Freymaurer/Fable.Multiverse)!
+
+
 ---
 ## Contribution
 
